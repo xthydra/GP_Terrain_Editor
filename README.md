@@ -1,16 +1,16 @@
-# GP_Terrain_Editor
+# Gameplay Terrain Editor
 
 #What it can do
 
-2) it will randomly generate terrains based on a seed
+1) it will randomly generate terrains based on a seed
 
-1) it will create trees on the terrains
+2) it will create trees on the terrains
 
 3) it will page the terrains in a vector, render terrains and trees based on distance
 
-3) it can save the terrains in a binary file
+4) it can save the terrains in a binary file
 
-4) it can edit the terrains vertices
+5) it can edit the terrains vertices
 
 #What is wrong with it
 
