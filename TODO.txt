@@ -17,7 +17,7 @@ Generate Tiles and Blendmap on a GPU? lol
 stick bunch of heightfields together in low detail as an overview feature to save GPU power + button
 implement vertical paging
 optimize long distance traveling by virtually moving terrains around as a virtual camera
-optimize the virtual camera by preventing buffer overflow on the value
+optimize the virtual camera by preventing buffer overflow on the position value
 have gameplay highlight the button or something when you click on it
 make editing tools less clicky and more volatile
 
@@ -41,43 +41,5 @@ take a look at textured.frag because it might contain a quick fix to spot light 
 ==========================BUG
 
 theres no checks against segmentation fault for terrains with certain patchsize versus heightfield size
-
-=============================
-
-======================CURRENT_CHANGES
-
-------------Code changes
-
--Blendmaps generator now use heightfields to return height
--Fixed some warning for using unsigned int against int
--Fixed a typo in diamond simplex that would cause segmentation fault
--Terrain Editing tools and Terrain Generator tools have been separated from "TerrainGenerator.cpp"
--Selection Ring can change terrain
--Aligning vertexes function
--Generate Normalmaps function
--Generate Raw Heightfields function
--Generate PNG Heightmaps function
--Generate Objects position
--Generate tiled terrains function
-
-------------UI changes
--Renamed UI tab "Terrain" to "Editor"
-
--Aligning vertexes button(Editor tab)
-
--Added new UI radio button and container called "Generator"
--Generate blendmaps button(Generator tab)
--Generate blendmaps form
--Generate terrains button(Generator tab)
--Generate heightmaps button(Generator tab)
--Generate Objects button(Generator tab)
--Generate normalmaps button(Generator tab)
--Generate Raw Heightfields button(Generator tab)
-
--Added new UI container called "Navigator"
--Move speed slider(navigator tab)
--Pager Rendering distance slider (navigator tab)
--Pager Unloading distance slider (navigator tab)
--Pager loading distance slider (navigator tab)
 
 =============================
