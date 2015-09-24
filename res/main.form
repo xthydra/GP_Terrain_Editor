@@ -1,0 +1,277 @@
+form MainForm
+{
+    theme = res/common/default.theme
+    width = 640
+    height = 640
+    position = 30, 30 
+    layout = LAYOUT_VERTICAL
+    style = noBorder
+    consumeInputEvents = false
+    
+    container Spacer1
+    {
+        width = 640
+        height = 20
+    }
+    container ModeToolbar
+    {
+        autoWidth = true
+        height = 75
+        layout = LAYOUT_FLOW
+        alignment = ALIGN_TOP
+        style = noBorder
+                
+        radioButton NavigateButton
+        {
+            group = ModeGroup
+            text = Navigate
+            selected = true
+            height = 45
+            width = 130
+        }
+
+		radioButton GeneratorButton
+        {
+            group = ModeGroup
+            text = Generator
+            selected = false
+            height = 45
+            width = 130
+        }
+        
+        radioButton EditorButton
+        {
+            group = ModeGroup
+            text = Editor
+            height = 45
+            width = 130
+        }
+        /** Not implemented yet
+        radioButton PaintButton
+        {
+            group = ModeGroup
+            text = Paint
+            height = 45
+            width = 120
+        }
+        */
+        
+    }
+	container NavigateToolBar
+    {
+		visible = false
+        width = 120
+        height = 450
+		position = 0, 50
+        layout = LAYOUT_VERTICAL
+
+        slider MoveSlider
+        {
+            text = Move Speed
+            selected = false
+            min = 1.0
+            max = 100.0
+            value = 10.0
+            step = 1.0
+            height = 45
+            width = 120
+        }
+		slider RenderSlider
+        {
+            text = Render
+            selected = false
+            min = 1.0
+            max = 10.0
+            value = 1.0
+            step = 0.2
+            height = 45
+            width = 120
+        }
+		slider LoadSlider
+        {
+            text = Load
+            selected = false
+            min = 1.0
+            max = 10.0
+            value = 1.0
+            step = 0.2
+            height = 45
+            width = 120
+        }
+		slider UnloadSlider
+        {
+            text = Unload
+            selected = false
+            min = 1.0
+            max = 10.0
+            value = 1.0
+            step = 0.2
+            height = 45
+            width = 120
+        }
+    }
+    container TerrainEditorbar
+    {
+        visible = false
+        width = 120
+        height = 450
+		position = 0, 50
+        layout = LAYOUT_VERTICAL
+        
+        slider SizeSlider
+        {
+            text = Size
+            selected = true
+            min = 1.0
+            max = 100.0
+            value = 1.0
+            step = 1.0
+            height = 45
+            width = 120
+        }
+    
+        button FlattenButton
+        {
+            text = Flatten
+            height = 45
+            width = 120
+        }
+        button RaiseButton
+        {
+            text = Raise
+            height = 45
+            width = 120
+        }
+        button LowerButton
+        {
+            text = Lower
+            height = 45
+            width = 120
+        }
+        button SmoothButton
+        {
+            text = Smooth
+            height = 45
+            width = 120
+        }
+        button AlignButton
+        {
+            text = Align
+            height = 45
+            width = 120
+        }
+    }
+
+	container GeneratorToolBar
+    {
+        visible = false
+        width = 120
+        height = 450
+		position = 0, 50
+        layout = LAYOUT_VERTICAL
+	
+        button GenerateTerrainsButton
+        {
+            text = Terrains
+            height = 45
+            width = 120
+        }
+		button GeneratenSaveButton
+        {
+            text = Generate n Save
+            height = 45
+            width = 120	
+        }
+        button GenerateBlendMapsButton
+        {
+            text = Blendmaps
+            height = 45
+            width = 120	
+        }
+        button GenerateHeightMapsButton
+        {
+            text = Heightmaps
+            height = 45
+            width = 120
+        }
+		button GenerateNormalMapsButton
+        {
+            text = Normalmaps		
+            height = 45
+            width = 120
+        }
+		button GenerateRawHeightfieldsButton
+        {
+            text = Raw Heightfields
+            height = 45
+            width = 120
+        }
+		button GenerateObjectsPosButton
+        {
+            text = Objects Positions
+            height = 45
+            width = 120
+        }
+		button GenerateNoiseButton
+        {
+            text = Noise Generator
+            height = 45
+            width = 120
+        }
+		button LoadButton
+        {
+            text = Load
+            height = 45
+            width = 120
+        }
+    }
+    container PaintToolbar
+    {
+        visible = false
+        width = 120
+        height = 450
+        layout = LAYOUT_VERTICAL
+        
+        slider SizeSlider2
+        {
+            text = Size
+            selected = true
+            min = 500.0
+            max = 50000.0
+            value = 500.0
+            step = 1.0
+            height = 45
+            width = 120
+        }
+        
+        radioButton GrassButton
+        {
+            group = TextureGroup
+            text = Grass
+            selected = true
+            height = 45
+            width = 120
+        }
+        
+        radioButton RocksButton
+        {
+            group = TextureGroup
+            text = Rocks
+            height = 45
+            width = 120
+        }
+        
+        button DrawButton
+        {
+            text = Draw
+            height = 45
+            width = 120
+        }
+        button EraseButton
+        {
+            text = Erase
+            height = 45
+            width = 120
+        }
+    }
+}

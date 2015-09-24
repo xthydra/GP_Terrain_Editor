@@ -1,0 +1,67 @@
+form generateBlendmapsForm
+{
+    theme = res/common/default.theme
+    width = 400
+    height = 600
+    alignment = ALIGN_VCENTER_HCENTER
+    layout = LAYOUT_VERTICAL
+    style = noBorder
+
+	slider Blendmap1-Intensity
+    {
+        text = Blend1-Intensity
+        min = 0.0
+        max = 100.0
+        value = 50.0
+        step = 1.0
+        height = 45
+        width = 400
+    }
+	slider Blendmap1-Opacity
+    {
+        text = Blend1-Opacity
+        min = 0.0
+        max = 100.0
+        value = 0.0
+        step = 1.0
+        height = 45
+        width = 400
+    }
+    slider Blendmap2-Intensity
+    {
+        text = Blend2-Intensity
+        min = 0.0
+        max = 100.0
+        value = 100.0
+        step = 2.0
+        height = 45
+        width = 400
+    }
+	slider Blendmap2-Opacity
+    {
+        text = Blend2-Opacity
+        min = 0.0
+        max = 100.0
+        value = 100.0
+        step = 1.0
+        height = 45
+        width = 400
+    }
+    container ButtonContainer {
+        layout = LAYOUT_FLOW
+        width = 450
+        height = 45
+        
+        button CancelGenerateBlendmapsButton {
+            text = Cancel
+            height = 45
+            width = 200
+        }
+        button ConfirmGenerateBlendmapsButton {
+            text = Generate
+            height = 45
+            width = 200
+        }
+    } 
+
+}

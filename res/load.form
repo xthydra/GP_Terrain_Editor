@@ -1,0 +1,76 @@
+form GenerateForm
+{
+    theme = res/common/default.theme
+    width = 400
+    height = 600
+    alignment = ALIGN_VCENTER_HCENTER
+    layout = LAYOUT_VERTICAL
+    style = noBorder
+             
+    container LoadContainer
+	{
+        layout = LAYOUT_FLOW
+        width = 450
+        height = 135
+        radioButton BlendmapRadio
+        {
+            text = Blendmap
+            selected = true
+            height = 45
+            width = 200
+        }
+        radioButton RawHeightfieldRadio
+        {
+            text = RAW Heightmap
+            height = 45
+            width = 200
+        }
+        radioButton HeightmapRadio
+        {
+            text = PNG Heightmap
+            height = 45
+            width = 200
+        }
+        radioButton ObjectsPosRadio
+        {
+            text = Objects Pos
+            height = 45
+            width = 200
+        }
+        radioButton NormalmapRadio
+        {
+            text = Normalmap
+            height = 45
+            width = 200
+        }
+    }
+    label FolderLabel
+    {
+        text = Folder to load from "res/tmp"
+        height = 45
+        width = 400
+    }
+    textbox FolderTextBox
+    {
+        text = file
+        height = 45
+        width = 400
+    }
+    container ButtonContainer {
+        layout = LAYOUT_FLOW
+        width = 450
+        height = 45
+        
+        button CancelLoadButton {
+            text = Cancel
+            height = 45
+            width = 200
+        }
+        button ConfirmLoadButton {
+            text = Load
+            height = 45
+            width = 200
+        }
+    } 
+
+}
