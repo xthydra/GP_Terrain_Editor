@@ -317,11 +317,9 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="bar-descriptor.xml">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="game.config" />
-    <None Include="icon.png" />
+    <None Include="LICENSE.md" />
+    <None Include="README.md" />
     <None Include="res\generateBlendmaps.form" />
     <None Include="res\generateNoise.form" />
     <None Include="res\generateTerrains.form" />
