@@ -1509,6 +1509,25 @@ bool TerrainToolMain::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelD
 {
 	if (evt == Mouse::MOUSE_PRESS_RIGHT_BUTTON)
 	{
+		if (_inputMode == INPUT_MODE::TERRAIN)
+		{
+			Ray pickRay;
+			_scene->getActiveCamera()->pickRay(Rectangle(0, 0, getWidth(), getHeight()), x, y, &pickRay);
+			pickRay.setOrigin(_camera.getPosition());
+
+			for (size_t i = 0; i < TerrPager->Param.loadedTerrains.size(); i++)
+			{
+				TerrainHitFilter hitFilter(TerrPager->Param.loadedTerrains[i]);
+				PhysicsController::HitResult hitResult;
+				if (Game::getInstance()->getPhysicsController()->rayTest(pickRay, 1000000, &hitResult, &hitFilter))
+				{
+					if (hitResult.object == TerrPager->Param.loadedTerrains[i]->getNode()->getCollisionObject())
+					{
+						_selectionRing->setPosition(hitResult.point.x, hitResult.point.z, TerrPager->Param.loadedTerrains[i]);
+					}
+				}
+			}
+		}
 		return true;
 	}
 	if (evt == Mouse::MOUSE_PRESS_LEFT_BUTTON)
@@ -1530,25 +1549,6 @@ bool TerrainToolMain::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelD
 			float pitch = -MATH_DEG_TO_RAD(deltaY * 0.5f);
 			float yaw = MATH_DEG_TO_RAD(deltaX * 0.5f);
 			_camera.rotate(yaw, pitch);
-		}
-		if (_inputMode == TERRAIN || _inputMode == PAINT)
-		{
-			Ray pickRay;
-			_scene->getActiveCamera()->pickRay(Rectangle(0, 0, getWidth(), getHeight()), x, y, &pickRay);
-			pickRay.setOrigin(_camera.getPosition());
-
-			for (size_t i = 0; i < TerrPager->Param.loadedTerrains.size(); i++)
-			{
-				TerrainHitFilter hitFilter(TerrPager->Param.loadedTerrains[i]);
-				PhysicsController::HitResult hitResult;
-				if (Game::getInstance()->getPhysicsController()->rayTest(pickRay, 1000000, &hitResult, &hitFilter))
-				{
-					if (hitResult.object == TerrPager->Param.loadedTerrains[i]->getNode()->getCollisionObject())
-					{
-						_selectionRing->setPosition(hitResult.point.x, hitResult.point.z, TerrPager->Param.loadedTerrains[i]);
-					}
-				}
-			}
 		}
 		_prevX = x;
 		_prevY = y;

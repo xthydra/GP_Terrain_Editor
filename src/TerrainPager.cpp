@@ -148,9 +148,85 @@ void TerrainPager::loadTerrain(int z, int x)
 	zoneList[z][x]->setLoaded(true);
 	zoneList[z][x]->setObjectInside(Terr);
 
+	Param.loadedHeightfields.shrink_to_fit();
+	Param.loadedTerrains.shrink_to_fit();
+
 	Param.loadedTerrains.push_back(zoneList[z][x]->getObjectInside()->_terrain);
 	Param.loadedHeightfields.push_back(Param.heightFieldList[z][x]);
 }
+
+void TerrainPager::reloadTerrain(int z, int x,HeightField * field)
+{
+	CTerrain * Terr;
+	if (Param.heightFieldList.size() > 0)
+	{
+		if (Param.generatedBlendmaps == false)
+		{
+			FilesSaver saver;
+			saver.saveBlendmap(Param.blendMaps[z][x][0],
+				Param.blendMaps[z][x][1],
+				Param.BlendMapDIR,
+				z,
+				x,
+				Param.heightFieldResolution);
+		}
+		if (Param.generatedNormalmaps == false)
+		{
+			FilesSaver saver;
+			saver.saveNormalmap(Param.normalMaps[z][x],
+				Param.NormalMapDIR,
+				z,
+				x,
+				Param.heightFieldResolution);
+		}
+		std::string blendName1, blendName2, normalName;
+		blendName1 += Param.BlendMapDIR;
+		normalName += Param.NormalMapDIR;
+
+		blendName1 += "blend-";
+		blendName1 += std::to_string(z);
+		blendName1 += "-";
+		blendName1 += std::to_string(x);
+		blendName1 += "_";
+
+		blendName2 += blendName1;
+
+		blendName1 += std::to_string(1);
+		blendName1 += ".png";
+
+		blendName2 += std::to_string(2);
+		blendName2 += ".png";
+
+		normalName += "normalMap-";
+		normalName += std::to_string(z);
+		normalName += "-";
+		normalName += std::to_string(x);
+		normalName += ".png";
+
+		Param.heightFieldList[z][x] = field;
+
+		Terr = new CTerrain(field,
+			Param.LodQuality,
+			Param.TextureScale,
+			Param.skirtSize,
+			Param.patchSize,
+			Param.Scale,
+			gameplay::Vector3(zoneList[z][x]->getPosition().x,
+				0,
+				zoneList[z][x]->getPosition().z),
+			normalName.c_str(),
+			blendName1.c_str(),
+			blendName2.c_str(),
+			this->_Scene);
+	}
+
+	zoneList[z][x]->setLoaded(true);
+	zoneList[z][x]->setObjectInside(Terr);
+
+	Param.loadedTerrains.push_back(zoneList[z][x]->getObjectInside()->_terrain);
+	Param.loadedHeightfields.push_back(Param.heightFieldList[z][x]);
+}
+
 
 void TerrainPager::removeTerrain(int z, int x)
 {
@@ -162,9 +238,7 @@ void TerrainPager::removeTerrain(int z, int x)
 			Param.loadedHeightfields.erase(Param.loadedHeightfields.begin() + g);
 		}
 	}
-
 	zoneList[z][x]->getObjectInside()->~CTerrain();
-	delete zoneList[z][x]->getObjectInside();
 
 	zoneList[z][x]->setLoaded(false);
 }
@@ -181,6 +255,8 @@ void TerrainPager::removeTerrains()
 	{
 		removeTerrain(PosZ[i], PosX[i]);
 	}
+	PosX.~vector();
+	PosZ.~vector();
 }
 
 void TerrainPager::reloadTerrains()
@@ -196,6 +272,8 @@ void TerrainPager::reloadTerrains()
 		removeTerrain(PosZ[i], PosX[i]);
 		loadTerrain(PosZ[i], PosX[i]);
 	}
+	PosX.~vector();
+	PosZ.~vector();
 }
 
 void TerrainPager::reload(std::vector<int> pos)
@@ -213,9 +291,25 @@ void TerrainPager::reload(std::vector<int> pos)
 		int fieldX = (PosX[i] / Param.heightFieldResolution) / (Param.heightFieldResolution - 1);
 		int fieldZ = (PosZ[i] / Param.heightFieldResolution) / (Param.heightFieldResolution - 1);
 
+		int resolution = Param.heightFieldList[fieldZ][fieldX]->getColumnCount();
+
+		gameplay::HeightField* field=HeightField::create(resolution,resolution);
+
+		for (size_t i = 0; i < resolution; i++)
+		{
+			for (size_t j = 0; j < resolution; j++)
+			{
+				size_t vertexe = (j*resolution) + i;
+				float * vertex = field->getArray();
+				vertex[vertexe] = Param.heightFieldList[fieldZ][fieldX]->getHeight(i, j);
+			}
+		}
+
 		removeTerrain(fieldZ, fieldX);
-		loadTerrain(fieldZ, fieldX);
+		reloadTerrain(fieldZ, fieldX, field);
 	}
+	PosX.~vector();
+	PosZ.~vector();
 }
 
 int TerrainPager::findTerrain(Vector2 pos, Vector2 resolution)

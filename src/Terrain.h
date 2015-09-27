@@ -18,7 +18,7 @@
 
 #include "gameplay.h"
 
-class CTerrain
+struct CTerrain
 {
 public:
 	gameplay::Terrain * _terrain;

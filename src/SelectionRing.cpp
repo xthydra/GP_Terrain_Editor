@@ -33,14 +33,8 @@ SelectionRing::SelectionRing(Scene* scene)
 
 	// Attempt to set a material for the model - this is not working and I need to work out why.
 	//one->getModel()->setMaterial("res/demo.material#colored", 0);
-	for (size_t i = 0; i < one->getChildCount(); i++)
-	{
-		Model * ring=(Model*)one->getNextSibling();
-		if (ring)
-		{
-			ring->setMaterial("res/demo.material#colored", 0);
-		}
-	}
+	Model* ring = dynamic_cast<Model*>(one->getDrawable());
+	ring->setMaterial("res/demo.material#colored", 0);
 
 	// We dont need this anymore.
 	SAFE_RELEASE(bundle);

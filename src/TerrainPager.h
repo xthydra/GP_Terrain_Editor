@@ -117,6 +117,7 @@ public:
 	void render();
 	void PagingCheck();
 	void loadTerrain(int, int);
+	void reloadTerrain(int, int, HeightField*);
 	void removeTerrain(int, int);
 	void removeTerrains();
 	void computePositions();

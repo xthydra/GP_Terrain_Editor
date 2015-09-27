@@ -58,6 +58,17 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 
 CTerrain::~CTerrain()
 {
-	SAFE_RELEASE(terrainNode);
-	SAFE_RELEASE(_terrain);
+	_Scene->removeNode(terrainNode);
+	int refcount = terrainNode->getRefCount();
+	for (size_t i = 0; i < refcount; i++)
+	{
+		terrainNode->release();
+		//SAFE_RELEASE(terrainNode);
+	}
+	refcount = _terrain->getRefCount();
+	for (size_t i = 0; i < refcount; i++)
+	{
+		_terrain->release();
+		//SAFE_RELEASE(_terrain);
+	}
 }
