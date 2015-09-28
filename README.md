@@ -8,7 +8,7 @@
 
 3) it will page the terrains in a vector, render terrains and trees based on distance
 
-4) it will generate blendmaps and normalmaps based on the heightfield and save it
+4) it will generate blendmaps and normalmaps based on the heightfield and save it in PNG file
 
 5) it can save the terrains in a binary file
 
