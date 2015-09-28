@@ -8,9 +8,11 @@
 
 3) it will page the terrains in a vector, render terrains and trees based on distance
 
-4) it can save the terrains in a binary file
+4) it will generate blendmaps and normalmaps based on the heightfield and save it
 
-5) it can edit the terrains vertices
+5) it can save the terrains in a binary file
+
+6) it can edit the terrains vertices
 
 #What is wrong with it
 
