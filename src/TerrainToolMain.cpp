@@ -347,28 +347,22 @@ void TerrainToolMain::initialize()
 	Node* tree = Stree->findNode("trunk");
 	tree->setScale(Vector3(50, 50, 50));
 	leaves->setScale(Vector3(50, 50, 50));
-	//Material* material = tree->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
-	//Model* tempt = (Model*)tree->getFirstChild();
 	Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
-	//Material* material = tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
 	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
 #define TRANSPARENCY
 #ifdef TRANSPARENCY
-	//Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
-	//Model* tempt2 = (Model*)leaves->getFirstChild();
 	Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
-	//Material* material2 = tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
 	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
 #else
 	Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
 #endif
 
 #ifdef POINTLIGHT_TEST
-	tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+	//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
 	tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
 	tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
 	tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+	//tempt2->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
 	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
 	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
 	tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");

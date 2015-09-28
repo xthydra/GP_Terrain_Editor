@@ -85,6 +85,7 @@ TerrainPager::TerrainPager(STerrainParameters param, gameplay::Scene* scen)
 void TerrainPager::loadTerrain(int z, int x)
 {
 	CTerrain * Terr;
+
 	if (Param.heightFieldList.size() > 0)
 	{
 			if (Param.generatedBlendmaps == false)
@@ -106,6 +107,7 @@ void TerrainPager::loadTerrain(int z, int x)
 					x,
 					Param.heightFieldResolution);
 			}
+			//find the blendmap and normal map filename
 			std::string blendName1, blendName2, normalName;
 			blendName1 += Param.BlendMapDIR;
 			normalName += Param.NormalMapDIR;
@@ -130,7 +132,23 @@ void TerrainPager::loadTerrain(int z, int x)
 			normalName += std::to_string(x);
 			normalName += ".png";
 
-			Terr = new CTerrain(Param.heightFieldList[z][x],
+			//I copy the heightfield before sending to create a terrain
+			int resolution = Param.heightFieldResolution;
+
+			gameplay::HeightField* field = HeightField::create(resolution, resolution);
+
+			for (size_t i = 0; i < resolution; i++)
+			{
+				for (size_t j = 0; j < resolution; j++)
+				{
+					size_t vertexe = (j*resolution) + i;
+					float * vertex = field->getArray();
+					vertex[vertexe] = Param.heightFieldList[z][x]->getHeight(i, j);
+				}
+			}
+	
+			//create the terrain
+			Terr = new CTerrain(field,
 				Param.LodQuality,
 				Param.TextureScale,
 				Param.skirtSize,
@@ -145,88 +163,17 @@ void TerrainPager::loadTerrain(int z, int x)
 				this->_Scene);
 	}
 
+	//terrain pager values to check against
 	zoneList[z][x]->setLoaded(true);
 	zoneList[z][x]->setObjectInside(Terr);
 
 	Param.loadedHeightfields.shrink_to_fit();
 	Param.loadedTerrains.shrink_to_fit();
 
+	//terrain pager values to check against
 	Param.loadedTerrains.push_back(zoneList[z][x]->getObjectInside()->_terrain);
 	Param.loadedHeightfields.push_back(Param.heightFieldList[z][x]);
 }
-
-void TerrainPager::reloadTerrain(int z, int x,HeightField * field)
-{
-	CTerrain * Terr;
-	if (Param.heightFieldList.size() > 0)
-	{
-		if (Param.generatedBlendmaps == false)
-		{
-			FilesSaver saver;
-			saver.saveBlendmap(Param.blendMaps[z][x][0],
-				Param.blendMaps[z][x][1],
-				Param.BlendMapDIR,
-				z,
-				x,
-				Param.heightFieldResolution);
-		}
-		if (Param.generatedNormalmaps == false)
-		{
-			FilesSaver saver;
-			saver.saveNormalmap(Param.normalMaps[z][x],
-				Param.NormalMapDIR,
-				z,
-				x,
-				Param.heightFieldResolution);
-		}
-		std::string blendName1, blendName2, normalName;
-		blendName1 += Param.BlendMapDIR;
-		normalName += Param.NormalMapDIR;
-
-		blendName1 += "blend-";
-		blendName1 += std::to_string(z);
-		blendName1 += "-";
-		blendName1 += std::to_string(x);
-		blendName1 += "_";
-
-		blendName2 += blendName1;
-
-		blendName1 += std::to_string(1);
-		blendName1 += ".png";
-
-		blendName2 += std::to_string(2);
-		blendName2 += ".png";
-
-		normalName += "normalMap-";
-		normalName += std::to_string(z);
-		normalName += "-";
-		normalName += std::to_string(x);
-		normalName += ".png";
-
-		Param.heightFieldList[z][x] = field;
-
-		Terr = new CTerrain(field,
-			Param.LodQuality,
-			Param.TextureScale,
-			Param.skirtSize,
-			Param.patchSize,
-			Param.Scale,
-			gameplay::Vector3(zoneList[z][x]->getPosition().x,
-				0,
-				zoneList[z][x]->getPosition().z),
-			normalName.c_str(),
-			blendName1.c_str(),
-			blendName2.c_str(),
-			this->_Scene);
-	}
-
-	zoneList[z][x]->setLoaded(true);
-	zoneList[z][x]->setObjectInside(Terr);
-
-	Param.loadedTerrains.push_back(zoneList[z][x]->getObjectInside()->_terrain);
-	Param.loadedHeightfields.push_back(Param.heightFieldList[z][x]);
-}
-
 
 void TerrainPager::removeTerrain(int z, int x)
 {
@@ -281,32 +228,17 @@ void TerrainPager::reload(std::vector<int> pos)
 	std::vector<int> PosX, PosZ;
 	for (size_t i = 0; i < pos.size(); i++)
 	{
-		//get the heightfield vector position by dividing by scaling then divide by heightfield resolution
 		PosX.push_back(Param.loadedTerrains[pos[i]]->getNode()->getTranslationWorld().x);
 		PosZ.push_back(Param.loadedTerrains[pos[i]]->getNode()->getTranslationWorld().z);
 	}
 	for (size_t i = 0; i < pos.size(); i++)
 	{
-
+		//get the heightfield vector position by dividing by scaling then divide by heightfield resolution
 		int fieldX = (PosX[i] / Param.heightFieldResolution) / (Param.heightFieldResolution - 1);
 		int fieldZ = (PosZ[i] / Param.heightFieldResolution) / (Param.heightFieldResolution - 1);
 
-		int resolution = Param.heightFieldList[fieldZ][fieldX]->getColumnCount();
-
-		gameplay::HeightField* field=HeightField::create(resolution,resolution);
-
-		for (size_t i = 0; i < resolution; i++)
-		{
-			for (size_t j = 0; j < resolution; j++)
-			{
-				size_t vertexe = (j*resolution) + i;
-				float * vertex = field->getArray();
-				vertex[vertexe] = Param.heightFieldList[fieldZ][fieldX]->getHeight(i, j);
-			}
-		}
-
 		removeTerrain(fieldZ, fieldX);
-		reloadTerrain(fieldZ, fieldX, field);
+		loadTerrain(fieldZ, fieldX);
 	}
 	PosX.~vector();
 	PosZ.~vector();
@@ -435,7 +367,10 @@ void TerrainPager::PagingCheck()
 			}
 			if (ActualDistance > Param.DistanceUnload && load == true)
 			{
+				//problem is there is no way to get the heightfield back LOL
+				//i need a vector that would not be pointing out gameplay::Terrains so that when it's release then it won't get destroyed
 				removeTerrain(i, j);
+				//unloadTerrain(i, j);
 			}
 		}
 	}

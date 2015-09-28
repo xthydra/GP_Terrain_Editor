@@ -58,11 +58,13 @@ struct STerrainParameters
 	//std::vector<std::vector<std::vector<Vector3*> > >
 	gameplay::Vector3 Scale;
 
-	/*
-	folder name to access files during terrain init
-	*/
+	/*folder name to access files during terrain init*/
 	char * BlendMapDIR;
+
+	/*folder name to access files during terrain init*/
 	char * NormalMapDIR;
+
+	/*folder name to access files during terrain init*/
 	char * HeightMapDIR;
 
 	int LodQuality;
@@ -72,19 +74,39 @@ struct STerrainParameters
 	int maxHeight;
 	int patchSize;
 	int skirtSize;
+	
+	/*resolution of paged terrains*/
 	int tilesResolution;
+
+	/*resolution of a terrain*/
 	int heightFieldResolution;
 
+	/*distance required to load a terrain*/
 	float DistanceLoad;
+	
+	/*distance required to unload a terrain*/
 	float DistanceUnload;
+	
+	/*the maximum distance at which a terrain can be rendered*/
 	float DistanceMaxRender;
+	
+	/*the maximum distance at which an object can be rendered*/
 	float DistanceMaxModelRender;
 
+	/*if every blendmaps have been generated*/
 	bool generatedBlendmaps;
+	
+	/*if every normalmaps have been generated*/
 	bool generatedNormalmaps;
+	
+	/*if every heightmaps have been generated*/
 	bool generatedHeightmaps;
+	
+	/*if every objects have been generated*/
 	bool generatedObjects;
-	bool Debug;//it's for terrain->draw(wireframe)
+
+	/*if you want to draw the terrain in wireframe*/
+	bool Debug;
 };
 
 class CBufferZone
@@ -117,7 +139,6 @@ public:
 	void render();
 	void PagingCheck();
 	void loadTerrain(int, int);
-	void reloadTerrain(int, int, HeightField*);
 	void removeTerrain(int, int);
 	void removeTerrains();
 	void computePositions();

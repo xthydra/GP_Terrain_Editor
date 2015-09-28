@@ -40,8 +40,6 @@ take a look at textured.frag because it might contain a quick fix to spot light 
 
 ==========================BUG
 
-there's a memory leak when editing terrains
-
 theres no checks against segmentation fault for terrains with certain patchsize versus heightfield size
 
 =============================
