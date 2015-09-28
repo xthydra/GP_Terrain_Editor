@@ -20,7 +20,9 @@
 
 3) it wasn't tested on mac and linux platforms
 
-4) most of the tools are either partially working or doesn't have a UI to be conditionally useful
+4) most of the tools are either partially working or and doesn't have a UI to be conditionally useful
+
+5) 75% of all the project contains functions that aren't commented(lol)
 
 #What i will try to change
 
