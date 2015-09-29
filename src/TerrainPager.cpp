@@ -90,27 +90,32 @@ void TerrainPager::loadTerrain(int z, int x)
 	{
 			if (Param.generatedBlendmaps == false)
 			{
-				FilesSaver saver;
-				saver.saveBlendmap(Param.blendMaps[z][x][0],
-								   Param.blendMaps[z][x][1],
-								   Param.BlendMapDIR,
-								   z,
-								   x,
-								   Param.heightFieldResolution);
+				if (Param.blendMaps.size() > 0)
+				{
+					FilesSaver saver;
+					saver.saveBlendmap(Param.blendMaps[z][x][0],
+						Param.blendMaps[z][x][1],
+						Param.BlendMapDIR,
+						z,
+						x,
+						Param.heightFieldResolution);
+				}
 			}
 			if (Param.generatedNormalmaps == false)
 			{
-				FilesSaver saver;
-				saver.saveNormalmap(Param.normalMaps[z][x],
-					Param.NormalMapDIR,
-					z,
-					x,
-					Param.heightFieldResolution);
+				if (Param.normalMaps.size() > 0)
+				{
+					FilesSaver saver;
+					saver.saveNormalmap(Param.normalMaps[z][x],
+						Param.NormalMapDIR,
+						z,
+						x,
+						Param.heightFieldResolution);
+				}
 			}
 			//find the blendmap and normal map filename
 			std::string blendName1, blendName2, normalName;
 			blendName1 += Param.BlendMapDIR;
-			normalName += Param.NormalMapDIR;
 
 			blendName1 += "blend-";
 			blendName1 += std::to_string(z);
@@ -126,11 +131,16 @@ void TerrainPager::loadTerrain(int z, int x)
 			blendName2 += std::to_string(2);
 			blendName2 += ".png";
 
-			normalName += "normalMap-";
-			normalName += std::to_string(z);
-			normalName += "-";
-			normalName += std::to_string(x);
-			normalName += ".png";
+			if (Param.normalMaps.size() > 0)
+			{
+				normalName += Param.NormalMapDIR;
+
+				normalName += "normalMap-";
+				normalName += std::to_string(z);
+				normalName += "-";
+				normalName += std::to_string(x);
+				normalName += ".png";
+			}
 
 			//I copy the heightfield before sending to create a terrain
 			int resolution = Param.heightFieldResolution;
@@ -290,6 +300,38 @@ void TerrainPager::computePositions()
 
 }
 
+void TerrainPager::removeObjects()
+{
+	for (size_t i = 0; i < Param.objects.size();)
+	{
+		for (size_t j = 0; j < Param.objects[i].size();)
+		{
+			for (size_t g = 0; g < Param.objects[i][j].size(); g++)
+			{
+				_Scene->removeNode(Param.objects[i][j][g]);
+				int refcount = Param.objects[i][j][g]->getRefCount();
+				for (size_t f = 0; f < refcount; f++)
+				{
+					Param.objects[i][j][g]->release();
+				}
+			}
+			j++;
+		}
+		i++;
+	}
+	for (size_t i = 0; i < Param.objects.size();)
+	{
+		for (size_t j = 0; j < Param.objects[i].size();)
+		{
+			Param.objects[i][j].clear();
+			j++;
+		}
+		Param.objects[i].clear();
+		i++;
+	}
+	Param.objects.clear();
+}
+
 void TerrainPager::loadHeightfields()
 {
 	if (Param.heightMapPNGList.size() > 0)
@@ -345,9 +387,9 @@ void TerrainPager::loadHeightfields()
 
 void TerrainPager::PagingCheck()
 {
-	for (int i = 0; i<Param.tilesResolution; i++)
+	for (int i = 0; i < Param.tilesResolution; i++)
 	{
-		for (int j = 0; j<Param.tilesResolution; j++)
+		for (int j = 0; j < Param.tilesResolution; j++)
 		{
 			//float ActualDistance = _Scene->getActiveCamera()->getNode()->getTranslationWorld().distance(zoneList[i][j]->getPosition());
 
@@ -367,10 +409,7 @@ void TerrainPager::PagingCheck()
 			}
 			if (ActualDistance > Param.DistanceUnload && load == true)
 			{
-				//problem is there is no way to get the heightfield back LOL
-				//i need a vector that would not be pointing out gameplay::Terrains so that when it's release then it won't get destroyed
 				removeTerrain(i, j);
-				//unloadTerrain(i, j);
 			}
 		}
 	}
@@ -398,4 +437,68 @@ void TerrainPager::render()
 			Param.loadedTerrains[i]->draw(Param.Debug);
 		}
 	}
+
+	//i can possibly lesser the amount of time it would iterate objects by checking against only loaded terrains
+
+	for (size_t i = 0; i < Param.objects.size();)
+	{
+		for (size_t j = 0; j < Param.objects[i].size();)
+		{
+			for (size_t g = 0; g < Param.objects[i][j].size(); g++)
+			{
+				if (Param.objects[i][j][g] != NULL)
+				{
+					Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+					Vector3 v2 = Param.objects[i][j][g]->getTranslationWorld();
+
+					float dx = v.x - v2.x;
+					float dz = v.z - v2.z;
+
+					int ActualDistance = sqrt(dx * dx + dz * dz);
+
+
+					if (ActualDistance < Param.DistanceMaxModelRender)
+					{
+						if (Param.generatedObjects = true && !Param.Debug)
+						{
+							Model* model = dynamic_cast<Model*>(Param.objects[i][j][g]->getDrawable());
+							if (model)
+							{
+								Param.objects[i][j][g]->getDrawable()->draw();
+							}
+						}
+					}
+				} 
+			}
+			j++;
+		}
+		i++;
+	}
+
+	/*
+	for (size_t i = 0; i < Param.objects.size(); i++)
+	{
+		for (size_t g = 0; g < Param.objects[i].size(); g++)
+		{
+			for (size_t f = 0; f < Param.objects[i][g].size(); f++)
+			{
+				Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+				Vector3 v2 = Param.objects[i][g][f]->getTranslationWorld();
+
+				float dx = v.x - v2.x;
+				float dz = v.z - v2.z;
+
+				int ActualDistance = sqrt(dx * dx + dz * dz);
+
+
+				if (ActualDistance < Param.DistanceMaxModelRender)
+				{
+					if (Param.generatedObjects = true && !Param.Debug)
+					{
+						Param.objects[i][g][f]->getDrawable()->draw();
+					}
+				}
+			}
+		}
+	}*/
 }

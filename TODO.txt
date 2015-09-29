@@ -22,24 +22,21 @@ have gameplay highlight the button or something when you click on it
 make editing tools less clicky and more volatile
 
 
-if i had maximum height from when creating terrains... i wouldn't need to generate all blendmaps all at once before starting the lazy thread that's encoding blendmaps into PNGs...that would be an optimization
+if i had maximum height from when creating terrains then i wouldn't need to generate all blendmaps all at once before starting the lazy thread that's encoding blendmaps into PNGs...that would be an optimization
 
 -----------------------------
 
 =============================
 
-========================WONKY
-
-Editing functions should have more than 4 conditional boundary... more like 8 to support the selection of extremitys between 4 terrains
-the aligning function is missing 4 vertexes aligniment between 4 terrains extremity
-the diamond simplex noiser look too much smooth on Y scale
-
-take a look at textured.frag because it might contain a quick fix to spot light and point light to terrains
-
-=============================	
-
 ==========================BUG
 
-theres no checks against segmentation fault for terrains with certain patchsize versus heightfield size
+1)Editing functions should have more than 4 conditional boundaries... more like 8 to support the selection of extremitys between 4 terrains
+2)the aligning function is missing 4 vertexes aligniment between 4 terrains extremity
+3)the diamond simplex noiser look too much smooth on Y scale
+4)the trees created after the initial terrains creation aren't deleted
+5)there's 1 tree that always seem to render lol
+6)theres no checks against segmentation fault for terrains with certain patchsize versus heightfield size
 
+
+take a look at textured.frag because it might contain a quick fix to spot light and point light to terrains
 =============================

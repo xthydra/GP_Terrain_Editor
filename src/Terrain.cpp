@@ -32,13 +32,25 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 {
 	this->_Scene = scen;
 
-	_terrain = gameplay::Terrain::create(heightField,
-		scale,
-		patchSize,
-		LODQuality,
-		skirtSize,
-		normalmap,
-		"res/materials/terrain.material");
+	if (normalmap == NULL)
+	{
+		_terrain = gameplay::Terrain::create(heightField,
+			scale,
+			patchSize,
+			LODQuality,
+			skirtSize,
+			normalmap,
+			"res/materials/terrain.material");
+	}
+	else {
+		_terrain = gameplay::Terrain::create(heightField,
+			scale,
+			patchSize,
+			LODQuality,
+			skirtSize,
+			0,
+			"res/materials/terrain.material");
+	}
 	
 	_terrain->setLayer(0, "res/common/terrain/grass.dds", gameplay::Vector2(ScaleTexture, ScaleTexture));
 	_terrain->setLayer(1, "res/common/terrain/dirt.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend1, 3);

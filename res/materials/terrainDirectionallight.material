@@ -10,7 +10,7 @@ material terrain
 
     u_ambientColor = SCENE_AMBIENT_COLOR
 	u_directionalLightColor[0] = LIGHT_COLOR_0
-	u_directionalLightDirection[0] = LIGHT_DIRECTION_0
+	u_directionalLightDirection[0] = LIGHT_POSITION_0
 
     renderState
     {

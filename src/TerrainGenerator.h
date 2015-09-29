@@ -67,7 +67,7 @@ public:
 								 int);
 
 	/**
-	* Generate normalmaps in PNG extension
+	* Generate normalmaps as a PNG extension
 	*
 	* @param terrain scaleY
 	* @param Heightfield resolution
@@ -81,7 +81,7 @@ public:
 						 std::vector<std::vector<gameplay::HeightField *> >);
 
 	/**
-	* Generate heightfield images in PNG extension
+	* Generate heightfield images as a PNG extension
 	*
 	* @param Terrain ScaleY
 	* @param Heightfield resolution
@@ -153,5 +153,6 @@ public:
 															size_t,
 															std::vector<std::vector<gameplay::HeightField *> >);
 
+	/*last directory used to output files*/
 	char * lastDIR;
 };

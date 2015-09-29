@@ -143,6 +143,7 @@ public:
 	void removeTerrains();
 	void computePositions();
 	void loadHeightfields();
+	void removeObjects();
 	
 	/**
 	* Reload all renderable terrains

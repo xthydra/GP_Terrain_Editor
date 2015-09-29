@@ -9,8 +9,9 @@ material terrain
     u_surfaceLayerMaps = TERRAIN_LAYER_MAPS
 
     u_ambientColor = SCENE_AMBIENT_COLOR
-	u_directionalLightColor[0] = LIGHT_COLOR_0
-	u_directionalLightDirection[0] = LIGHT_DIRECTION_0
+	u_pointLightColor[0] = LIGHT_COLOR_0
+	u_pointLightPosition[0] = LIGHT_POSITION_0
+	u_pointLightRangeInverse[0] = LIGHT_INVERSE_RANGE_0
 
     renderState
     {
@@ -24,7 +25,7 @@ material terrain
         {
             vertexShader = res/shaders/terrain.vert
             fragmentShader = res/shaders/terrain.frag
-            defines = DIRECTIONAL_LIGHT_COUNT 1
+            defines = POINT_LIGHT_COUNT 1
         }
     }
 }
