@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2014 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -403,11 +403,11 @@ void TerrainPager::PagingCheck()
 
 			bool load = zoneList[i][j]->isLoaded();
 
-			if (ActualDistance < Param.DistanceLoad && load == false)
+			if (ActualDistance < Param.distanceLoad && load == false)
 			{
 				loadTerrain(i, j);
 			}
-			if (ActualDistance > Param.DistanceUnload && load == true)
+			if (ActualDistance > Param.distanceUnload && load == true)
 			{
 				removeTerrain(i, j);
 			}
@@ -432,7 +432,7 @@ void TerrainPager::render()
 
 		int ActualDistance = sqrt(dx * dx + dz * dz);
 #endif
-		if (ActualDistance < Param.DistanceMaxRender)
+		if (ActualDistance < Param.distanceMaxRender)
 		{
 			Param.loadedTerrains[i]->draw(Param.Debug);
 		}
@@ -457,7 +457,7 @@ void TerrainPager::render()
 					int ActualDistance = sqrt(dx * dx + dz * dz);
 
 
-					if (ActualDistance < Param.DistanceMaxModelRender)
+					if (ActualDistance < Param.distanceMaxModelRender)
 					{
 						if (Param.generatedObjects = true && !Param.Debug)
 						{

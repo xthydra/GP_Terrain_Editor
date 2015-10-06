@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2014 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,8 +21,13 @@
 struct CTerrain
 {
 public:
+	/*the terrain*/
 	gameplay::Terrain * _terrain;
+
+	/*the terrain node*/
 	gameplay::Node *terrainNode;
+
+	/*the physical object of the terrain*/
 	gameplay::PhysicsCollisionObject * _PhyObject;
 
 	/**
@@ -52,5 +57,6 @@ public:
 
 	~CTerrain();
 private:
+	/*a pointer to the scene created in "TerrainToolMain.cpp"*/
 	gameplay::Scene* _Scene;
 };

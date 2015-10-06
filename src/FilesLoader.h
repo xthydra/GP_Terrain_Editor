@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2014 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -20,11 +20,33 @@
 
 struct FilesLoader
 {
+	/*unuseable*/
 	std::vector<std::vector<char*> > loadObjectsPos(const char*);
+
+	/*
+	Param folder to load the heightmaps
+	@return 2 vectors + an array of characters (z,x,char*)
+	*/
 	std::vector<std::vector<char*> > loadHeightmaps(const char*);
+
+	/*
+	Param folder to load the heightmaps
+	@return 2 vectors + an array of characters (z,x,char*)
+	*/
 	std::vector<std::vector<char*> > loadRAWHeightmaps(const char*);
+
+	/*
+	Param folder to load the normalmaps
+	@return 2 vectors + an array of characters (z,x,char*)
+	*/
 	std::vector<std::vector<char*> > loadNormalmaps(const char*);
+
+	/*
+	Param folder to load the blendmaps
+	@return 2 vectors + an array of characters (z,x,char*)
+	*/
 	std::vector<std::vector<std::vector<char*> > > loadBlendmaps(const char*);
 
+	/*the resolution of the cumulative amount of terrains*/
 	int tilesResolution;
 };

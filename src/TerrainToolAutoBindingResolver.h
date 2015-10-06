@@ -1,6 +1,6 @@
 ﻿/*
     GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-    Copyright (C) 2014 Anthony Belisle <xt.hydra@gmail.com>
+    Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,8 +69,13 @@ public:
      **/
     Vector3 getLightColor0() const;
 
-
+	/*
+	Called by resolveAutoBinding to get the light position
+	
+	@return Vector3
+	*/
 	Vector3 getLightPosition0() const;
+
 	float getLightOutterAngleCos0() const;
 	float getLightInnerAngleCos0() const;
 	float getLightInverseRange0() const;

@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2014 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -583,41 +583,41 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	else if (strcmp(control->getId(), "LoadSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		if (TerrPager->Param.DistanceUnload > (slider->getValue() * TerrPager->Param.BoundingBox))
+		if (TerrPager->Param.distanceUnload > (slider->getValue() * TerrPager->Param.BoundingBox))
 		{
-			TerrPager->Param.DistanceLoad = (slider->getValue() * TerrPager->Param.BoundingBox);
+			TerrPager->Param.distanceLoad = (slider->getValue() * TerrPager->Param.BoundingBox);
 		}
-		else if (TerrPager->Param.DistanceUnload < (slider->getValue() * TerrPager->Param.BoundingBox))
+		else if (TerrPager->Param.distanceUnload < (slider->getValue() * TerrPager->Param.BoundingBox))
 		{
 			Control * control2 = _mainForm->getControl("UnloadSlider");
 			Slider * slider2 = (Slider *)control2;
 			slider2->setValue(slider->getValue() + 1);
 			//setloadSlider value below unloadSlider
-			TerrPager->Param.DistanceUnload = (slider2->getValue() * TerrPager->Param.BoundingBox);
-			TerrPager->Param.DistanceLoad = (slider->getValue() * TerrPager->Param.BoundingBox);
+			TerrPager->Param.distanceUnload = (slider2->getValue() * TerrPager->Param.BoundingBox);
+			TerrPager->Param.distanceLoad = (slider->getValue() * TerrPager->Param.BoundingBox);
 		}
 	}
 	else if (strcmp(control->getId(), "RenderSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		TerrPager->Param.DistanceMaxRender = (slider->getValue() * TerrPager->Param.BoundingBox);
-		TerrPager->Param.DistanceMaxModelRender = ((slider->getValue() * TerrPager->Param.BoundingBox) * 0.3);
+		TerrPager->Param.distanceMaxRender = (slider->getValue() * TerrPager->Param.BoundingBox);
+		TerrPager->Param.distanceMaxModelRender = ((slider->getValue() * TerrPager->Param.BoundingBox) * 0.3);
 	}
 	else if (strcmp(control->getId(), "UnloadSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		if (TerrPager->Param.DistanceLoad < (slider->getValue() * TerrPager->Param.BoundingBox))
+		if (TerrPager->Param.distanceLoad < (slider->getValue() * TerrPager->Param.BoundingBox))
 		{
-			TerrPager->Param.DistanceUnload = (slider->getValue() * TerrPager->Param.BoundingBox);
+			TerrPager->Param.distanceUnload = (slider->getValue() * TerrPager->Param.BoundingBox);
 		}
-		else if (TerrPager->Param.DistanceLoad >(slider->getValue() * TerrPager->Param.BoundingBox))
+		else if (TerrPager->Param.distanceLoad >(slider->getValue() * TerrPager->Param.BoundingBox))
 		{
 			Control * control2 = _mainForm->getControl("LoadSlider");
 			Slider * slider2 = (Slider *)control2;
 			slider2->setValue(slider->getValue() - 1);
 			//setloadSlider value below unloadSlider
-			TerrPager->Param.DistanceLoad = (slider2->getValue() * TerrPager->Param.BoundingBox);
-			TerrPager->Param.DistanceUnload = (slider->getValue() * TerrPager->Param.BoundingBox);
+			TerrPager->Param.distanceLoad = (slider2->getValue() * TerrPager->Param.BoundingBox);
+			TerrPager->Param.distanceUnload = (slider->getValue() * TerrPager->Param.BoundingBox);
 		}
 	}
 	//=============================
@@ -1305,9 +1305,9 @@ void TerrainToolMain::generateObjectsPosition()
 
 			TerrPager->Param.Debug = true;
 			update(1);
-			TerrPager->Param.DistanceMaxModelRender = (TerrPager->Param.DistanceMaxRender * 2);
+			TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 2);
 			render(1);
-			TerrPager->Param.DistanceMaxModelRender = (TerrPager->Param.DistanceMaxRender * 0.1);
+			TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 0.1);
 			TerrPager->Param.Debug = false;
 		}
 	}
@@ -1444,17 +1444,17 @@ void TerrainToolMain::generateNewTerrain()
 		bAmp);
 
 	float Render, Load, Unload;
-	Render = TerrPager->Param.DistanceMaxRender / TerrPager->Param.BoundingBox;
-	Load = TerrPager->Param.DistanceLoad / TerrPager->Param.BoundingBox;
-	Unload = TerrPager->Param.DistanceUnload / TerrPager->Param.BoundingBox;
+	Render = TerrPager->Param.distanceMaxRender / TerrPager->Param.BoundingBox;
+	Load = TerrPager->Param.distanceLoad / TerrPager->Param.BoundingBox;
+	Unload = TerrPager->Param.distanceUnload / TerrPager->Param.BoundingBox;
 
 	TerrPager->Param.Scale = Vector3(TerrPager->Param.heightFieldResolution, scaley, TerrPager->Param.heightFieldResolution);
 
 	TerrPager->Param.BoundingBox = (TerrPager->Param.heightFieldResolution * TerrPager->Param.heightFieldResolution) - TerrPager->Param.heightFieldResolution;
 
-	TerrPager->Param.DistanceMaxRender = TerrPager->Param.BoundingBox * Render;
-	TerrPager->Param.DistanceLoad = TerrPager->Param.BoundingBox * Load;
-	TerrPager->Param.DistanceUnload = TerrPager->Param.BoundingBox * Unload;
+	TerrPager->Param.distanceMaxRender = TerrPager->Param.BoundingBox * Render;
+	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * Load;
+	TerrPager->Param.distanceUnload = TerrPager->Param.BoundingBox * Unload;
 
 	TerrPager->computePositions();
 
@@ -1532,10 +1532,8 @@ void TerrainToolMain::generateNewTerrain()
 		TerrPager->Param.heightFieldResolution));
 #endif
 
-	_camera.setPosition(Vector3(0, 0, 0));
+	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * 3;
 	TerrPager->PagingCheck();
-	//TerrPager->reloadTerrains();
-
 	_camera.setPosition(Vector3(0, TerrPager->zoneList[0][0]->getObjectInside()->_terrain->getHeight(0, 0), 0));
 }
 
@@ -1726,7 +1724,7 @@ bool TerrainToolMain::drawScene(Node* node)
 		float ActualDistance = _scene->getActiveCamera()->getNode()->getTranslationWorld().distance(node->getTranslationWorld());
 
 		//if the range of view is too much small....it crash lol
-		if (ActualDistance < TerrPager->Param.DistanceMaxModelRender)
+		if (ActualDistance < TerrPager->Param.distanceMaxModelRender)
 		{
 			if (TerrPager->Param.generatedObjects = true)
 			{
