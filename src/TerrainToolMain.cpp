@@ -247,7 +247,8 @@ void TerrainToolMain::initialize()
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
 	
-	/*
+//#define EXAMPLE
+#ifdef EXAMPLE
 	//Generate heightfields for the terrain pager
 	STerrainParameters param;
 	param.generatedBlendmaps = false;
@@ -292,9 +293,9 @@ void TerrainToolMain::initialize()
 
 	param.Debug = false;
 
-	param.DistanceLoad = param.BoundingBox * .9;
-	param.DistanceUnload = param.BoundingBox * 1;
-	param.DistanceMaxRender = param.BoundingBox * 1;
+	param.distanceLoad = param.BoundingBox * .9;
+	param.distanceUnload = param.BoundingBox * 1;
+	param.distanceMaxRender = param.BoundingBox * 1;
 
 	TerrPager = new TerrainPager(param, _scene);
 
@@ -410,8 +411,8 @@ void TerrainToolMain::initialize()
 	tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 	tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-	_scene->addNode(leaves);
-	_scene->addNode(tree);
+	//_scene->addNode(leaves);
+	//_scene->addNode(tree);
 
 	TerrPager->PagingCheck();
 
@@ -443,7 +444,7 @@ void TerrainToolMain::initialize()
 
 				tree2->setTranslation(Vector3(
 					objsPos[i][j][g]->x,
-					objsPos[i][j][g]->y+20,
+					objsPos[i][j][g]->y+30,
 					objsPos[i][j][g]->z));
 
 				_scene->addNode(tree2);
@@ -468,11 +469,11 @@ void TerrainToolMain::initialize()
 #endif
 	TerrPager->Param.Debug = true;
 	update(1);
-	TerrPager->Param.DistanceMaxModelRender = (TerrPager->Param.DistanceMaxRender * 2);
+	TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 2);
 	render(1);
-	TerrPager->Param.DistanceMaxModelRender = (TerrPager->Param.DistanceMaxRender * 0.1);
+	TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 0.1);
 	TerrPager->Param.Debug = false;
-	*/
+#endif
 }
 
 void TerrainToolMain::finalize()
@@ -553,7 +554,7 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	else if (strcmp(control->getId(), "GenerateRawHeightfieldsButton") == 0)
 	{
 		TerrainGenerator terrainGenerator;
-		terrainGenerator.createRawHeightfields(TerrPager->Param.Scale.y, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+		terrainGenerator.createRawHeightfields(TerrPager->Param.Scale.y, TerrPager->Param.maxHeight, TerrPager->Param.BoundingBox, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
 	}
 	else if (strcmp(control->getId(), "GenerateObjectsPosButton") == 0)
 	{
@@ -851,6 +852,7 @@ void TerrainToolMain::load()
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
+		TerrPager->removeObjects();
 		FilesLoader load;
 		TerrPager->Param.heightMapRAWList = load.loadRAWHeightmaps(folder);
 		TerrPager->Param.HeightMapDIR = (char*)folder;
@@ -874,6 +876,7 @@ void TerrainToolMain::load()
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
+		TerrPager->removeObjects();
 		FilesLoader load;
 		TerrPager->Param.heightMapPNGList = load.loadHeightmaps(folder);
 		TerrPager->Param.HeightMapDIR = (char*)folder;
@@ -1452,9 +1455,9 @@ void TerrainToolMain::generateNewTerrain()
 
 	TerrPager->Param.BoundingBox = (TerrPager->Param.heightFieldResolution * TerrPager->Param.heightFieldResolution) - TerrPager->Param.heightFieldResolution;
 
-	TerrPager->Param.distanceMaxRender = TerrPager->Param.BoundingBox * Render;
-	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * Load;
-	TerrPager->Param.distanceUnload = TerrPager->Param.BoundingBox * Unload;
+	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * .9;
+	TerrPager->Param.distanceUnload = TerrPager->Param.BoundingBox * 1;
+	TerrPager->Param.distanceMaxRender = TerrPager->Param.BoundingBox * 1;
 
 	TerrPager->computePositions();
 

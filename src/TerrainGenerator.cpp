@@ -154,6 +154,8 @@ std::vector<std::vector<std::vector<Vector3*> > >
 }
 
 void TerrainGenerator::createRawHeightfields(int scaleY,
+											 int maxHeight,
+											 int boundingBox,
 											 size_t heightfieldSize,
 											 std::vector<std::vector<gameplay::HeightField *> > heightFields)
 {
@@ -169,10 +171,16 @@ void TerrainGenerator::createRawHeightfields(int scaleY,
 #endif
 #define BIT16
 #ifdef BIT16
-	int terrainminheight=0;
-	int terrainmaxheight=0;
+	
+
+	//i need vectors of each terrains max and min height instead of the difference between all terrain
+	int terrainMinHeight=0;
+	int terrainMaxHeight=0;
+	std::vector<std::vector<std::vector<int> > > terrainMinMaxHeight;
+	terrainMinMaxHeight.resize(heightFields.size());
 	for (size_t i = 0; i < heightFields.size(); i++)
 	{
+		terrainMinMaxHeight[i].resize(heightFields[i].size());
 		for (size_t j = 0; j < heightFields[i].size(); j++)
 		{
 			size_t x, z;
@@ -194,17 +202,21 @@ void TerrainGenerator::createRawHeightfields(int scaleY,
 					worldy = returnHeight(scaleY, worldx, worldz, heightFields[i][j], heightfieldSize);
 
 					// In the first pass we determine the min and max for the entire terrain.
-					if (worldy < terrainminheight || (i == 0 && j == 0)) 
+					if (worldy < terrainMinHeight ) 
 					{
-						terrainminheight = worldy;
+						terrainMinHeight = worldy;
 					}
 
-					if (worldy > terrainmaxheight || (i == 0 && j == 0)) 
+					if (worldy > terrainMaxHeight ) 
 					{
-						terrainmaxheight = worldy;
+						terrainMaxHeight = worldy;
 					}
 				}
 			}
+			terrainMinMaxHeight[i][j].push_back(terrainMinHeight);
+			terrainMinMaxHeight[i][j].push_back(terrainMaxHeight);
+			terrainMaxHeight = 0;
+			terrainMinHeight = 0;
 		}
 	}
 
@@ -228,6 +240,49 @@ void TerrainGenerator::createRawHeightfields(int scaleY,
 			{
 				for (z = 0; z < heightfieldSize; z++)
 				{
+#define TEST
+#ifdef TEST
+					k = x + (z * heightfieldSize);
+
+					worldx = ((float)x / (float)heightfieldSize) * (worldmaxx - worldminx) + worldminx;
+					worldz = ((float)z / (float)heightfieldSize) * (worldmaxz - worldminz) + worldminz;
+
+					worldy = returnHeight(scaleY, worldx, worldz, heightFields[i][j], heightfieldSize);
+
+					bool modified = false;
+					if (worldy > 0)
+					{
+						// i need to make sure that the negative value of minimal terrain height would be added to the position as a positive value
+						worldy = (worldy - (terrainMinMaxHeight[i][j][0]));
+						modified = true;
+					}
+
+					//the position need to be positive
+					else if (worldy < 0 && modified == false)
+					{
+						//this doesnt work cuz it would still remain negative
+						// and i need the value to become positive like
+						// -3(worldy) + -4(minheight) = 1
+
+						worldy = worldy + (-terrainMinMaxHeight[i][j][0]);
+					}
+					
+					//i need pourcentage difference between worldy and maxheight
+					double pourcentageofworldy = worldy / (terrainMinMaxHeight[i][j][1]- (terrainMinMaxHeight[i][j][0]));
+
+					int scaledHeight = 65535 * pourcentageofworldy;
+
+					if (scaledHeight > 65535)
+					{
+						scaledHeight = 65535;
+					}
+					if (scaledHeight < 0)
+					{
+						scaledHeight = 0;
+					}
+
+					raw[k] = scaledHeight;
+#else
 					k = x + (z * heightfieldSize);
 
 					worldx = ((float)x / (float)heightfieldSize) * (worldmaxx - worldminx) + worldminx;
@@ -240,7 +295,10 @@ void TerrainGenerator::createRawHeightfields(int scaleY,
 					//pourcentageofworldy= worldy/maxheight
 					//saveablevalue=65535 * pourcentageofworldy
 
+					//it seem like sometime the world position Y is negative which output the terrain in a weird way
+					// need a way to prevent the world position to be negative
 					double pourcentageofworldy = worldy / (terrainmaxheight - terrainminheight);
+					
 					int scaledHeight = 65535 * pourcentageofworldy;
 
 					if (scaledHeight > 65535)
@@ -253,6 +311,7 @@ void TerrainGenerator::createRawHeightfields(int scaleY,
 					}
 
 					raw[k] = scaledHeight;
+#endif
 				}
 			}
 

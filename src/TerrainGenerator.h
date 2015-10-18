@@ -97,12 +97,16 @@ public:
 	* Generate heightfield images in Raw binary
 	*
 	* @param Terrain ScaleY
+	* @param Terrain maxHeight
+	* @param Terrain Boundingbox
 	* @param Heightfield resolution
 	* @param Heightfields vectors
 	*
 	* @return void
 	**/
 	void createRawHeightfields(int,
+							   int,
+							   int,
 							   size_t,
 							   std::vector<std::vector<gameplay::HeightField *> >);
 
