@@ -1446,11 +1446,6 @@ void TerrainToolMain::generateNewTerrain()
 		bGain,
 		bAmp);
 
-	float Render, Load, Unload;
-	Render = TerrPager->Param.distanceMaxRender / TerrPager->Param.BoundingBox;
-	Load = TerrPager->Param.distanceLoad / TerrPager->Param.BoundingBox;
-	Unload = TerrPager->Param.distanceUnload / TerrPager->Param.BoundingBox;
-
 	TerrPager->Param.Scale = Vector3(TerrPager->Param.heightFieldResolution, scaley, TerrPager->Param.heightFieldResolution);
 
 	TerrPager->Param.BoundingBox = (TerrPager->Param.heightFieldResolution * TerrPager->Param.heightFieldResolution) - TerrPager->Param.heightFieldResolution;
@@ -1535,7 +1530,6 @@ void TerrainToolMain::generateNewTerrain()
 		TerrPager->Param.heightFieldResolution));
 #endif
 
-	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * 3;
 	TerrPager->PagingCheck();
 	_camera.setPosition(Vector3(0, TerrPager->zoneList[0][0]->getObjectInside()->_terrain->getHeight(0, 0), 0));
 }

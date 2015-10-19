@@ -26,7 +26,6 @@ struct STerrainParameters
 	*/
 	std::vector<std::vector<gameplay::HeightField*> > heightFieldList;
 
-
 	/*
 	Files List to load
 	*/

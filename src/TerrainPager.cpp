@@ -435,6 +435,13 @@ void TerrainPager::render()
 		if (ActualDistance < Param.distanceMaxRender)
 		{
 			Param.loadedTerrains[i]->draw(Param.Debug);
+
+			//for example 
+			//get position of Param.loadedTerrains[i]
+			//use the world position of the terrain to compute the vector position to access objects that are contained into it
+			//iterate all objects that are suposed to be on the terrain
+			//check against the distance between the camera and the object
+			//render it if needed
 		}
 	}
 
