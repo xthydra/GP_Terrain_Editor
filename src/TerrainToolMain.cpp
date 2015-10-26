@@ -411,9 +411,6 @@ void TerrainToolMain::initialize()
 	tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 	tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-	//_scene->addNode(leaves);
-	//_scene->addNode(tree);
-
 	TerrPager->PagingCheck();
 
 	Vector3 worldScale;//(1,1,1);
@@ -423,8 +420,6 @@ void TerrainToolMain::initialize()
 	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, param.Scale.y, 1, param.heightFieldResolution, param.heightFieldList, tree);
 	std::vector<std::vector<std::vector<Node*> > > objs;
 	std::vector<Model*> models;
-	//tree->setTranslation(objs[0][0][0]);
-	//leaves->setTranslation(objs[0][0][0]);
 
 	objs.resize(param.heightFieldList.size());	
 	for (size_t i = 0; i < param.heightFieldList.size(); i++)
@@ -467,12 +462,9 @@ void TerrainToolMain::initialize()
 	t3.objectBool();
 	saverThreads.push_back(t3);
 #endif
-	TerrPager->Param.Debug = true;
-	update(1);
-	TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 2);
-	render(1);
-	TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 0.1);
-	TerrPager->Param.Debug = false;
+	tree->getDrawable()->draw();
+	leaves->getDrawable()->draw();
+	TerrPager->Param.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 #endif
 }
 
@@ -963,230 +955,12 @@ void TerrainToolMain::generateNewBlendmaps()
 
 void TerrainToolMain::generateObjectsPosition()
 {
-#ifdef OLD
-	Scene * Stree = Scene::load("res/tree.gpb");
-	Node* leaves = Stree->findNode("sub02");
-	Node* tree = Stree->findNode("sub01");
-	tree->setScale(Vector3(50, 50, 50));
-	leaves->setScale(Vector3(50, 50, 50));
-	//Material* material = tree->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-	Model * shit = (Model*)tree->getFirstChild();
-	Material* material = shit->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-	//Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-	Model * shit2 = (Model*)leaves->getFirstChild();
-	Material* material2 = shit2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-
-	material->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-	material->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	material2->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-	material2->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-
-	// Set the ambient color of the material.
-	material->getParameter("u_ambientColor")->setValue(Vector3(0.2f, 0.2f, 0.2f));
-	material2->getParameter("u_ambientColor")->setValue(Vector3(0.2f, 0.2f, 0.2f));
-
-	// Bind the light's color and direction to the material.
-	material->getParameter("u_directionalLightColor[0]")->setValue(_light->getColor());
-	material->getParameter("u_directionalLightDirection[0]")->bindValue(_light->getNode(), &Node::getForwardVectorWorld);
-	material2->getParameter("u_directionalLightColor[0]")->setValue(_light->getColor());
-	material2->getParameter("u_directionalLightDirection[0]")->bindValue(_light->getNode(), &Node::getForwardVectorWorld);
-
-	// Load the texture from file.
-	Texture::Sampler* sampler = material->getParameter("u_diffuseTexture")->setValue("res/bark_loo.png", true);
-	Texture::Sampler* sampler2 = material2->getParameter("u_diffuseTexture")->setValue("res/blatt1.png", true);
-
-	//Making sure the models will be seen
-	material->getStateBlock()->setCullFace(true);
-	material2->getStateBlock()->setCullFace(true);
-	material->getStateBlock()->setDepthTest(true);
-	material2->getStateBlock()->setDepthTest(true);
-
-	_scene->addNode(leaves);
-	_scene->addNode(tree);
-
-	TerrPager->PagingCheck();
-
-	Vector3 worldScale;
-	TerrPager->Param.loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
-
-	TerrainGenerator terrainGenerator;
-	std::vector<std::vector<std::vector<Vector3*> > > objsPos =
-		terrainGenerator.generateObjectsPosition(worldScale,
-		TerrPager->Param.Scale.y,
-		1,
-		TerrPager->Param.heightFieldResolution,
-		TerrPager->Param.heightFieldList, tree);
-
-	//tree->setTranslation(objs[0][0][0]);
-	//leaves->setTranslation(objs[0][0][0]);
-
-	for (size_t i = 0; i < TerrPager->Param.heightFieldList.size(); i++)
-	{
-		for (size_t j = 0; j < TerrPager->Param.heightFieldList[i].size(); j++)
-		{
-			for (size_t g = 0; g < objsPos[i][j].size(); g++)
-			{
-				if (g != 0 && j != 0 && i != 0)
-				{
-					Node * tmp1 = tree->clone();
-					Node * tmp2 = leaves->clone();
-
-					tmp1->setTranslation(Vector3(objsPos[i][j][g]->x,
-						objsPos[i][j][g]->y,
-						objsPos[i][j][g]->z));
-
-					tmp2->setTranslation(Vector3(objsPos[i][j][g]->x,
-						objsPos[i][j][g]->y,
-						objsPos[i][j][g]->z));
-
-					_scene->addNode(tmp1);
-					_scene->addNode(tmp2);
-				}
-			}
-		}
-	}
-#endif
-#ifdef OLD2
 	if (TerrPager)
 	{
 		if (TerrPager->Param.heightFieldList.size() > 0)
 		{
-			Scene * Stree = Scene::load("res/tree.gpb");
-			Node* leaves = Stree->findNode("leaves");
-			Node* tree = Stree->findNode("trunk");
-			tree->setScale(Vector3(50, 50, 50));
-			leaves->setScale(Vector3(50, 50, 50));
-			Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
-			tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
-#define TRANSPARENCY
-#ifdef TRANSPARENCY
-			Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
-			tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
-#else
-			Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-#endif
+			TerrPager->removeObjects();
 
-			/*
-			#ifdef POINTLIGHT_TEST
-				//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-				tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-				tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-				tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-				//tempt2->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-				tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-				tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-				tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-			#else
-				material->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-				material->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-				material2->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-				material2->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-			#endif
-			*/
-			// Set the ambient color of the material.
-			tempt->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
-			tempt2->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
-
-			/*
-			#ifdef POINTLIGHT_TEST
-				tempt->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-				tempt->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-				tempt->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-				tempt2->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-				tempt2->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-				tempt2->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-			#else
-				// Bind the light's color and direction to the material.
-				material->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-				material->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
-				material2->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-				material2->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
-			#endif
-			*/
-			// Load the texture from file.
-			Texture::Sampler* sampler = tempt->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/bark.png", true);
-			Texture::Sampler* sampler2 = tempt2->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/leave.png", true);
-
-			tempt->getMaterial()->getStateBlock()->setCullFace(true);
-			tempt->getMaterial()->getStateBlock()->setDepthTest(true);
-
-			tempt2->getMaterial()->getStateBlock()->setCullFace(true);
-			tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
-
-			_scene->addNode(leaves);
-			_scene->addNode(tree);
-
-			TerrPager->PagingCheck();
-
-			Vector3 worldScale;//(1,1,1);
-			TerrPager->PagingCheck();
-			TerrPager->Param.loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
-
-			TerrainGenerator terrainGenerator;
-
-			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, TerrPager->Param.Scale.y, 1, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList, tree);
-			std::vector<std::vector<std::vector<Node*> > > objs;
-			//tree->setTranslation(objs[0][0][0]);
-			//leaves->setTranslation(objs[0][0][0]);
-
-			objs.resize(TerrPager->Param.heightFieldList.size());
-			for (size_t i = 0; i < TerrPager->Param.heightFieldList.size(); i++)
-			{
-				objs[i].resize(TerrPager->Param.heightFieldList.size());
-				for (size_t j = 0; j < TerrPager->Param.heightFieldList[i].size(); j++)
-				{
-					for (size_t g = 0; g < objsPos[i][j].size(); g++)
-					{
-						Node * tmp1 = tree->clone();
-						Node * tmp2 = leaves->clone();
-
-						Node * tree2 = Node::create("tree");
-
-						tree2->addChild(tmp2);
-						tree2->addChild(tmp1);
-
-						tree2->setTranslation(Vector3(
-							objsPos[i][j][g]->x,
-							objsPos[i][j][g]->y + 20,
-							objsPos[i][j][g]->z));
-
-						_scene->addNode(tree2);
-
-						objs[i][j].push_back(tree2);
-					}
-				}
-			}
-			//TerrPager->removeObjects();
-			TerrPager->Param.objectsPosition = objsPos;
-			TerrPager->Param.objects = objs;
-			TerrPager->Param.objectsFilename.push_back("tree.gpb");
-
-			FilesSaver saver;
-			Threads t;
-			t.objectBool();
-			saverThreads.push_back(t);
-
-			threads.push_back(std::async(std::launch::async,
-				&FilesSaver::saveObjectsPos,
-				saver,
-				TerrPager->Param.objectsPosition,
-				TerrPager->Param.objectsFilename[0]));
-
-			Threads t3;
-			t3.objectBool();
-			saverThreads.push_back(t3);
-
-			update(1);
-			TerrPager->Param.DistanceMaxModelRender = (TerrPager->Param.DistanceMaxRender * 2);
-			render(1);
-			TerrPager->Param.DistanceMaxModelRender = (TerrPager->Param.DistanceMaxRender * 0.1);
-		}
-	}
-#endif
-	if (TerrPager)
-	{
-		if (TerrPager->Param.heightFieldList.size() > 0)
-		{
 			Scene * Stree = Scene::load("res/tree.gpb");
 			Node* leaves = Stree->findNode("leaves");
 			Node* tree = Stree->findNode("trunk");
@@ -1248,9 +1022,6 @@ void TerrainToolMain::generateObjectsPosition()
 			tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 			tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-			_scene->addNode(leaves);
-			_scene->addNode(tree);
-
 			TerrPager->PagingCheck();
 
 			Vector3 worldScale;//(1,1,1);
@@ -1261,8 +1032,6 @@ void TerrainToolMain::generateObjectsPosition()
 			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, TerrPager->Param.Scale.y, 1, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList, tree);
 			std::vector<std::vector<std::vector<Node*> > > objs;
 			std::vector<Model*> models;
-			//tree->setTranslation(objs[0][0][0]);
-			//leaves->setTranslation(objs[0][0][0]);
 
 			objs.resize(TerrPager->Param.heightFieldList.size());
 			for (size_t i = 0; i < TerrPager->Param.heightFieldList.size(); i++)
@@ -1306,12 +1075,9 @@ void TerrainToolMain::generateObjectsPosition()
 			t3.objectBool();
 			saverThreads.push_back(t3);*/
 
-			TerrPager->Param.Debug = true;
-			update(1);
-			TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 2);
-			render(1);
-			TerrPager->Param.distanceMaxModelRender = (TerrPager->Param.distanceMaxRender * 0.1);
-			TerrPager->Param.Debug = false;
+			tree->getDrawable()->draw();
+			leaves->getDrawable()->draw();
+			TerrPager->Param.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 		}
 	}
 }
@@ -1530,8 +1296,16 @@ void TerrainToolMain::generateNewTerrain()
 		TerrPager->Param.heightFieldResolution));
 #endif
 
+	TerrPager->Param.distanceLoad = (TerrPager->Param.BoundingBox * TerrPager->Param.maxHeight ) * 0.9;
+	TerrPager->Param.distanceUnload = (TerrPager->Param.BoundingBox * TerrPager->Param.maxHeight) * 1;
+	TerrPager->Param.distanceMaxRender = (TerrPager->Param.BoundingBox * TerrPager->Param.maxHeight) * 1;
+
 	TerrPager->PagingCheck();
 	_camera.setPosition(Vector3(0, TerrPager->zoneList[0][0]->getObjectInside()->_terrain->getHeight(0, 0), 0));
+
+	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * .9;
+	TerrPager->Param.distanceUnload = TerrPager->Param.BoundingBox * 1;
+	TerrPager->Param.distanceMaxRender = TerrPager->Param.BoundingBox * 1;
 }
 
 void TerrainToolMain::moveCamera(float elapsedTime)

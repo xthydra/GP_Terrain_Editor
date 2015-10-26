@@ -59,6 +59,7 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 	terrainNode = gameplay::Node::create("terrain");
 	terrainNode->setTranslation(pos);
 	terrainNode->setDrawable(_terrain);
+
 	//terrainNode->setTerrain(_terrain);
 	_Scene->addNode(terrainNode);
 
