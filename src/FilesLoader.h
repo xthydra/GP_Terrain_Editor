@@ -27,13 +27,13 @@ struct FilesLoader
 	Param folder to load the heightmaps
 	@return 2 vectors + an array of characters (z,x,char*)
 	*/
-	std::vector<std::vector<char*> > loadHeightmaps(const char*);
+	//std::vector<std::vector<char*> > loadHeightmaps(const char*);
 
 	/*
 	Param folder to load the heightmaps
 	@return 2 vectors + an array of characters (z,x,char*)
 	*/
-	std::vector<std::vector<char*> > loadRAWHeightmaps(const char*);
+	std::vector<std::vector<HeightField*> > loadRAWHeightmaps(const char*);
 
 	/*
 	Param folder to load the normalmaps

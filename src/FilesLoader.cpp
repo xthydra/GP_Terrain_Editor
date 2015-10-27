@@ -21,74 +21,15 @@ std::vector<std::vector<char*> > FilesLoader::loadObjectsPos(const char* folder)
 {
 	return std::vector<std::vector<char*> >(0);
 }
-std::vector<std::vector<char*> > FilesLoader::loadHeightmaps(const char* folder)
-{
-	std::vector<std::vector<char*> > fileNames;
-	int arraySize, x = 0, z = 0;
 
-	bool arraySizeFound = false;
-
-	while (!arraySizeFound)
-	{
-		std::string filename;
-		filename += "res/tmp/";
-		filename += folder;
-		filename += "/field-";
-		filename += std::to_string(x);
-		filename += "-";
-		filename += std::to_string(z);
-		filename += ".raw";
-
-		std::ifstream file;
-		file.open(filename, std::ifstream::binary);
-
-		file.seekg(0, std::ios::end);
-		int size = file.tellg();
-
-		if (size > 0)
-		{
-			arraySize = x;
-			x++;
-		}
-		else if (size == -1)
-		{
-			arraySize = x;
-			arraySizeFound = true;
-		}
-	}
-
-	fileNames.resize(arraySize);
-	for (size_t i = 0; i<arraySize;)
-	{
-		fileNames[i].resize(arraySize);
-		for (size_t j = 0; j<arraySize;)
-		{
-			std::string filename;
-			filename += "field-";
-			filename += std::to_string(i);
-			filename += "-";
-			filename += std::to_string(j);
-			filename += ".raw";
-
-
-			char* cstr = new char[filename.length() + 1];
-			strcpy(cstr, filename.c_str());
-
-			fileNames[i][j] = cstr;
-			j++;
-		}
-		i++;
-	}
-	tilesResolution = arraySize;
-	return fileNames;
-}
-std::vector<std::vector<char*> > FilesLoader::loadRAWHeightmaps(const char* folder)
+std::vector<std::vector<HeightField*> > FilesLoader::loadRAWHeightmaps(const char* folder)
 {
 	std::vector<std::vector<char*> > fileNames;
 	int arraySize, x = 0, z=0;
 
 	bool arraySizeFound = false;
 
+	//find the tiles resolution
 	while (!arraySizeFound)
 	{
 		std::string filename;
@@ -118,6 +59,7 @@ std::vector<std::vector<char*> > FilesLoader::loadRAWHeightmaps(const char* fold
 		}
 	}
 
+	//stack the files names in vectors
 	fileNames.resize(arraySize);
 	for (size_t i = 0; i<arraySize;)
 	{
@@ -141,7 +83,66 @@ std::vector<std::vector<char*> > FilesLoader::loadRAWHeightmaps(const char* fold
 		i++;
 	}
 	tilesResolution = arraySize;
-	return fileNames;
+
+	int heightfieldBuffer;
+
+	//read each files and output data in vectors
+	std::vector<std::vector<std::vector<__int16>>> raw;
+	raw.resize(fileNames.size());
+	for (size_t i = 0; i < fileNames.size(); i++)
+	{
+		raw[i].resize(fileNames[i].size());
+		for (size_t j = 0; j < fileNames[i].size(); j++)
+		{
+			std::string filename;
+			filename += "res/tmp/";
+			filename += folder;
+			filename += "/";
+			filename += fileNames[i][j];
+
+			std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
+			heightfieldBuffer=in.tellg();
+
+			if (heightfieldBuffer != -1)
+			{
+				raw[i][j].resize(heightfieldBuffer/sizeof(__int16));
+
+				int fd = open(filename.c_str(), O_RDONLY | O_RAW);
+
+				read(fd, raw[i][j].data(), heightfieldBuffer);
+			}
+		}
+	}
+
+	std::vector<std::vector<gameplay::HeightField*> > heightfields;
+
+	int heighfieldResolution = sqrt(heightfieldBuffer / 2);
+
+	//create empty heightmaps
+	heightfields.resize(tilesResolution);
+	for (size_t i = 0; i < tilesResolution; i++)
+	{
+		heightfields[i].resize(tilesResolution);
+		for (size_t j = 0; j < tilesResolution; j++)
+		{
+			heightfields[i][j] = HeightField::create(heighfieldResolution, heighfieldResolution);
+		}
+	}
+
+	//parse every files and output heightfields
+	for (size_t i = 0; i < raw.size(); i++)
+	{
+		for (size_t j = 0; j < raw[i].size(); j++)
+		{
+			float * verts=heightfields[i][j]->getArray();
+
+			for (size_t g = 0; g < raw[i][j].size(); g++)
+			{
+				verts[g] = raw[i][j][g];
+			}
+		}
+	}
+	return heightfields;
 }
 std::vector<std::vector<char*> > FilesLoader::loadNormalmaps(const char* folder)
 {

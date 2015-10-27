@@ -81,19 +81,6 @@ public:
 						 std::vector<std::vector<gameplay::HeightField *> >);
 
 	/**
-	* Generate heightfield images as a PNG extension
-	*
-	* @param Terrain ScaleY
-	* @param Heightfield resolution
-	* @param Heightfields vectors
-	*
-	* @return void
-	**/
-	void createHeightmaps(int,
-						  size_t,
-						  std::vector<std::vector<gameplay::HeightField *> >);
-
-	/**
 	* Generate heightfield images in Raw binary
 	*
 	* @param Terrain ScaleY

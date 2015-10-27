@@ -148,9 +148,6 @@ void TerrainToolMain::initialize()
 	control = _mainForm->getControl("GenerateBlendMapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	control = _mainForm->getControl("GenerateHeightMapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
 	control = _mainForm->getControl("GenerateNormalMapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
@@ -228,9 +225,6 @@ void TerrainToolMain::initialize()
 	_saveForm = Form::create("res/save.form");
 	_saveForm->setVisible(false);
 
-	control = _saveForm->getControl("PNGHeightmapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
 	control = _saveForm->getControl("RAWHeightmapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
@@ -247,7 +241,7 @@ void TerrainToolMain::initialize()
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
 	
-//#define EXAMPLE
+#define EXAMPLE
 #ifdef EXAMPLE
 	//Generate heightfields for the terrain pager
 	STerrainParameters param;
@@ -528,25 +522,38 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 		_mainForm->setVisible(false);
 		_saveForm->setVisible(true);
 	}
-	else if (strcmp(control->getId(), "GenerateHeightMapsButton") == 0)
-	{
-		TerrainGenerator terrainGenerator;
-		terrainGenerator.createHeightmaps(TerrPager->Param.Scale.y, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
-	}
 	else if (strcmp(control->getId(), "GenerateBlendMapsButton") == 0)
 	{
-		_mainForm->setVisible(false);
-		_generateBlendmapsForm->setVisible(true);
+		if (TerrPager)
+		{
+			if (TerrPager->Param.heightFieldList.size() > 0)
+			{
+				_mainForm->setVisible(false);
+				_generateBlendmapsForm->setVisible(true);
+			}
+		}
 	}
 	else if (strcmp(control->getId(), "GenerateNormalMapsButton") == 0)
 	{
-		TerrainGenerator terrainGenerator;
-		terrainGenerator.createNormalmaps(TerrPager->Param.Scale.y, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+		if (TerrPager)
+		{
+			if (TerrPager->Param.heightFieldList.size() > 0)
+			{
+				TerrainGenerator terrainGenerator;
+				terrainGenerator.createNormalmaps(TerrPager->Param.Scale.y, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+			}
+		}
 	}
 	else if (strcmp(control->getId(), "GenerateRawHeightfieldsButton") == 0)
 	{
-		TerrainGenerator terrainGenerator;
-		terrainGenerator.createRawHeightfields(TerrPager->Param.Scale.y, TerrPager->Param.maxHeight, TerrPager->Param.BoundingBox, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+		if (TerrPager)
+		{
+			if (TerrPager->Param.heightFieldList.size() > 0)
+			{
+				TerrainGenerator terrainGenerator;
+				terrainGenerator.createRawHeightfields(TerrPager->Param.Scale.y, TerrPager->Param.maxHeight, TerrPager->Param.BoundingBox, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+			}
+		}
 	}
 	else if (strcmp(control->getId(), "GenerateObjectsPosButton") == 0)
 	{
@@ -845,12 +852,11 @@ void TerrainToolMain::load()
 	if (radioButton->isSelected())
 	{
 		TerrPager->removeObjects();
+		TerrPager->removeTerrains();
 		FilesLoader load;
-		TerrPager->Param.heightMapRAWList = load.loadRAWHeightmaps(folder);
+		TerrPager->Param.heightFieldList = load.loadRAWHeightmaps(folder);
 		TerrPager->Param.HeightMapDIR = (char*)folder;
 		TerrPager->Param.tilesResolution = load.tilesResolution;
-		TerrPager->loadHeightfields();
-		TerrPager->removeTerrains();
 	}
 
 	control = _loadForm->getControl("BlendmapRadio");
@@ -862,19 +868,6 @@ void TerrainToolMain::load()
 		TerrPager->Param.BlendMapDIR = (char*)folder;
 		TerrPager->Param.tilesResolution = load.tilesResolution;
 		TerrPager->reloadTerrains();
-	}
-
-	control = _loadForm->getControl("HeightmapRadio");
-	radioButton = (RadioButton *)control;
-	if (radioButton->isSelected())
-	{
-		TerrPager->removeObjects();
-		FilesLoader load;
-		TerrPager->Param.heightMapPNGList = load.loadHeightmaps(folder);
-		TerrPager->Param.HeightMapDIR = (char*)folder;
-		TerrPager->Param.tilesResolution = load.tilesResolution;
-		TerrPager->loadHeightfields();
-		TerrPager->removeTerrains();
 	}
 
 	control = _loadForm->getControl("ObjectsPosRadio");
@@ -891,66 +884,70 @@ void TerrainToolMain::load()
 		FilesLoader load;
 		TerrPager->Param.normalMapList = load.loadNormalmaps(folder);
 		TerrPager->Param.NormalMapDIR = (char*)folder;
+		TerrPager->reloadTerrains();
 	}
 
 }
 
 void TerrainToolMain::generateNewBlendmaps()
 {
-	Control * control;
-	Slider * slider;
-
-	control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");
-	slider = (Slider *)control;
-	int Intensity1 = slider->getValue();
-
-	control = _generateBlendmapsForm->getControl("Blendmap2-Intensity");
-	slider = (Slider *)control;
-	int Intensity2 = slider->getValue();
-
-	control = _generateBlendmapsForm->getControl("Blendmap1-Opacity");
-	slider = (Slider *)control;
-	int Opacity1 = slider->getValue();
-
-	control = _generateBlendmapsForm->getControl("Blendmap2-Opacity");
-	slider = (Slider *)control;
-	int Opacity2 = slider->getValue();
-
-	TerrainGenerator terrainGenerator;
-
-	TerrPager->Param.blendMaps = terrainGenerator.createTiledTransparentBlendImages(TerrPager->Param.Scale.y,
-		Intensity1,
-		Intensity2,
-		Opacity1,
-		Opacity2,
-		TerrPager->Param.heightFieldResolution,
-		TerrPager->Param.heightFieldList);
-	TerrPager->Param.BlendMapDIR = createTMPFolder();
-
-	for (size_t i = 0; i < threads.size(); i++)
+	if (TerrPager)
 	{
-		if (saverThreads[i].blendmap == true)
+		Control * control;
+		Slider * slider;
+
+		control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");
+		slider = (Slider *)control;
+		int Intensity1 = slider->getValue();
+
+		control = _generateBlendmapsForm->getControl("Blendmap2-Intensity");
+		slider = (Slider *)control;
+		int Intensity2 = slider->getValue();
+
+		control = _generateBlendmapsForm->getControl("Blendmap1-Opacity");
+		slider = (Slider *)control;
+		int Opacity1 = slider->getValue();
+
+		control = _generateBlendmapsForm->getControl("Blendmap2-Opacity");
+		slider = (Slider *)control;
+		int Opacity2 = slider->getValue();
+
+		TerrainGenerator terrainGenerator;
+
+		TerrPager->Param.blendMaps = terrainGenerator.createTiledTransparentBlendImages(TerrPager->Param.Scale.y,
+			Intensity1,
+			Intensity2,
+			Opacity1,
+			Opacity2,
+			TerrPager->Param.heightFieldResolution,
+			TerrPager->Param.heightFieldList);
+		TerrPager->Param.BlendMapDIR = createTMPFolder();
+
+		for (size_t i = 0; i < threads.size(); i++)
 		{
-			threads[i].~future();
-			threads.erase(threads.begin() + i);
-			saverThreads.erase(saverThreads.begin() + i);
+			if (saverThreads[i].blendmap == true)
+			{
+				threads[i].~future();
+				threads.erase(threads.begin() + i);
+				saverThreads.erase(saverThreads.begin() + i);
+			}
 		}
+
+		FilesSaver saver;
+		Threads t;
+		t.blendBool();
+		saverThreads.push_back(t);
+		TerrPager->Param.generatedBlendmaps = false;
+
+		threads.push_back(std::async(std::launch::async,
+			&FilesSaver::saveBlendmaps,
+			saver,
+			TerrPager->Param.blendMaps,
+			TerrPager->Param.BlendMapDIR,
+			TerrPager->Param.heightFieldResolution));
+
+		TerrPager->reloadTerrains();
 	}
-
-	FilesSaver saver;
-	Threads t;
-	t.blendBool();
-	saverThreads.push_back(t);
-	TerrPager->Param.generatedBlendmaps = false;
-
-	threads.push_back(std::async(std::launch::async,
-		&FilesSaver::saveBlendmaps,
-		saver,
-		TerrPager->Param.blendMaps,
-		TerrPager->Param.BlendMapDIR,
-		TerrPager->Param.heightFieldResolution));
-
-	TerrPager->reloadTerrains();
 }
 
 void TerrainToolMain::generateObjectsPosition()

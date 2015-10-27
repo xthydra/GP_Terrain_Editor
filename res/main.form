@@ -188,12 +188,6 @@ form MainForm
             height = 45
             width = 120	
         }
-        button GenerateHeightMapsButton
-        {
-            text = Heightmaps
-            height = 45
-            width = 120
-        }
 		button GenerateNormalMapsButton
         {
             text = Normalmaps		

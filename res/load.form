@@ -25,12 +25,6 @@ form GenerateForm
             height = 45
             width = 200
         }
-        radioButton HeightmapRadio
-        {
-            text = PNG Heightmap
-            height = 45
-            width = 200
-        }
         radioButton ObjectsPosRadio
         {
             text = Objects Pos

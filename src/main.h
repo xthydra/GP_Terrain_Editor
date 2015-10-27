@@ -21,19 +21,22 @@
 
 //if you see error C2504 you need to put the files with error in it underneath the class undefined
 #pragma once
-#include <fstream>
-#include <string>
 #ifdef WIN32
 #define _USE_MATH_DEFINES
 #include <time.h>
 #include <cstdlib>
 #include <io.h>
 #include <direct.h>
+#include <future>
+#include <share.h>
+#else
+#include <unistd.h>
 #endif
+#include <fstream>
+#include <string>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <future>
 #include <thread>
 #include <chrono>
 #include <iostream>	

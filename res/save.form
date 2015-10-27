@@ -13,12 +13,6 @@ form GeneratenSaveForm
         width = 450
         height = 135
 
-		button PNGHeightmapsButton
-		{
-			text = PNG Heightmap
-			height = 45
-			width = 200
-		}
 		button RAWHeightmapsButton
 		{
 			text = RAW Heightmap
