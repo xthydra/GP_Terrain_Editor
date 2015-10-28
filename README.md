@@ -20,7 +20,7 @@
 
 4) it can generate blendmaps and normalmaps based on the heightfield and save it in PNG image format
 
-5) it can save the terrains in a binary file
+5) it can save terrains in binary files
 
 6) it can edit the terrains vertices
 
