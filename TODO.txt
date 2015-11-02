@@ -1,8 +1,4 @@
 =====================UPCOMING_FEATURES
-
-Saving terrain in .terrain
-Texture Painting tool
-
 ------------------------PRIOR
 Generate Objects Position Button
 Load/Save Objects Positions Button
@@ -20,7 +16,7 @@ optimize long distance traveling by virtually moving terrains around as a virtua
 optimize the virtual camera by preventing buffer overflow on the position value
 have gameplay highlight the button or something when you click on it
 make editing tools less clicky and more volatile
-
+Texture Painting tool
 
 if i had maximum height from when creating terrains then i wouldn't need to generate all blendmaps all at once before starting the lazy thread that's encoding blendmaps into PNGs...that would be an optimization
 
@@ -34,7 +30,4 @@ if i had maximum height from when creating terrains then i wouldn't need to gene
 2)the aligning function is missing 4 vertexes aligniment between 4 terrains extremity
 3)the diamond simplex noiser look too much smooth on Y scale
 6)theres no checks against segmentation fault for terrains with certain patchsize versus heightfield size
-
-
-take a look at textured.frag because it might contain a quick fix to spot light and point light to terrains
 =============================
