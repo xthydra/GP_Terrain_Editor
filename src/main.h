@@ -20,18 +20,26 @@
 //xcopy ..\GamePlay\bin\windows\OpenAL.dll $(Configuration) / s / y / d
 
 //if you see error C2504 you need to put the files with error in it underneath the class undefined
+
+#include "gameplay.h"
+
+#define THREADS2
+
 #pragma once
 #ifdef WIN32
 #define _USE_MATH_DEFINES
+#include <Windows.h>
+#include <tchar.h>
+#include <strsafe.h>
 #include <time.h>
 #include <cstdlib>
 #include <io.h>
 #include <direct.h>
-#include <future>
 #include <share.h>
 #else
 #include <unistd.h>
 #endif
+#include <thread>
 #include <fstream>
 #include <string>
 #include <math.h>
@@ -49,10 +57,263 @@
 #include "INoiseAlgorithm.h"
 #include "DiamondSquareNoise.h"
 #include "SimplexNoise.h"
-#include "TerrainToolAutoBindingResolver.h"
-#include "TerrainGenerator.h"
+#include "AutoBindingResolver.h"
+#include "Generator.h"
 #include "FilesLoader.h"
 #include "FilesSaver.h"
-#include "TerrainPager.h"
+#include "Pager.h"
 #include "TerrainEditor.h"
-#include "TerrainToolMain.h"
+
+/*i'm using that to confirm a thread termination*/
+struct Threads
+{
+	bool blendmap,
+		normalmap,
+		objectPos;
+
+	void blendBool() { blendmap = true, normalmap = false, objectPos = false; }
+	void normalBool() { blendmap = false, normalmap = true, objectPos = false; }
+	void objectBool() { blendmap = false, normalmap = false, objectPos = true; }
+};
+
+using namespace gameplay;
+
+/**
+* Main game class.
+*/
+class Main : public Game, Control::Listener
+{
+	/**
+	* @see Game::keyEvent
+	*/
+	void keyEvent(Keyboard::KeyEvent evt, int key);
+
+	/**
+	* @see Game::mouseEvent
+	*/
+	bool mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta);
+
+	/**
+	* @see Game::initialize
+	*/
+	void initialize();
+
+	/**
+	* @see Game::finalize
+	*/
+	void finalize();
+
+	/**
+	* @see Game::update
+	*/
+	void update(float elapsedTime);
+
+	/**
+	* @see Game::render
+	*/
+	void render(float elapsedTime);
+
+	/**
+	* Handler for UI form event
+	*/
+	void controlEvent(Control* control, EventType evt);
+
+	/**
+	* Draws the scene each frame.
+	*/
+	bool drawScene(Node* node);
+
+	/**
+	* If the camera is moving, move it relative to the amount of time that has passed.
+	*
+	* @param elapsedTime ...
+	* @return void
+	**/
+	void moveCamera(float elapsedTime);
+
+	/**
+	* Build a new terrain based on the parameters in the terrain generation form.
+	*
+	* @return void
+	**/
+	void generateNewTerrain();
+
+	/*
+	used to load files using the UI
+	*/
+	void load();
+
+	/*
+	randomly generate objects positions
+	*/
+	void generateObjectsPosition();
+
+	/*
+	threads used to save files
+	*/
+	std::vector<std::thread> threads;
+	
+	/*
+	used to confirm the state of a thread
+	*/
+	std::vector<Threads> saverThreads;
+
+	/**
+	* Generate blendmaps
+	*
+	* @return void
+	**/
+	void generateNewBlendmaps();
+
+	/**
+	* Used by the ui to switch input states.
+	**/
+	enum INPUT_MODE { NAVIGATION, TERRAIN, PAINT, GENERATOR };
+
+	/**
+	* How fast we fly.
+	**/
+	float MOVE_SPEED;
+
+	/**
+	* The Terrain Pager
+	**/
+	Pager * _pager;
+
+	/**
+	* The root scene node.
+	**/
+	Scene* _scene;
+
+	/**
+	* The root of the selection node.
+	**/
+	Node* _selection;
+
+	/**
+	* The selection ring instance.
+	**/
+	SelectionRing *_selectionRing;
+
+	/**
+	* Used to pass params to the terrain shader.
+	**/
+	TerrainToolAutoBindingResolver* _binding;
+
+	/**
+	* This is the scene camera.
+	**/
+	FirstPersonCamera _camera;
+
+	/**
+	* The scene light.
+	**/
+	Light* _light;
+
+	/**
+	* A ui form.
+	**/
+	Form* _mainForm;
+
+	/**
+	* A ui form.
+	**/
+	Form* _sizeForm;
+
+	/**
+	* UI form for generating terrains.
+	**/
+	Form* _generateTerrainsForm;
+
+	/**
+	* UI form for modiying blendmaps intensity.
+	**/
+	Form* _generateBlendmapsForm;
+
+	/**
+	* UI form for modiying noise parameters.
+	**/
+	Form* _noiseForm;
+
+	/**
+	* UI form for loading files.
+	**/
+	Form* _loadForm;
+
+	/**
+	* UI form for saving files.
+	**/
+	Form* _saveForm;
+
+	/**
+	* boolean flags to say if we are moving.
+	**/
+	bool _moveForward, _moveBackward, _moveLeft, _moveRight;
+
+	/**
+	* Used to cancel an action.
+	**/
+	bool _doAction;
+
+	/**
+	* Store the last cursor position.
+	**/
+	float _prevX, _prevY;
+
+	/**
+	* Used to know if the button is hold
+	**/
+	bool LMB, RMB;
+
+	/**
+	* The scale of the selection.
+	**/
+	float _selectionScale;
+
+	/**
+	* The current input mode.
+	**/
+	INPUT_MODE _inputMode;
+
+public:
+
+	/**
+	* Constructor.
+	*/
+	Main();
+};
+
+/**
+* Used to quickly filter ray collisions to collisions with the terrain (for picking).
+**/
+
+struct TerrainHitFilter : public PhysicsController::HitFilter {
+
+	/**
+	* Constructor -- stores a reference to the terrain.
+	*
+	* @param terrain ...
+	**/
+	TerrainHitFilter(Terrain* terrain)
+	{
+		terrainObject = terrain->getNode()->getCollisionObject();
+	}
+
+	/**
+	* Only return true if the hit is on the terrain.
+	*
+	* @param object The result of the ray collision test.
+	* @return bool
+	**/
+	bool filter(PhysicsCollisionObject* object)
+	{
+		// Filter out all objects but the terrain
+		return (object != terrainObject);
+	}
+
+	/**
+	* Stored so it can be used in the hit detection.
+	**/
+	PhysicsCollisionObject* terrainObject;
+};
+

@@ -19,11 +19,9 @@
 #include "main.h"
 
 /**
-* This structure is called and destroyed only for editing given terrains
+* The structure is called and destroyed only for editing given terrains
 **/
 struct TerrainEditor{
-
-public:
 
 	/**
 	* Aligning each vertexes at terrains extremity next to each others height to make it look smoother

@@ -21,15 +21,6 @@
 struct CTerrain
 {
 public:
-	/*the terrain*/
-	gameplay::Terrain * _terrain;
-
-	/*the terrain node*/
-	gameplay::Node *terrainNode;
-
-	/*the physical object of the terrain*/
-	gameplay::PhysicsCollisionObject * _PhyObject;
-
 	/**
 	* Heightfield constructor
 	*
@@ -41,6 +32,7 @@ public:
 	* @param position
 	* @param blendmap1
 	* @param blendmap2
+	*
 	* @return void
 	**/
 	CTerrain(gameplay::HeightField * heightField,
@@ -55,8 +47,18 @@ public:
 		const char*,
 		gameplay::Scene*);
 
+	/*the terrain*/
+	gameplay::Terrain * terrain;
+
+	/*the terrain node*/
+	gameplay::Node *terrainNode;
+
 	~CTerrain();
 private:
-	/*a pointer to the scene created in "TerrainToolMain.cpp"*/
-	gameplay::Scene* _Scene;
+
+	/*the physical object of the terrain*/
+	gameplay::PhysicsCollisionObject * _physicObject;
+
+	/*a pointer to the scene created in "Main.cpp"*/
+	gameplay::Scene* _scene;
 };

@@ -16,20 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#ifndef SIMPLEXNOISE_H
-#define SIMPLEXNOISE_H
-
-#include "gameplay.h"
-
 #include "main.h"
 
 using namespace gameplay;
 
-/**
- * Noise generation algotirm based on simplex noise.
- * This C++ version is based on the java version at: http://webstaff.itn.liu.se/~stegu/simplexnoise/SimplexNoise.java by Stefan Gustavson.
- **/
 class SimplexNoise : public INoiseAlgorithm
 {
     public:
@@ -50,6 +40,7 @@ class SimplexNoise : public INoiseAlgorithm
          * @param rangemin The minumum height value to generate.
          * @param rangemax The maximum height value to generate.
          * @param seed A random seed
+		 *
          * @return void
          **/
         virtual void init(double maxx, double maxz, double rangemin, double rangemax, int seed);
@@ -60,13 +51,13 @@ class SimplexNoise : public INoiseAlgorithm
          * @param x X coordinate
          * @param z Z coordinate
 		 * @param tiles Resolution
+		 *
          * @return double
          **/
         virtual double noise(double x, double z);
         
         /**
-         * Destructor...
-         *
+         * Destructor
          **/
         virtual ~SimplexNoise();
     private:
@@ -78,6 +69,7 @@ class SimplexNoise : public INoiseAlgorithm
          *
          * @param x X coordinate
          * @param z Z coordinate
+		 *
          * @return double
          **/
         double noiseSingle(double x, double z);
@@ -88,6 +80,7 @@ class SimplexNoise : public INoiseAlgorithm
          * @param v Vector
          * @param x x scale
          * @param z z scale
+		 *
          * @return double
          **/
         double dot( const Vector3 & v, double x, double z );
@@ -167,5 +160,3 @@ class SimplexNoise : public INoiseAlgorithm
          **/
         double _worldScale;
 };
-
-#endif // SIMPLEXNOISE_H

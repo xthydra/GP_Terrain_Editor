@@ -20,6 +20,7 @@
 
 void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > > objsPos, char * objectName)
 {
+#ifdef OLD_OBS_SAVER
 #ifdef WIN32
 	char tmpdir[] = "res/tmp/fileXXXXXX";
 	mktemp(tmpdir);
@@ -67,6 +68,51 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 		}
 		i++;
 	}
+#else
+#ifdef WIN32
+	char tmpdir[] = "res/tmp/fileXXXXXX";
+	mktemp(tmpdir);
+	_mkdir("res/tmp");
+	_mkdir(tmpdir);
+#else
+	char tmpdir[] = "res/tmp/fileXXXXXX";
+	mkdtemp(tmpdir);
+#endif
+	for (size_t i = 0; i < objsPos.size();)
+	{
+		for (size_t j = 0; j < objsPos[i].size();)
+		{
+			std::vector<__int16> raw;
+
+			size_t x, z, k;
+
+			for (size_t g = 0; g < objsPos[i][j].size();)
+			{
+				raw.push_back(objsPos[i][j][g]->x);
+				raw.push_back(objsPos[i][j][g]->y);
+				raw.push_back(objsPos[i][j][g]->z);
+				g++;
+			}
+
+			std::string fileName;
+			fileName += tmpdir;
+			fileName += "/";
+			fileName += std::to_string(i);
+			fileName += "-";
+			fileName += std::to_string(j);
+			fileName += objectName;
+
+			int fd = open(fileName.c_str(), O_CREAT | O_WRONLY | O_RAW);
+			if (fd != -1)
+			{
+				write(fd, raw.data(), raw.size()*sizeof(__int16));
+				close(fd);
+			}
+			j++;
+		}
+		i++;
+	}
+#endif
 }
 
 void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned char> > > normalmaps, char * folder, int normalMapResolution)

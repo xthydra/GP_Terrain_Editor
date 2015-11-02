@@ -21,17 +21,11 @@
 struct FilesLoader
 {
 	/*unuseable*/
-	std::vector<std::vector<char*> > loadObjectsPos(const char*);
+	std::vector<std::vector<std::vector<Vector3*> > > loadObjectsPos(const char*);
 
 	/*
 	Param folder to load the heightmaps
-	@return 2 vectors + an array of characters (z,x,char*)
-	*/
-	//std::vector<std::vector<char*> > loadHeightmaps(const char*);
-
-	/*
-	Param folder to load the heightmaps
-	@return 2 vectors + an array of characters (z,x,char*)
+	@return heightfields in 2 vectors used to define the tile position
 	*/
 	std::vector<std::vector<HeightField*> > loadRAWHeightmaps(const char*);
 

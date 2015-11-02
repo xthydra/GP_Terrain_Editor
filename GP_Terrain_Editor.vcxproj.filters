@@ -28,16 +28,16 @@
     <ClCompile Include="src\TerrainEditor.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainGenerator.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainPager.cpp">
+    <ClCompile Include="src\Pager.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainToolAutoBindingResolver.cpp">
+    <ClCompile Include="src\Generator.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainToolMain.cpp">
+    <ClCompile Include="src\AutoBindingResolver.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,9 +60,6 @@
     <ClInclude Include="src\LodePNG.h">
       <Filter>src\headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\main.h">
-      <Filter>src\headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\SelectionRing.h">
       <Filter>src\headers</Filter>
     </ClInclude>
@@ -75,16 +72,16 @@
     <ClInclude Include="src\TerrainEditor.h">
       <Filter>src\headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\TerrainGenerator.h">
+    <ClInclude Include="src\Main.h">
       <Filter>src\headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\TerrainPager.h">
+    <ClInclude Include="src\Generator.h">
       <Filter>src\headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\TerrainToolAutoBindingResolver.h">
+    <ClInclude Include="src\Pager.h">
       <Filter>src\headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\TerrainToolMain.h">
+    <ClInclude Include="src\AutoBindingResolver.h">
       <Filter>src\headers</Filter>
     </ClInclude>
   </ItemGroup>

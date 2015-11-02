@@ -30,11 +30,11 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 				   const char* blend2,
 				   gameplay::Scene* scen)
 {
-	this->_Scene = scen;
+	this->_scene = scen;
 
 	if (normalmap == NULL)
 	{
-		_terrain = gameplay::Terrain::create(heightField,
+		terrain = gameplay::Terrain::create(heightField,
 			scale,
 			patchSize,
 			LODQuality,
@@ -43,7 +43,7 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 			"res/materials/terrain.material");
 	}
 	else {
-		_terrain = gameplay::Terrain::create(heightField,
+		terrain = gameplay::Terrain::create(heightField,
 			scale,
 			patchSize,
 			LODQuality,
@@ -52,36 +52,33 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 			"res/materials/terrain.material");
 	}
 	
-	_terrain->setLayer(0, "res/common/terrain/grass.dds", gameplay::Vector2(ScaleTexture, ScaleTexture));
-	_terrain->setLayer(1, "res/common/terrain/dirt.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend1, 3);
-	_terrain->setLayer(2, "res/common/terrain/rock.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend2, 3);
+	terrain->setLayer(0, "res/common/terrain/grass.dds", gameplay::Vector2(ScaleTexture, ScaleTexture));
+	terrain->setLayer(1, "res/common/terrain/dirt.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend1, 3);
+	terrain->setLayer(2, "res/common/terrain/rock.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend2, 3);
 
 	terrainNode = gameplay::Node::create("terrain");
 	terrainNode->setTranslation(pos);
-	terrainNode->setDrawable(_terrain);
+	terrainNode->setDrawable(terrain);
 
-	//terrainNode->setTerrain(_terrain);
-	_Scene->addNode(terrainNode);
+	_scene->addNode(terrainNode);
 
 	gameplay::PhysicsRigidBody::Parameters *rigidParams = new gameplay::PhysicsRigidBody::Parameters();
 	rigidParams->mass = 1;
 	rigidParams->kinematic = true;
-	_PhyObject = terrainNode->setCollisionObject(gameplay::PhysicsCollisionObject::RIGID_BODY, gameplay::PhysicsCollisionShape::heightfield(), rigidParams);
+	_physicObject = terrainNode->setCollisionObject(gameplay::PhysicsCollisionObject::RIGID_BODY, gameplay::PhysicsCollisionShape::heightfield(), rigidParams);
 }
 
 CTerrain::~CTerrain()
 {
-	_Scene->removeNode(terrainNode);
+	_scene->removeNode(terrainNode);
 	int refcount = terrainNode->getRefCount();
 	for (size_t i = 0; i < refcount; i++)
 	{
 		terrainNode->release();
-		//SAFE_RELEASE(terrainNode);
 	}
-	refcount = _terrain->getRefCount();
+	refcount = terrain->getRefCount();
 	for (size_t i = 0; i < refcount; i++)
 	{
-		_terrain->release();
-		//SAFE_RELEASE(_terrain);
+		terrain->release();
 	}
 }

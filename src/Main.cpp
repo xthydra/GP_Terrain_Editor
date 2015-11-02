@@ -18,27 +18,6 @@
 
 #include "main.h"
 
-// Declare our game instance
-TerrainToolMain game;
-
-TerrainToolMain::TerrainToolMain()
-	: _scene(NULL),
-	_mainForm(NULL),
-	_generateTerrainsForm(NULL),
-	_loadForm(NULL),
-	_moveForward(false),
-	_moveBackward(false),
-	_moveLeft(false),
-	_moveRight(false),
-	_prevX(0),
-	_prevY(0),
-	MOVE_SPEED(10.0f),
-	_selectionScale(100.0f),
-	_inputMode(NAVIGATION),
-	_doAction(false)
-{
-}
-
 char * createTMPFolder()
 {
 #ifdef WIN32
@@ -74,8 +53,37 @@ bool toggleVisibility(gameplay::Control * control)
 	else { return true; }
 }
 
-void TerrainToolMain::initialize()
+// Declare our game instance
+Main game;
+
+Main::Main()
+	: _scene(NULL),
+	_mainForm(NULL),
+	_generateTerrainsForm(NULL),
+	_loadForm(NULL),
+	_moveForward(false),
+	_moveBackward(false),
+	_moveLeft(false),
+	_moveRight(false),
+	_prevX(0),
+	_prevY(0),
+	MOVE_SPEED(10.0f),
+	_selectionScale(100.0f),
+	_inputMode(NAVIGATION),
+	_doAction(false)
 {
+}
+
+void Main::initialize()
+{
+	
+#ifdef _WIN64
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+#endif
+
 	// Create an empty scene.
 	_scene = Scene::create();
 	_scene->setAmbientColor(0.5,0.5,0.5);
@@ -107,6 +115,7 @@ void TerrainToolMain::initialize()
 	_binding->setLight(_light);
 #endif*/
 	//creating and setting up the UI
+	
 	_mainForm = Form::create("res/main.form");
 
 	Control *control = _mainForm->getControl("EditorButton");
@@ -244,101 +253,102 @@ void TerrainToolMain::initialize()
 #define EXAMPLE
 #ifdef EXAMPLE
 	//Generate heightfields for the terrain pager
-	STerrainParameters param;
-	param.generatedBlendmaps = false;
-	param.generatedNormalmaps = false;
-	param.generatedHeightmaps = false;
-	param.generatedObjects = false;
-	param.tilesResolution = 2;			//TERRAIN_PARAMETER_1
-	param.heightFieldResolution = 128;  //TERRAIN_PARAMETER_2
+	PagerParameters parameters;
+	parameters.generatedBlendmaps = false;
+	parameters.generatedNormalmaps = false;
+	parameters.generatedHeightmaps = false;
+	parameters.generatedObjects = false;
+	parameters.tilesResolution = 2;			//TERRAIN_parametersETER_1
+	parameters.heightFieldResolution = 128;  //TERRAIN_parametersETER_2
 	//if you put LOD on 1 it will make terrain creation faster
-	param.LodQuality = 1;				//TERRAIN_PARAMETER_3
-	param.TextureScale = 40;			//TERRAIN_PARAMETER_4
-	param.minHeight = 0;				//TERRAIN_PARAMETER_5
-	param.maxHeight = 128;				//TERRAIN_PARAMETER_6
-	param.skirtSize = 16;				//TERRAIN_PARAMETER_7
-	param.patchSize = 32;				//TERRAIN_PARAMETER_8
-	param.Scale = Vector3(param.heightFieldResolution, ((param.heightFieldResolution*param.tilesResolution)*0.10), param.heightFieldResolution);
+	parameters.lodQuality = 1;				//TERRAIN_parametersETER_3
+	parameters.textureScale = 40;			//TERRAIN_parametersETER_4
+	parameters.minHeight = 0;				//TERRAIN_parametersETER_5
+	parameters.maxHeight = 128;				//TERRAIN_parametersETER_6
+	parameters.skirtSize = 16;				//TERRAIN_parametersETER_7
+	parameters.patchSize = 32;				//TERRAIN_parametersETER_8
+	parameters.scale = Vector3(parameters.heightFieldResolution, ((parameters.heightFieldResolution*parameters.tilesResolution)*0.10), parameters.heightFieldResolution);
 
-	//int maxHeight = ((TerrPager->Param.tilesResolution * TerrPager->Param.tilesResolution) * TerrPager->Param.tilesResolution) *
-	//(TerrPager->Param.heightFieldResolution * TerrPager->Param.tilesResolution);
-
-	param.BoundingBox = (param.heightFieldResolution * param.heightFieldResolution) - param.heightFieldResolution;
+	parameters.boundingBox = (parameters.heightFieldResolution * parameters.heightFieldResolution) - parameters.heightFieldResolution;
 
 	TerrainGenerator terrainGenerator;
 	std::vector<std::vector<gameplay::HeightField*>> heightfields;
-	heightfields = terrainGenerator.buildTerrainTiles(param.heightFieldResolution,
-		param.tilesResolution,
-		param.minHeight,
-		param.maxHeight,
+	heightfields = terrainGenerator.buildTerrainTiles(parameters.heightFieldResolution,
+		parameters.tilesResolution,
+		parameters.minHeight,
+		parameters.maxHeight,
 		0,
 		1,
 		1,
 		true,
 		true);
-
-	param.heightFieldList = heightfields;
-	//param.Scale = Vector3(param.heightFieldResolution, (param.heightFieldResolution /param.tilesResolution), param.heightFieldResolution);
+	//parameters.Scale = Vector3(parameters.heightFieldResolution, (parameters.heightFieldResolution /parameters.tilesResolution), parameters.heightFieldResolution);
 
 	//if you want to apply a second scale apply it like that
-	//E.G : param.Scale = param.Scale * 1.5; param.BoundingBox=param.BoundingBox* 1.5;
+	//E.G : parameters.Scale = parameters.Scale * 1.5; parameters.BoundingBox=parameters.BoundingBox* 1.5;
 	//but dont expect the terrain editor tools to work because alot of functions are using heightfield resolution instead
-	//of the scale parameter sent to the paging class
+	//of the scale parameters sent to the paging class
 
-	param.Debug = false;
+	parameters.Debug = false;
 
-	param.distanceLoad = param.BoundingBox * .9;
-	param.distanceUnload = param.BoundingBox * 1;
-	param.distanceMaxRender = param.BoundingBox * 1;
+	parameters.distanceTerrainLoad = parameters.boundingBox * .9;
+	parameters.distanceTerrainUnload = parameters.boundingBox * 1;
+	parameters.distanceTerrainMaxRender = parameters.boundingBox * 1;
 
-	TerrPager = new TerrainPager(param, _scene);
+	_pager = new Pager(parameters, _scene);
+
+	_pager->heightFieldList = heightfields;
+
+	_pager->computePositions();
 
 #define CREATE_BLENDMAPS
 #ifdef CREATE_BLENDMAPS
-	TerrPager->Param.blendMaps = 
-		terrainGenerator.createTiledTransparentBlendImages(TerrPager->Param.Scale.y,
+	_pager->blendMaps =
+		terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
 														   0,
 														   50,
 														   0,
 														   100,
-														   TerrPager->Param.heightFieldResolution,
-														   TerrPager->Param.heightFieldList);
-	TerrPager->Param.BlendMapDIR = createTMPFolder();
+														   _pager->parameters.heightFieldResolution,
+														   _pager->heightFieldList);
+	_pager->parameters.blendMapDIR = createTMPFolder();
 
 	FilesSaver saver;
 	Threads t;
 	t.blendBool();
 	saverThreads.push_back(t);
 
-	threads.push_back(std::async(std::launch::async,
+	threads.push_back(std::thread(
 		&FilesSaver::saveBlendmaps,
 		saver,
-		TerrPager->Param.blendMaps,
-		TerrPager->Param.BlendMapDIR,
-		TerrPager->Param.heightFieldResolution));
+		_pager->blendMaps,
+		_pager->parameters.blendMapDIR,
+		_pager->parameters.heightFieldResolution));
+
 #endif
 
 #define CREATE_NORMALMAPS
 #ifdef CREATE_NORMALMAPS
-	TerrPager->Param.normalMaps = 
-		terrainGenerator.createNormalmaps(param.Scale.y, 
-										  TerrPager->Param.heightFieldResolution, 
-										  TerrPager->Param.heightFieldList);
+	_pager->normalMaps = 
+		terrainGenerator.createNormalmaps(parameters.scale.y, 
+										  _pager->parameters.heightFieldResolution, 
+										  _pager->heightFieldList);
 
-	TerrPager->Param.NormalMapDIR = createTMPFolder();
+	_pager->parameters.normalMapDIR = createTMPFolder();
 
 	Threads t2;
 	t2.normalBool();
 	saverThreads.push_back(t2);
 
-	threads.push_back(std::async(std::launch::async,
+	threads.push_back(std::thread(
 		&FilesSaver::saveNormalmaps,
 		saver,
-		TerrPager->Param.normalMaps,
-		TerrPager->Param.NormalMapDIR,
-		TerrPager->Param.heightFieldResolution));
+		_pager->normalMaps,
+		_pager->parameters.normalMapDIR,
+		_pager->parameters.heightFieldResolution));
+
 #endif
-	_camera.setPosition(Vector3(0, ((param.heightFieldResolution*param.tilesResolution) * 25), 0));
+	_camera.setPosition(Vector3(0, ((parameters.heightFieldResolution*parameters.tilesResolution) * 25), 0));
 	_camera.rotate(0, -90);
 
 	_selectionRing = new SelectionRing(_scene);
@@ -405,21 +415,21 @@ void TerrainToolMain::initialize()
 	tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 	tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-	TerrPager->PagingCheck();
+	_pager->PagingCheck();
 
 	Vector3 worldScale;//(1,1,1);
-	TerrPager->PagingCheck();
-	TerrPager->Param.loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
+	_pager->PagingCheck();
+	_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
-	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, param.Scale.y, 1, param.heightFieldResolution, param.heightFieldList, tree);
+	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, parameters.scale.y, 1, parameters.heightFieldResolution, _pager->heightFieldList, tree);
 	std::vector<std::vector<std::vector<Node*> > > objs;
 	std::vector<Model*> models;
 
-	objs.resize(param.heightFieldList.size());	
-	for (size_t i = 0; i < param.heightFieldList.size(); i++)
+	objs.resize(_pager->heightFieldList.size());
+	for (size_t i = 0; i < _pager->heightFieldList.size(); i++)
 	{
-		objs[i].resize(param.heightFieldList.size());
-		for (size_t j = 0; j < param.heightFieldList[i].size(); j++)
+		objs[i].resize(_pager->heightFieldList.size());
+		for (size_t j = 0; j < _pager->heightFieldList[i].size(); j++)
 		{
 			for (size_t g = 0; g < objsPos[i][j].size(); g++)
 			{
@@ -442,15 +452,15 @@ void TerrainToolMain::initialize()
 			}
 		}
 	}
-	TerrPager->Param.objects = objs;
-	TerrPager->Param.objectsPosition = objsPos;
-	TerrPager->Param.objectsFilename.push_back("tree.gpb");
+	_pager->objects = objs;
+	_pager->objectsPosition = objsPos;
+	_pager->objectsFilename.push_back("tree.gpb");
 
-	threads.push_back(std::async(std::launch::async,
+	threads.push_back(std::thread(
 		&FilesSaver::saveObjectsPos,
 		saver,
-		TerrPager->Param.objectsPosition,
-		TerrPager->Param.objectsFilename[0]));
+		_pager->objectsPosition,
+		_pager->objectsFilename[0]));
 
 	Threads t3;
 	t3.objectBool();
@@ -458,11 +468,11 @@ void TerrainToolMain::initialize()
 #endif
 	tree->getDrawable()->draw();
 	leaves->getDrawable()->draw();
-	TerrPager->Param.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
+	_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 #endif
 }
 
-void TerrainToolMain::finalize()
+void Main::finalize()
 {
 	SAFE_RELEASE(_mainForm);
 	SAFE_RELEASE(_generateTerrainsForm);
@@ -474,7 +484,7 @@ void TerrainToolMain::finalize()
 	delete _binding;
 }
 
-void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventType evt)
+void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 {
 	//=====================MAIN_FORM
 	if (strcmp(control->getId(), "NavigateButton") == 0)
@@ -524,9 +534,9 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	}
 	else if (strcmp(control->getId(), "GenerateBlendMapsButton") == 0)
 	{
-		if (TerrPager)
+		if (_pager)
 		{
-			if (TerrPager->Param.heightFieldList.size() > 0)
+			if (_pager->heightFieldList.size() > 0)
 			{
 				_mainForm->setVisible(false);
 				_generateBlendmapsForm->setVisible(true);
@@ -535,23 +545,23 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	}
 	else if (strcmp(control->getId(), "GenerateNormalMapsButton") == 0)
 	{
-		if (TerrPager)
+		if (_pager)
 		{
-			if (TerrPager->Param.heightFieldList.size() > 0)
+			if (_pager->heightFieldList.size() > 0)
 			{
 				TerrainGenerator terrainGenerator;
-				terrainGenerator.createNormalmaps(TerrPager->Param.Scale.y, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+				terrainGenerator.createNormalmaps(_pager->parameters.scale.y, _pager->parameters.heightFieldResolution, _pager->heightFieldList);
 			}
 		}
 	}
 	else if (strcmp(control->getId(), "GenerateRawHeightfieldsButton") == 0)
 	{
-		if (TerrPager)
+		if (_pager)
 		{
-			if (TerrPager->Param.heightFieldList.size() > 0)
+			if (_pager->heightFieldList.size() > 0)
 			{
 				TerrainGenerator terrainGenerator;
-				terrainGenerator.createRawHeightfields(TerrPager->Param.Scale.y, TerrPager->Param.maxHeight, TerrPager->Param.BoundingBox, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList);
+				terrainGenerator.createRawHeightfields(_pager->parameters.scale.y, _pager->parameters.maxHeight, _pager->parameters.boundingBox, _pager->parameters.heightFieldResolution, _pager->heightFieldList);
 			}
 		}
 	}
@@ -559,7 +569,7 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	{
 		generateObjectsPosition();
 		//FilesSaver saver;
-		//std::thread(&FilesSaver::saveObjectsPos,saver, TerrPager->Param.objectsPosition, TerrPager->Param.objectsFilename[0]);
+		//std::thread(&FilesSaver::saveObjectsPos,saver, _pager->parameters.objectsPosition, _pager->parameters.objectsFilename[0]);
 	}
 	else if (strcmp(control->getId(), "GenerateNoiseButton") == 0)
 	{
@@ -583,41 +593,41 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	else if (strcmp(control->getId(), "LoadSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		if (TerrPager->Param.distanceUnload > (slider->getValue() * TerrPager->Param.BoundingBox))
+		if (_pager->parameters.distanceTerrainUnload > (slider->getValue() * _pager->parameters.boundingBox))
 		{
-			TerrPager->Param.distanceLoad = (slider->getValue() * TerrPager->Param.BoundingBox);
+			_pager->parameters.distanceTerrainLoad = (slider->getValue() * _pager->parameters.boundingBox);
 		}
-		else if (TerrPager->Param.distanceUnload < (slider->getValue() * TerrPager->Param.BoundingBox))
+		else if (_pager->parameters.distanceTerrainUnload < (slider->getValue() * _pager->parameters.boundingBox))
 		{
 			Control * control2 = _mainForm->getControl("UnloadSlider");
 			Slider * slider2 = (Slider *)control2;
 			slider2->setValue(slider->getValue() + 1);
 			//setloadSlider value below unloadSlider
-			TerrPager->Param.distanceUnload = (slider2->getValue() * TerrPager->Param.BoundingBox);
-			TerrPager->Param.distanceLoad = (slider->getValue() * TerrPager->Param.BoundingBox);
+			_pager->parameters.distanceTerrainUnload = (slider2->getValue() * _pager->parameters.boundingBox);
+			_pager->parameters.distanceTerrainLoad = (slider->getValue() * _pager->parameters.boundingBox);
 		}
 	}
 	else if (strcmp(control->getId(), "RenderSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		TerrPager->Param.distanceMaxRender = (slider->getValue() * TerrPager->Param.BoundingBox);
-		TerrPager->Param.distanceMaxModelRender = ((slider->getValue() * TerrPager->Param.BoundingBox) * 0.3);
+		_pager->parameters.distanceTerrainMaxRender = (slider->getValue() * _pager->parameters.boundingBox);
+		_pager->parameters.distanceMaxModelRender = ((slider->getValue() * _pager->parameters.boundingBox) * 0.3);
 	}
 	else if (strcmp(control->getId(), "UnloadSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		if (TerrPager->Param.distanceLoad < (slider->getValue() * TerrPager->Param.BoundingBox))
+		if (_pager->parameters.distanceTerrainLoad < (slider->getValue() * _pager->parameters.boundingBox))
 		{
-			TerrPager->Param.distanceUnload = (slider->getValue() * TerrPager->Param.BoundingBox);
+			_pager->parameters.distanceTerrainUnload = (slider->getValue() * _pager->parameters.boundingBox);
 		}
-		else if (TerrPager->Param.distanceLoad >(slider->getValue() * TerrPager->Param.BoundingBox))
+		else if (_pager->parameters.distanceTerrainLoad >(slider->getValue() * _pager->parameters.boundingBox))
 		{
 			Control * control2 = _mainForm->getControl("LoadSlider");
 			Slider * slider2 = (Slider *)control2;
 			slider2->setValue(slider->getValue() - 1);
 			//setloadSlider value below unloadSlider
-			TerrPager->Param.distanceLoad = (slider2->getValue() * TerrPager->Param.BoundingBox);
-			TerrPager->Param.distanceUnload = (slider->getValue() * TerrPager->Param.BoundingBox);
+			_pager->parameters.distanceTerrainLoad = (slider2->getValue() * _pager->parameters.boundingBox);
+			_pager->parameters.distanceTerrainUnload = (slider->getValue() * _pager->parameters.boundingBox);
 		}
 	}
 	//=============================
@@ -626,48 +636,49 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	else if (strcmp(control->getId(), "SizeSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
-		_selectionScale = slider->getValue() * ((TerrPager->Param.heightFieldResolution / 8) * (TerrPager->Param.Scale.x / 8));
-		int nearest = TerrPager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+		_selectionScale = slider->getValue() * ((_pager->parameters.heightFieldResolution / 8) * (_pager->parameters.scale.x / 8));
+		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
-			_selectionRing->setScale(_selectionScale, TerrPager->Param.loadedTerrains[nearest]);
+			_selectionRing->setScale(_selectionScale, _pager->loadedTerrains[nearest]);
 		}
 	}
 	else if (strcmp(control->getId(), "AlignButton") == 0)
 	{
 		TerrainEditor TerrEdit;
-		TerrEdit.aligningTerrainsVertexes(TerrPager->Param.heightFieldList,
-			TerrPager->Param.heightFieldResolution);
-		TerrPager->reloadTerrains();
+		TerrEdit.aligningTerrainsVertexes(_pager->heightFieldList,
+			_pager->parameters.heightFieldResolution);
+		_pager->reloadTerrains();
 	}
 	else if (strcmp(control->getId(), "RaiseButton") == 0)
 	{
 		TerrainEditor TerrEdit;
-		int nearest = TerrPager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
 			int posX = _selectionRing->getPositionX();
 			int posZ = _selectionRing->getPositionZ();
 
 			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			int Xarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().x
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
-			posX -= (Xarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
+			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
+			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
 
-			int Zarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().z
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
-			posZ -= (Zarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
+			int Xarray = worldPos.x / (terrainBox.max.x * 2);
+			posX -= (Xarray)*(terrainBox.max.x * 2);
+
+			int Zarray = worldPos.z / (terrainBox.max.z * 2);
+			posZ -= (Zarray)*(terrainBox.max.z * 2);
 
 			std::vector<int> heightfields =
 				TerrEdit.raiseTiles(posX,
 				posZ,
 				_selectionRing->getScale(),
-				TerrPager->Param.loadedTerrains,
+				_pager->loadedTerrains,
 				nearest,
-				TerrPager->Param.heightFieldResolution,
-				TerrPager->Param.loadedHeightfields);
+				_pager->parameters.heightFieldResolution,
+				_pager->loadedHeightfields);
 
-			TerrPager->reload(heightfields);
+			_pager->reload(heightfields);
 		}
 	}
 	else if (strcmp(control->getId(), "LowerButton") == 0)
@@ -677,91 +688,94 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 		//button->setSkinColor(button->getSkinColor(Control::State::ACTIVE), gameplay::Control::State::NORMAL);
 
 		TerrainEditor TerrEdit;
-		int nearest = TerrPager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
 			int posX = _selectionRing->getPositionX();
 			int posZ = _selectionRing->getPositionZ();
 
 			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			int Xarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().x
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
-			posX -= (Xarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
+			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
+			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
 
-			int Zarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().z
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
-			posZ -= (Zarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
+			int Xarray = worldPos.x / (terrainBox.max.x * 2);
+			posX -= (Xarray)*(terrainBox.max.x * 2);
+
+			int Zarray = worldPos.z / (terrainBox.max.z * 2);
+			posZ -= (Zarray)*(terrainBox.max.z * 2);
 
 			std::vector<int> heightfields =
 				TerrEdit.lowerTiles(posX,
 				posZ,
 				_selectionRing->getScale(),
-				TerrPager->Param.loadedTerrains,
+				_pager->loadedTerrains,
 				nearest,
-				TerrPager->Param.heightFieldResolution,
-				TerrPager->Param.loadedHeightfields);
+				_pager->parameters.heightFieldResolution,
+				_pager->loadedHeightfields);
 
-			TerrPager->reload(heightfields);
+			_pager->reload(heightfields);
 		}
 	}
 	else if (strcmp(control->getId(), "FlattenButton") == 0)
 	{
 		TerrainEditor TerrEdit;
-		int nearest = TerrPager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
 			int posX = _selectionRing->getPositionX();
 			int posZ = _selectionRing->getPositionZ();
 
 			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			int Xarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().x
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
-			posX -= (Xarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
+			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
+			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
 
-			int Zarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().z
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
-			posZ -= (Zarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
+			int Xarray = worldPos.x / (terrainBox.max.x * 2);
+			posX -= (Xarray)*(terrainBox.max.x * 2);
+
+			int Zarray = worldPos.z / (terrainBox.max.z * 2);
+			posZ -= (Zarray)*(terrainBox.max.z * 2);
 
 			std::vector<int> heightfields =
 				TerrEdit.flattenTiles(posX,
 				posZ,
 				_selectionRing->getScale(),
-				TerrPager->Param.loadedTerrains,
+				_pager->loadedTerrains,
 				nearest,
-				TerrPager->Param.heightFieldResolution,
-				TerrPager->Param.loadedHeightfields);
+				_pager->parameters.heightFieldResolution,
+				_pager->loadedHeightfields);
 
-			TerrPager->reload(heightfields);
+			_pager->reload(heightfields);
 		}
 	}
 	else if (strcmp(control->getId(), "SmoothButton") == 0)
 	{
 		TerrainEditor TerrEdit;
-		int nearest = TerrPager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
 			int posX = _selectionRing->getPositionX();
 			int posZ = _selectionRing->getPositionZ();
 
-			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			int Xarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().x
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
-			posX -= (Xarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.x * 2);
+			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
+			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
 
-			int Zarray = TerrPager->Param.loadedTerrains[nearest]->getNode()->getTranslationWorld().z
-				/ (TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
-			posZ -= (Zarray)*(TerrPager->Param.loadedTerrains[nearest]->getBoundingBox().max.z * 2);
+			//reposition the ray hit as if the terrain underneath the ray was at position 0
+			int Xarray = worldPos.x / (terrainBox.max.x * 2);
+			posX -= (Xarray)*(terrainBox.max.x * 2);
+
+			int Zarray = worldPos.z / (terrainBox.max.z * 2);
+			posZ -= (Zarray)*(terrainBox.max.z * 2);
 
 			std::vector<int> heightfields =
 				TerrEdit.smoothTiles(posX,
 				posZ,
 				_selectionRing->getScale(),
-				TerrPager->Param.loadedTerrains,
+				_pager->loadedTerrains,
 				nearest,
-				TerrPager->Param.heightFieldResolution,
-				TerrPager->Param.loadedHeightfields);
+				_pager->parameters.heightFieldResolution,
+				_pager->loadedHeightfields);
 
-			TerrPager->reload(heightfields);
+			_pager->reload(heightfields);
 		}
 	}
 	//=============================
@@ -837,7 +851,7 @@ void TerrainToolMain::controlEvent(Control* control, Control::Listener::EventTyp
 	}
 }
 
-void TerrainToolMain::load()
+void Main::load()
 {
 	Control * control;
 	TextBox * textBox;
@@ -851,12 +865,12 @@ void TerrainToolMain::load()
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
-		TerrPager->removeObjects();
-		TerrPager->removeTerrains();
+		_pager->removeObjects();
+		_pager->removeTerrains();
 		FilesLoader load;
-		TerrPager->Param.heightFieldList = load.loadRAWHeightmaps(folder);
-		TerrPager->Param.HeightMapDIR = (char*)folder;
-		TerrPager->Param.tilesResolution = load.tilesResolution;
+		_pager->heightFieldList = load.loadRAWHeightmaps(folder);
+		_pager->parameters.heightMapDIR = (char*)folder;
+		_pager->parameters.tilesResolution = load.tilesResolution;
 	}
 
 	control = _loadForm->getControl("BlendmapRadio");
@@ -864,17 +878,21 @@ void TerrainToolMain::load()
 	if (radioButton->isSelected())
 	{
 		FilesLoader load;
-		TerrPager->Param.blendMapList = load.loadBlendmaps(folder);
-		TerrPager->Param.BlendMapDIR = (char*)folder;
-		TerrPager->Param.tilesResolution = load.tilesResolution;
-		TerrPager->reloadTerrains();
+		_pager->blendMapList = load.loadBlendmaps(folder);
+		_pager->parameters.blendMapDIR = (char*)folder;
+		_pager->parameters.tilesResolution = load.tilesResolution;
+		_pager->reloadTerrains();
 	}
 
 	control = _loadForm->getControl("ObjectsPosRadio");
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
-
+		_pager->removeObjects();
+		FilesLoader load;
+		_pager->objectsPosition = load.loadObjectsPos(folder);
+		//TODO : std::string objectName=load.fileName;
+		//TODO : _pager->createObjects(objectName,_pager->parameters.objectsPosition);
 	}
 
 	control = _loadForm->getControl("NormalmapRadio");
@@ -882,16 +900,16 @@ void TerrainToolMain::load()
 	if (radioButton->isSelected())
 	{
 		FilesLoader load;
-		TerrPager->Param.normalMapList = load.loadNormalmaps(folder);
-		TerrPager->Param.NormalMapDIR = (char*)folder;
-		TerrPager->reloadTerrains();
+		_pager->normalMapList = load.loadNormalmaps(folder);
+		_pager->parameters.normalMapDIR = (char*)folder;
+		_pager->reloadTerrains();
 	}
 
 }
 
-void TerrainToolMain::generateNewBlendmaps()
+void Main::generateNewBlendmaps()
 {
-	if (TerrPager)
+	if (_pager)
 	{
 		Control * control;
 		Slider * slider;
@@ -914,20 +932,20 @@ void TerrainToolMain::generateNewBlendmaps()
 
 		TerrainGenerator terrainGenerator;
 
-		TerrPager->Param.blendMaps = terrainGenerator.createTiledTransparentBlendImages(TerrPager->Param.Scale.y,
+		_pager->blendMaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
 			Intensity1,
 			Intensity2,
 			Opacity1,
 			Opacity2,
-			TerrPager->Param.heightFieldResolution,
-			TerrPager->Param.heightFieldList);
-		TerrPager->Param.BlendMapDIR = createTMPFolder();
+			_pager->parameters.heightFieldResolution,
+			_pager->heightFieldList);
+		_pager->parameters.blendMapDIR = createTMPFolder();
 
 		for (size_t i = 0; i < threads.size(); i++)
 		{
 			if (saverThreads[i].blendmap == true)
 			{
-				threads[i].~future();
+				threads[i].~thread();
 				threads.erase(threads.begin() + i);
 				saverThreads.erase(saverThreads.begin() + i);
 			}
@@ -937,26 +955,26 @@ void TerrainToolMain::generateNewBlendmaps()
 		Threads t;
 		t.blendBool();
 		saverThreads.push_back(t);
-		TerrPager->Param.generatedBlendmaps = false;
+		_pager->parameters.generatedBlendmaps = false;
 
-		threads.push_back(std::async(std::launch::async,
+		threads.push_back(std::thread(
 			&FilesSaver::saveBlendmaps,
 			saver,
-			TerrPager->Param.blendMaps,
-			TerrPager->Param.BlendMapDIR,
-			TerrPager->Param.heightFieldResolution));
+			_pager->blendMaps,
+			_pager->parameters.blendMapDIR,
+			_pager->parameters.heightFieldResolution));
 
-		TerrPager->reloadTerrains();
+		_pager->reloadTerrains();
 	}
 }
 
-void TerrainToolMain::generateObjectsPosition()
+void Main::generateObjectsPosition()
 {
-	if (TerrPager)
+	if (_pager)
 	{
-		if (TerrPager->Param.heightFieldList.size() > 0)
+		if (_pager->heightFieldList.size() > 0)
 		{
-			TerrPager->removeObjects();
+			_pager->removeObjects();
 
 			Scene * Stree = Scene::load("res/tree.gpb");
 			Node* leaves = Stree->findNode("leaves");
@@ -1019,22 +1037,22 @@ void TerrainToolMain::generateObjectsPosition()
 			tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 			tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-			TerrPager->PagingCheck();
+			_pager->PagingCheck();
 
 			Vector3 worldScale;//(1,1,1);
-			TerrPager->PagingCheck();
-			TerrPager->Param.loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
+			_pager->PagingCheck();
+			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
 			TerrainGenerator terrainGenerator;
-			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, TerrPager->Param.Scale.y, 1, TerrPager->Param.heightFieldResolution, TerrPager->Param.heightFieldList, tree);
+			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, _pager->parameters.scale.y, 1, _pager->parameters.heightFieldResolution, _pager->heightFieldList, tree);
 			std::vector<std::vector<std::vector<Node*> > > objs;
 			std::vector<Model*> models;
 
-			objs.resize(TerrPager->Param.heightFieldList.size());
-			for (size_t i = 0; i < TerrPager->Param.heightFieldList.size(); i++)
+			objs.resize(_pager->heightFieldList.size());
+			for (size_t i = 0; i < _pager->heightFieldList.size(); i++)
 			{
-				objs[i].resize(TerrPager->Param.heightFieldList.size());
-				for (size_t j = 0; j < TerrPager->Param.heightFieldList[i].size(); j++)
+				objs[i].resize(_pager->heightFieldList.size());
+				for (size_t j = 0; j < _pager->heightFieldList[i].size(); j++)
 				{
 					for (size_t g = 0; g < objsPos[i][j].size(); g++)
 					{
@@ -1058,15 +1076,15 @@ void TerrainToolMain::generateObjectsPosition()
 					}
 				}
 			}
-			TerrPager->Param.objects = objs;
-			TerrPager->Param.objectsPosition = objsPos;
-			TerrPager->Param.objectsFilename.push_back("tree.gpb");
+			_pager->objects = objs;
+			_pager->objectsPosition = objsPos;
+			_pager->objectsFilename.push_back("tree.gpb");
 
 			/*threads.push_back(std::async(std::launch::async,
 				&FilesSaver::saveObjectsPos,
 				saver,
-				TerrPager->Param.objectsPosition,
-				TerrPager->Param.objectsFilename[0]));
+				_pager->parameters.objectsPosition,
+				_pager->parameters.objectsFilename[0]));
 
 			Threads t3;
 			t3.objectBool();
@@ -1074,44 +1092,44 @@ void TerrainToolMain::generateObjectsPosition()
 
 			tree->getDrawable()->draw();
 			leaves->getDrawable()->draw();
-			TerrPager->Param.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
+			_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 		}
 	}
 }
 
-void TerrainToolMain::generateNewTerrain()
+void Main::generateNewTerrain()
 {
-	if (TerrPager)
+	if (_pager)
 	{
-		TerrPager->removeObjects();
+		_pager->removeObjects();
 
-		TerrPager->removeTerrains();
-		for (size_t i = 0; i < TerrPager->zoneList.size(); i++)
+		_pager->removeTerrains();
+		for (size_t i = 0; i < _pager->zoneList.size(); i++)
 		{
-			for (size_t j = 0; j < TerrPager->zoneList[i].size(); j++)
+			for (size_t j = 0; j < _pager->zoneList[i].size(); j++)
 			{
-				if (TerrPager->zoneList[i][j]->isLoaded() == true)
+				if (_pager->zoneList[i][j]->isLoaded() == true)
 				{
-					TerrPager->removeTerrain(i, j);
+					_pager->removeTerrain(i, j);
 				}
 			}
 		}
 
-		TerrPager->Param.loadedTerrains.clear();
-		TerrPager->Param.loadedHeightfields.clear();
+		_pager->loadedTerrains.clear();
+		_pager->loadedHeightfields.clear();
 	}
 
-	if (!TerrPager)
+	if (!_pager)
 	{
-		STerrainParameters param;
-		param.TextureScale = 40;
-		param.generatedBlendmaps = false;
-		param.generatedNormalmaps = false;
-		param.generatedHeightmaps = false;
-		param.generatedObjects = false;
-		param.skirtSize = 16;
-		param.Debug = false;
-		TerrPager = new TerrainPager(param, _scene);
+		PagerParameters parameters;
+		parameters.textureScale = 40;
+		parameters.generatedBlendmaps = false;
+		parameters.generatedNormalmaps = false;
+		parameters.generatedHeightmaps = false;
+		parameters.generatedObjects = false;
+		parameters.skirtSize = 16;
+		parameters.Debug = false;
+		_pager = new Pager(parameters, _scene);
 	}
 
 
@@ -1123,26 +1141,26 @@ void TerrainToolMain::generateNewTerrain()
 
 	control = _generateTerrainsForm->getControl("DetailLevelsSlider");
 	slider = (Slider *)control;
-	TerrPager->Param.LodQuality = slider->getValue();
+	_pager->parameters.lodQuality = slider->getValue();
 
-	if (TerrPager->Param.LodQuality == 0){ TerrPager->Param.LodQuality = 1; }
+	if (_pager->parameters.lodQuality == 0){ _pager->parameters.lodQuality = 1; }
 
 	control = _generateTerrainsForm->getControl("HeightFieldSizeSlider");
 	slider = (Slider *)control;
 	int heightfieldResolution = slider->getValue();
-	TerrPager->Param.heightFieldResolution = heightfieldResolution;
+	_pager->parameters.heightFieldResolution = heightfieldResolution;
 
 	control = _generateTerrainsForm->getControl("MaxHeightSlider");
 	slider = (Slider *)control;
-	TerrPager->Param.maxHeight = (slider->getValue());
+	_pager->parameters.maxHeight = (slider->getValue());
 
 	control = _generateTerrainsForm->getControl("MinHeightSlider");
 	slider = (Slider *)control;
-	TerrPager->Param.minHeight = (slider->getValue());
+	_pager->parameters.minHeight = (slider->getValue());
 
 	control = _generateTerrainsForm->getControl("PatchSizeSlider");
 	slider = (Slider *)control;
-	TerrPager->Param.patchSize = (slider->getValue());
+	_pager->parameters.patchSize = (slider->getValue());
 
 	control = _generateTerrainsForm->getControl("ScaleYSlider");
 	slider = (Slider *)control;
@@ -1153,9 +1171,9 @@ void TerrainToolMain::generateNewTerrain()
 	xz = slider->getValue();*/
 
 	//if you want to apply a second scale apply it like that
-	//E.G : param.Scale = param.Scale * 1.5; param.BoundingBox=param.BoundingBox* 1.5;
+	//E.G : parameters.Scale = parameters.Scale * 1.5; parameters.BoundingBox=parameters.BoundingBox* 1.5;
 	//but dont expect the terrain editor tools to work because alot of functions are using heightfield resolution instead
-	//of the scale parameter sent to the paging class
+	//of the scale parameterseter sent to the paging class
 
 	control = _generateTerrainsForm->getControl("SeedTextBox");
 	textBox = (TextBox *)control;
@@ -1163,7 +1181,7 @@ void TerrainToolMain::generateNewTerrain()
 
 	control = _generateTerrainsForm->getControl("TilesResolutionBox");
 	textBox = (TextBox *)control;
-	TerrPager->Param.tilesResolution = (strtol(textBox->getText(), NULL, 10));
+	_pager->parameters.tilesResolution = (strtol(textBox->getText(), NULL, 10));
 
 	control = _generateTerrainsForm->getControl("SimplexNoiseRadio");
 	radioButton = (RadioButton *)control;
@@ -1193,34 +1211,34 @@ void TerrainToolMain::generateNewTerrain()
 	bool bGain = true;
 	if (radioButton->isSelected()) { bGain = false; }
 
-	//TerrPager->Param.maxHeight = 128;
-	//TerrPager->Param.maxHeight = TerrPager->Param.heightFieldResolution / 2;
+	//_pager->parameters.maxHeight = 128;
+	//_pager->parameters.maxHeight = _pager->parameters.heightFieldResolution / 2;
 
 	//creating heightfields
 	TerrainGenerator terrainGenerator;
 
-	TerrPager->Param.heightFieldList = terrainGenerator.buildTerrainTiles(TerrPager->Param.heightFieldResolution,
-		TerrPager->Param.tilesResolution,
-		TerrPager->Param.minHeight,
-		TerrPager->Param.maxHeight,
+	_pager->heightFieldList = terrainGenerator.buildTerrainTiles(_pager->parameters.heightFieldResolution,
+		_pager->parameters.tilesResolution,
+		_pager->parameters.minHeight,
+		_pager->parameters.maxHeight,
 		noise,
 		gain,
 		amplitude,
 		bGain,
 		bAmp);
 
-	TerrPager->Param.Scale = Vector3(TerrPager->Param.heightFieldResolution, scaley, TerrPager->Param.heightFieldResolution);
+	_pager->parameters.scale = Vector3(_pager->parameters.heightFieldResolution, scaley, _pager->parameters.heightFieldResolution);
 
-	TerrPager->Param.BoundingBox = (TerrPager->Param.heightFieldResolution * TerrPager->Param.heightFieldResolution) - TerrPager->Param.heightFieldResolution;
+	_pager->parameters.boundingBox = (_pager->parameters.heightFieldResolution * _pager->parameters.heightFieldResolution) - _pager->parameters.heightFieldResolution;
 
-	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * .9;
-	TerrPager->Param.distanceUnload = TerrPager->Param.BoundingBox * 1;
-	TerrPager->Param.distanceMaxRender = TerrPager->Param.BoundingBox * 1;
+	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * .9;
+	_pager->parameters.distanceTerrainUnload = _pager->parameters.boundingBox * 1;
+	_pager->parameters.distanceTerrainMaxRender = _pager->parameters.boundingBox * 1;
 
-	TerrPager->computePositions();
+	_pager->computePositions();
 
 	TerrainEditor terrEdit;
-	terrEdit.aligningTerrainsVertexes(TerrPager->Param.heightFieldList, TerrPager->Param.heightFieldResolution);
+	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList, _pager->parameters.heightFieldResolution);
 
 	control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");
 	slider = (Slider *)control;
@@ -1238,21 +1256,21 @@ void TerrainToolMain::generateNewTerrain()
 	slider = (Slider *)control;
 	int Opacity2 = slider->getValue();
 
-	TerrPager->Param.blendMaps = terrainGenerator.createTiledTransparentBlendImages(TerrPager->Param.Scale.y,
+	_pager->blendMaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
 		Intensity1,
 		Intensity2,
 		Opacity1,
 		Opacity2,
-		TerrPager->Param.heightFieldResolution,
-		TerrPager->Param.heightFieldList);
-	TerrPager->Param.BlendMapDIR = createTMPFolder();
-	TerrPager->Param.generatedBlendmaps = false;
+		_pager->parameters.heightFieldResolution,
+		_pager->heightFieldList);
+	_pager->parameters.blendMapDIR = createTMPFolder();
+	_pager->parameters.generatedBlendmaps = false;
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		if (saverThreads[i].blendmap == true)
 		{
-			threads[i].~future();
+			threads[i].~thread();
 			threads.erase(threads.begin() + i);
 			saverThreads.erase(saverThreads.begin() + i);
 		}
@@ -1263,49 +1281,48 @@ void TerrainToolMain::generateNewTerrain()
 	t.blendBool();
 	saverThreads.push_back(t);
 
-	threads.push_back(std::async(std::launch::async,
-		&FilesSaver::saveBlendmaps,
+	threads.push_back(std::thread(&FilesSaver::saveBlendmaps,
 		saver,
-		TerrPager->Param.blendMaps,
-		TerrPager->Param.BlendMapDIR,
-		TerrPager->Param.heightFieldResolution));
+		_pager->blendMaps,
+		_pager->parameters.blendMapDIR,
+		_pager->parameters.heightFieldResolution));
 
 #define CREATE_NORMALMAPS
 #ifdef CREATE_NORMALMAPS
 
-	TerrPager->Param.normalMaps =
-		terrainGenerator.createNormalmaps(TerrPager->Param.Scale.y,
-		TerrPager->Param.heightFieldResolution,
-		TerrPager->Param.heightFieldList);
+	_pager->normalMaps =
+		terrainGenerator.createNormalmaps(_pager->parameters.scale.y,
+		_pager->parameters.heightFieldResolution,
+		_pager->heightFieldList);
 
-	TerrPager->Param.NormalMapDIR = createTMPFolder();
-	TerrPager->Param.generatedNormalmaps = false;
+	_pager->parameters.normalMapDIR = createTMPFolder();
+	_pager->parameters.generatedNormalmaps = false;
 
 	Threads t2;
 	t2.normalBool();
 	saverThreads.push_back(t2);
 
-	threads.push_back(std::async(std::launch::async,
-		&FilesSaver::saveNormalmaps,
+	threads.push_back(std::thread(&FilesSaver::saveNormalmaps,
 		saver,
-		TerrPager->Param.normalMaps,
-		TerrPager->Param.NormalMapDIR,
-		TerrPager->Param.heightFieldResolution));
+		_pager->normalMaps,
+		_pager->parameters.normalMapDIR,
+		_pager->parameters.heightFieldResolution));
+
 #endif
 
-	TerrPager->Param.distanceLoad = (TerrPager->Param.BoundingBox * TerrPager->Param.maxHeight ) * 0.9;
-	TerrPager->Param.distanceUnload = (TerrPager->Param.BoundingBox * TerrPager->Param.maxHeight) * 1;
-	TerrPager->Param.distanceMaxRender = (TerrPager->Param.BoundingBox * TerrPager->Param.maxHeight) * 1;
+	_pager->parameters.distanceTerrainLoad = (_pager->parameters.boundingBox * _pager->parameters.maxHeight ) * 0.9;
+	_pager->parameters.distanceTerrainUnload = (_pager->parameters.boundingBox * _pager->parameters.maxHeight) * 1;
+	_pager->parameters.distanceTerrainMaxRender = (_pager->parameters.boundingBox * _pager->parameters.maxHeight) * 1;
 
-	TerrPager->PagingCheck();
-	_camera.setPosition(Vector3(0, TerrPager->zoneList[0][0]->getObjectInside()->_terrain->getHeight(0, 0), 0));
+	_pager->PagingCheck();
+	_camera.setPosition(Vector3(0, _pager->zoneList[0][0]->getObjectInside()->terrain->getHeight(0, 0), 0));
 
-	TerrPager->Param.distanceLoad = TerrPager->Param.BoundingBox * .9;
-	TerrPager->Param.distanceUnload = TerrPager->Param.BoundingBox * 1;
-	TerrPager->Param.distanceMaxRender = TerrPager->Param.BoundingBox * 1;
+	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * .9;
+	_pager->parameters.distanceTerrainUnload = _pager->parameters.boundingBox * 1;
+	_pager->parameters.distanceTerrainMaxRender = _pager->parameters.boundingBox * 1;
 }
 
-void TerrainToolMain::moveCamera(float elapsedTime)
+void Main::moveCamera(float elapsedTime)
 {
 	if (_moveForward)
 	{
@@ -1337,16 +1354,17 @@ void TerrainToolMain::moveCamera(float elapsedTime)
 	}
 }
 
-void TerrainToolMain::update(float elapsedTime)
+void Main::update(float elapsedTime)
 {
 
 	int iBlendmap, iNormalmap, iObjectpos, total;
 	bool blendmap = false, normalmap = false, objectpos = false;
+
 	total = threads.size();
+
 	for (size_t i = 0; i < threads.size(); i++)
 	{
-		std::future_status status = threads[i].wait_for(std::chrono::milliseconds(0));
-		if (status == std::future_status::ready)
+		if (threads[i].joinable())
 		{
 			if (saverThreads[i].blendmap == true)
 			{
@@ -1362,32 +1380,35 @@ void TerrainToolMain::update(float elapsedTime)
 			}
 			if (saverThreads[i].objectPos == true)
 			{
-				iObjectpos = i;
 				objectpos = true;
+				iObjectpos = i;
 				continue;
 			}
 		}
 	}
 	if (blendmap == true && total == saverThreads.size())
 	{
-		TerrPager->Param.blendMaps.clear();
+		_pager->blendMaps.clear();
 		saverThreads.erase(saverThreads.begin() + iBlendmap);
+		threads[iBlendmap].join();
 		threads.erase(threads.begin() + iBlendmap);
-		TerrPager->Param.generatedBlendmaps = true;
+		_pager->parameters.generatedBlendmaps = true;
 	}
 	if (normalmap == true && total == saverThreads.size())
 	{
-		//TerrPager->Param.normalMaps.clear();
+		_pager->normalMaps.clear();
 		saverThreads.erase(saverThreads.begin() + iNormalmap);
+		threads[iNormalmap].join();
 		threads.erase(threads.begin() + iNormalmap);
-		TerrPager->Param.generatedNormalmaps = true;
+		_pager->parameters.generatedNormalmaps = true;
 	}
 	if (objectpos == true && total == saverThreads.size()
 		&& saverThreads.size() != 0 && threads.size() != 0)
 	{
 		saverThreads.erase(saverThreads.begin() + iObjectpos);
+		threads[iObjectpos].join();
 		threads.erase(threads.begin() + iObjectpos);
-		TerrPager->Param.generatedObjects = true;
+		_pager->parameters.generatedObjects = true;
 	}
 
 	moveCamera(elapsedTime);
@@ -1418,16 +1439,16 @@ void TerrainToolMain::update(float elapsedTime)
 	}
 }
 
-void TerrainToolMain::render(float elapsedTime)
+void Main::render(float elapsedTime)
 {
 	// Clear the color and depth buffers
 	clear(CLEAR_COLOR_DEPTH, Vector4(0.0f, 0.5f, 1.0f, 1.0f), 1.0f, 0);
 
-	if (TerrPager)
+	if (_pager)
 	{
-		TerrPager->PagingCheck();
+		_pager->PagingCheck();
 
-		TerrPager->render();
+		_pager->render();
 	}
 
 	if (_selectionRing)
@@ -1454,7 +1475,7 @@ void TerrainToolMain::render(float elapsedTime)
 	//_scene->getFirstNode()->getNextSibling()->getNextSibling()->getNextSibling()->getDrawable()->draw();
 
 	// Visit all the nodes in the scene for drawing
-	_scene->visit(this, &TerrainToolMain::drawScene);
+	_scene->visit(this, &Main::drawScene);
 
 	if (_mainForm->isVisible())
 	{
@@ -1482,7 +1503,7 @@ void TerrainToolMain::render(float elapsedTime)
 	}
 }
 
-bool TerrainToolMain::drawScene(Node* node)
+bool Main::drawScene(Node* node)
 {
 	// If the node visited contains a model, draw it
 
@@ -1492,9 +1513,9 @@ bool TerrainToolMain::drawScene(Node* node)
 		float ActualDistance = _scene->getActiveCamera()->getNode()->getTranslationWorld().distance(node->getTranslationWorld());
 
 		//if the range of view is too much small....it crash lol
-		if (ActualDistance < TerrPager->Param.distanceMaxModelRender)
+		if (ActualDistance < _pager->parameters.distanceMaxModelRender)
 		{
-			if (TerrPager->Param.generatedObjects = true)
+			if (_pager->parameters.generatedObjects = true)
 			{
 				//model->draw();
 				node->getDrawable()->draw();
@@ -1505,7 +1526,7 @@ bool TerrainToolMain::drawScene(Node* node)
 	return true;
 }
 
-void TerrainToolMain::keyEvent(Keyboard::KeyEvent evt, int key)
+void Main::keyEvent(Keyboard::KeyEvent evt, int key)
 {
 	if (evt == Keyboard::KEY_PRESS)
 	{
@@ -1581,25 +1602,25 @@ void TerrainToolMain::keyEvent(Keyboard::KeyEvent evt, int key)
 	}
 }
 
-bool TerrainToolMain::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
+bool Main::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 {
 	if (evt == Mouse::MOUSE_PRESS_RIGHT_BUTTON)
 	{
 		if (_inputMode == INPUT_MODE::TERRAIN)
 		{
 			Ray pickRay;
-			_scene->getActiveCamera()->pickRay(Rectangle(0, 0, getWidth(), getHeight()), x, y, &pickRay);
+			_scene->getActiveCamera()->pickRay(gameplay::Rectangle(0, 0, getWidth(), getHeight()), x, y, &pickRay);
 			pickRay.setOrigin(_camera.getPosition());
 
-			for (size_t i = 0; i < TerrPager->Param.loadedTerrains.size(); i++)
+			for (size_t i = 0; i < _pager->loadedTerrains.size(); i++)
 			{
-				TerrainHitFilter hitFilter(TerrPager->Param.loadedTerrains[i]);
+				TerrainHitFilter hitFilter(_pager->loadedTerrains[i]);
 				PhysicsController::HitResult hitResult;
 				if (Game::getInstance()->getPhysicsController()->rayTest(pickRay, 1000000, &hitResult, &hitFilter))
 				{
-					if (hitResult.object == TerrPager->Param.loadedTerrains[i]->getNode()->getCollisionObject())
+					if (hitResult.object == _pager->loadedTerrains[i]->getNode()->getCollisionObject())
 					{
-						_selectionRing->setPosition(hitResult.point.x, hitResult.point.z, TerrPager->Param.loadedTerrains[i]);
+						_selectionRing->setPosition(hitResult.point.x, hitResult.point.z, _pager->loadedTerrains[i]);
 					}
 				}
 			}

@@ -358,10 +358,10 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
     <ClCompile Include="src\SimplexNoise.cpp" />
     <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="src\TerrainEditor.cpp" />
-    <ClCompile Include="src\TerrainGenerator.cpp" />
-    <ClCompile Include="src\TerrainPager.cpp" />
-    <ClCompile Include="src\TerrainToolAutoBindingResolver.cpp" />
-    <ClCompile Include="src\TerrainToolMain.cpp" />
+    <ClCompile Include="src\Generator.cpp" />
+    <ClCompile Include="src\Pager.cpp" />
+    <ClCompile Include="src\AutoBindingResolver.cpp" />
+    <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DiamondSquareNoise.h" />
@@ -370,15 +370,14 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
     <ClInclude Include="src\FirstPersonCamera.h" />
     <ClInclude Include="src\INoiseAlgorithm.h" />
     <ClInclude Include="src\LodePNG.h" />
-    <ClInclude Include="src\main.h" />
+    <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\SelectionRing.h" />
     <ClInclude Include="src\SimplexNoise.h" />
     <ClInclude Include="src\Terrain.h" />
     <ClInclude Include="src\TerrainEditor.h" />
-    <ClInclude Include="src\TerrainGenerator.h" />
-    <ClInclude Include="src\TerrainPager.h" />
-    <ClInclude Include="src\TerrainToolAutoBindingResolver.h" />
-    <ClInclude Include="src\TerrainToolMain.h" />
+    <ClInclude Include="src\Generator.h" />
+    <ClInclude Include="src\Pager.h" />
+    <ClInclude Include="src\AutoBindingResolver.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
