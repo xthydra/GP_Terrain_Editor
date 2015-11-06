@@ -1,11 +1,13 @@
 
+##u_worldViewMatrix = WORLD_VIEW_MATRIX
+##u_normalMap = TERRAIN_NORMAL_MAP
+
 material terrain
 {
-	u_worldViewMatrix = WORLD_VIEW_MATRIX
+	
     u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
 
     u_normalMatrix = INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX
-    u_normalMap = TERRAIN_NORMAL_MAP
     u_surfaceLayerMaps = TERRAIN_LAYER_MAPS
 
     u_ambientColor = SCENE_AMBIENT_COLOR

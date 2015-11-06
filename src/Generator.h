@@ -50,23 +50,6 @@ public:
 								Node*);
 
 	/**
-	* Generate positions from a given object on every heightfields based on a blendmap
-	*
-	* @param Randomness of the item spawn
-	* @param Heightfield resolution
-	* @param Heightfields vectors
-	* @param Blendmaps vector
-	* @param which blendmap to choose(first or second)
-	*
-	* @return void
-	**/
-	void generateObjectsPosition(int,
-								 size_t,
-								 std::vector<std::vector<gameplay::HeightField *> >,
-								 std::vector<std::vector<std::vector<char*> > >,
-								 int);
-
-	/**
 	* Generate normalmaps as a PNG extension
 	*
 	* @param terrain scaleY
@@ -79,23 +62,6 @@ public:
 		createNormalmaps(int,
 						 size_t,
 						 std::vector<std::vector<gameplay::HeightField *> >);
-
-	/**
-	* Generate heightfield images in Raw binary
-	*
-	* @param Terrain ScaleY
-	* @param Terrain maxHeight
-	* @param Terrain Boundingbox
-	* @param Heightfield resolution
-	* @param Heightfields vectors
-	*
-	* @return void
-	**/
-	void createRawHeightfields(int,
-							   int,
-							   int,
-							   size_t,
-							   std::vector<std::vector<gameplay::HeightField *> >);
 
 	/**
 	* Called to generate new random terrains from the given values.

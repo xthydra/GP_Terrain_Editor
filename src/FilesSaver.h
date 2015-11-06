@@ -37,17 +37,9 @@ struct FilesSaver
 
 	/*
 	Output heightmaps as PNG images(it's suposed to be encoding in binary tho lol)
-	@param heightfields in 3 vectors (z,x, pixels as unsigned char*)
-	@param heightmap Resolution
+	@param heightfields in 2 vectors (z,x)
 	*/
-	void saveRAWHeightmaps(std::vector<std::vector<std::vector<unsigned char*> > >, int);
-
-	/*
-	Output heightmaps as PNG images
-	@param heightfields in 3 vectors (z,x, pixels as unsigned char*)
-	@param heightmap Resolution
-	*/
-	void saveHeightmaps(std::vector<std::vector<std::vector<unsigned char*> > >, int);
+	void saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> >);
 
 	/*
 	Output blend maps as PNG images

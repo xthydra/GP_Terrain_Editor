@@ -23,8 +23,6 @@
 
 #include "gameplay.h"
 
-#define THREADS2
-
 #pragma once
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -64,7 +62,9 @@
 #include "Pager.h"
 #include "TerrainEditor.h"
 
-/*i'm using that to confirm a thread termination*/
+/**
+* Used to confirm a thread termination.
+**/
 struct Threads
 {
 	bool blendmap,
@@ -171,12 +171,12 @@ class Main : public Game, Control::Listener
 	enum INPUT_MODE { NAVIGATION, TERRAIN, PAINT, GENERATOR };
 
 	/**
-	* How fast we fly.
+	* Movement speed of the camera.
 	**/
 	float MOVE_SPEED;
 
 	/**
-	* The Terrain Pager
+	* The Pager will take care of loading,unloading and rendering various objects based on distance
 	**/
 	Pager * _pager;
 

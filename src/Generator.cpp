@@ -153,67 +153,6 @@ std::vector<std::vector<std::vector<Vector3*> > >
 	return objectPos;
 }
 
-void TerrainGenerator::createRawHeightfields(int scaleY,
-											 int maxHeight,
-											 int boundingBox,
-											 size_t heightfieldSize,
-											 std::vector<std::vector<gameplay::HeightField *> > heightFields)
-{
-	// Generate a new tmp folder for the blend images.
-#ifdef WIN32
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mktemp(tmpdir);
-	_mkdir("res/tmp");
-	_mkdir(tmpdir);
-#else
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mkdtemp(tmpdir);
-#endif
-
-	for (size_t i = 0; i < heightFields.size(); i++)
-	{
-		for (size_t j = 0; j < heightFields[i].size(); j++)
-		{
-			std::vector<__int16> raw;
-
-			size_t x, z, k;
-
-			raw.resize((heightfieldSize * heightfieldSize));
-
-			for (x = 0; x < heightfieldSize; x++)
-			{
-				for (z = 0; z < heightfieldSize; z++)
-				{
-					k = x + (z * heightfieldSize);
-					
-					// Get the unscaled height value from the HeightField
-					float height = heightFields[i][j]->getHeight(x, z);
-
-					raw[k] = height;
-				}
-			}
-
-			//E.G //field-0-0.png
-			std::string fieldName;
-
-			fieldName += tmpdir;
-			fieldName += "/";
-			fieldName += "field-";
-			fieldName += std::to_string(i);
-			fieldName += "-";
-			fieldName += std::to_string(j);
-			fieldName += ".raw";
-
-			int fd = open(fieldName.c_str(), O_CREAT | O_WRONLY | O_RAW);
-			if (fd != -1)
-			{
-				write(fd, raw.data(), raw.size()*sizeof(__int16));
-				close(fd);
-			}
-		}
-	}
-}
-
 std::vector<std::vector<std::vector<unsigned char> > >
 	TerrainGenerator::createNormalmaps(int scaleY,
 									   size_t _heightFieldSize,

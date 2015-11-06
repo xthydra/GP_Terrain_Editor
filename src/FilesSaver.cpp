@@ -20,55 +20,6 @@
 
 void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > > objsPos, char * objectName)
 {
-#ifdef OLD_OBS_SAVER
-#ifdef WIN32
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mktemp(tmpdir);
-	_mkdir("res/tmp");
-	_mkdir(tmpdir);
-#else
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mkdtemp(tmpdir);
-#endif
-	for (size_t i = 0; i < objsPos.size();)
-	{
-		for (size_t j = 0; j < objsPos[i].size();)
-		{
-			std::vector<char> raw;
-			for (size_t g = 0; g < objsPos[i][j].size();)
-			{
-				raw.push_back(objsPos[i][j][g]->x);
-				raw.push_back(' ');
-				raw.push_back(objsPos[i][j][g]->y);
-				raw.push_back(' ');
-				raw.push_back(objsPos[i][j][g]->z);
-				raw.push_back(' ');
-				raw.push_back(' ');
-				g++;
-			}
-			std::string fileName;
-			fileName += tmpdir;
-			fileName += "/";
-			fileName += std::to_string(i);
-			fileName += "-";
-			fileName += std::to_string(j);
-			fileName += objectName;
-
-			std::ofstream rawField;
-			rawField.open(fileName.c_str(), std::ios::binary);
-
-			rawField.write(raw.data(), raw.size());
-			rawField.close();
-
-			/*char* cstr = new char[fileName.length() + 1];
-			strcpy(cstr, fileName.c_str());*/
-
-			//fileNames[i][j] = cstr;
-			j++;
-		}
-		i++;
-	}
-#else
 #ifdef WIN32
 	char tmpdir[] = "res/tmp/fileXXXXXX";
 	mktemp(tmpdir);
@@ -100,6 +51,7 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 			fileName += std::to_string(i);
 			fileName += "-";
 			fileName += std::to_string(j);
+			fileName += "-";
 			fileName += objectName;
 
 			int fd = open(fileName.c_str(), O_CREAT | O_WRONLY | O_RAW);
@@ -112,7 +64,6 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 		}
 		i++;
 	}
-#endif
 }
 
 void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned char> > > normalmaps, char * folder, int normalMapResolution)
@@ -140,8 +91,9 @@ void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned cha
 	}
 }
 
-void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<std::vector<unsigned char*> > > heightmaps, int heightmapResolution)
+void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> > heightFields)
 {
+	// Generate a new tmp folder for the blend images.
 #ifdef WIN32
 	char tmpdir[] = "res/tmp/fileXXXXXX";
 	mktemp(tmpdir);
@@ -151,44 +103,38 @@ void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<std::vector<unsigned 
 	char tmpdir[] = "res/tmp/fileXXXXXX";
 	mkdtemp(tmpdir);
 #endif
-	for (size_t i = 0; i < heightmaps.size(); i++)
+
+	//TODO: if i want to be able to support 32 bit integer instead of 16 bit then
+	//i would need a conditional iteration like : while(i<heightfields.size() && bit16==true)
+	//check against every height if it doesnt go beyond or below 32000 else bit16==false
+	//and change the file extension to someshit like ".r32"
+	for (size_t i = 0; i < heightFields.size(); i++)
 	{
-		for (size_t j = 0; j < heightmaps[i].size(); j++)
+		for (size_t j = 0; j < heightFields[i].size(); j++)
 		{
-			//E.G //field-0-0.png
-			std::string fieldName;
+			std::vector<__int16> raw;
 
-			fieldName += tmpdir;
-			fieldName += "/";
-			fieldName += "fied-";
-			fieldName += std::to_string(i);
-			fieldName += "-";
-			fieldName += std::to_string(j);
-			fieldName += ".raw";
+			size_t x, z, k;
 
-			std::vector<unsigned char> mapData(reinterpret_cast<unsigned char>(heightmaps[i][j].data()));
+			int heightfieldSize = heightFields[0][0]->getColumnCount();
 
-			lodepng::encode(fieldName.c_str(), mapData, heightmapResolution, heightmapResolution);
-		}
-	}
-}
+			raw.resize((heightfieldSize * heightfieldSize));
 
-void FilesSaver::saveHeightmaps(std::vector<std::vector<std::vector<unsigned char*> > > heightmaps, int heightmapResolution)
-{
-#ifdef WIN32
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mktemp(tmpdir);
-	_mkdir("res/tmp");
-	_mkdir(tmpdir);
-#else
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mkdtemp(tmpdir);
-#endif
-	for (size_t i = 0; i < heightmaps.size(); i++)
-	{
-		for (size_t j = 0; j < heightmaps[i].size(); j++)
-		{
-			//E.G //field-0-0.png
+			//get the heightfield height in a vector
+			for (x = 0; x < heightfieldSize; x++)
+			{
+				for (z = 0; z < heightfieldSize; z++)
+				{
+					k = x + (z * heightfieldSize);
+
+					// Get the unscaled height value from the HeightField
+					float height = heightFields[i][j]->getHeight(x, z);
+
+					raw[k] = height;
+				}
+			}
+
+			//create the filename
 			std::string fieldName;
 
 			fieldName += tmpdir;
@@ -197,12 +143,15 @@ void FilesSaver::saveHeightmaps(std::vector<std::vector<std::vector<unsigned cha
 			fieldName += std::to_string(i);
 			fieldName += "-";
 			fieldName += std::to_string(j);
-			fieldName += ".png";
+			fieldName += ".r16";
 
-			std::vector<unsigned char> mapData(reinterpret_cast<unsigned char>(heightmaps[i][j].data()));
-
-			// Generate the png.
-			lodepng::encode(fieldName.c_str(), mapData, heightmapResolution, heightmapResolution);
+			//save the file
+			int fd = open(fieldName.c_str(), O_CREAT | O_WRONLY | O_RAW);
+			if (fd != -1)
+			{
+				write(fd, raw.data(), raw.size()*sizeof(__int16));
+				close(fd);
+			}
 		}
 	}
 }

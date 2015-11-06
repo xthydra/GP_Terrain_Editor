@@ -560,8 +560,8 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		{
 			if (_pager->heightFieldList.size() > 0)
 			{
-				TerrainGenerator terrainGenerator;
-				terrainGenerator.createRawHeightfields(_pager->parameters.scale.y, _pager->parameters.maxHeight, _pager->parameters.boundingBox, _pager->parameters.heightFieldResolution, _pager->heightFieldList);
+				FilesSaver saver;
+				saver.saveRAWHeightmaps(_pager->heightFieldList);
 			}
 		}
 	}

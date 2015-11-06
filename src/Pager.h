@@ -124,6 +124,9 @@ private:
 	bool loaded = false;
 };
 
+/**
+* The Pager will take care of loading,unloading and rendering various objects based on distance
+**/
 class Pager
 {
 public:
