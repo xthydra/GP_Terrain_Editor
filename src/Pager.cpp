@@ -383,6 +383,50 @@ void Pager::render()
 		{
 			loadedTerrains[i]->draw(parameters.Debug);
 
+			int posX = (loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
+			int posZ = (loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
+
+			for (size_t j = 0; j < objects[posZ][posX].size(); j++)
+			{
+				if (objects[posZ][posX][j] != NULL)
+				{
+					BoundingSphere bound = objects[posZ][posX][j]->getBoundingSphere();
+					if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
+					{
+						Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+						Vector3 v2 = objects[posZ][posX][j]->getTranslationWorld();
+
+						float dx = v.x - v2.x;
+						float dz = v.z - v2.z;
+
+						int ActualDistance = sqrt(dx * dx + dz * dz);
+
+						if (ActualDistance < parameters.distanceMaxModelRender)
+						{
+							if (parameters.generatedObjects = true && !parameters.Debug)
+							{
+								if (objects[posZ][posX][j]->getDrawable())
+								{
+									objects[posZ][posX][j]->getDrawable()->draw();
+								}
+								if (objects[posZ][posX][j]->getChildCount() > 0)
+								{
+									Node *childs = objects[posZ][posX][j]->getFirstChild();
+									while (childs)
+									{
+										if (childs->getDrawable())
+										{
+											childs->getDrawable()->draw();
+										}
+										childs = childs->getNextSibling();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
 			//for example 
 			//get position of parameters.loadedTerrains[i]
 			//use the world position of the terrain to compute the vector position to access objects that are contained into it
@@ -394,6 +438,7 @@ void Pager::render()
 
 	//i can possibly lesser the amount of time it would iterate objects by checking against only loaded terrains
 
+	/*
 	for (size_t i = 0; i < objects.size();)
 	{
 		for (size_t j = 0; j < objects[i].size();)
@@ -410,15 +455,25 @@ void Pager::render()
 
 					int ActualDistance = sqrt(dx * dx + dz * dz);
 
-
 					if (ActualDistance < parameters.distanceMaxModelRender)
 					{
 						if (parameters.generatedObjects = true && !parameters.Debug)
 						{
-							Model* model = dynamic_cast<Model*>(objects[i][j][g]->getDrawable());
-							if (model)
+							if (objects[i][j][g]->getDrawable())
 							{
 								objects[i][j][g]->getDrawable()->draw();
+							}
+							if (objects[i][j][g]->getChildCount() > 0)
+							{
+								Node *childs = objects[i][j][g]->getFirstChild();
+								while (childs)
+								{
+									if (childs->getDrawable())
+									{
+										childs->getDrawable()->draw();
+									}
+									childs = childs->getNextSibling();
+								}
 							}
 						}
 					}
@@ -428,31 +483,5 @@ void Pager::render()
 		}
 		i++;
 	}
-
-	/*
-	for (size_t i = 0; i < parameters.objects.size(); i++)
-	{
-		for (size_t g = 0; g < parameters.objects[i].size(); g++)
-		{
-			for (size_t f = 0; f < parameters.objects[i][g].size(); f++)
-			{
-				Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
-				Vector3 v2 = parameters.objects[i][g][f]->getTranslationWorld();
-
-				float dx = v.x - v2.x;
-				float dz = v.z - v2.z;
-
-				int ActualDistance = sqrt(dx * dx + dz * dz);
-
-
-				if (ActualDistance < parameters.DistanceMaxModelRender)
-				{
-					if (parameters.generatedObjects = true && !parameters.Debug)
-					{
-						parameters.objects[i][g][f]->getDrawable()->draw();
-					}
-				}
-			}
-		}
-	}*/
+	*/
 }

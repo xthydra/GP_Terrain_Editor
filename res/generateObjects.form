@@ -1,0 +1,66 @@
+form GenerateForm
+{
+    theme = res/common/default.theme
+    width = 400
+    height = 600
+    alignment = ALIGN_VCENTER_HCENTER
+    layout = LAYOUT_VERTICAL
+    style = noBorder
+             
+    label MaterialLabel
+    {
+        text = Material
+        height = 45
+        width = 400
+    }
+    textbox MaterialTextBox
+    {
+        text = .material
+        height = 45
+        width = 400
+    }
+	label ObjectLabel
+    {
+        text = Object .gpd File
+        height = 45
+        width = 400
+    }
+    textbox ObjectTextBox
+    {
+        text = .gpb
+        height = 45
+        width = 400
+    }
+	label ChanceLabel
+    {
+        text = factor of chance that it would be created
+        height = 45
+        width = 400
+    }
+    textbox ChanceTextBox
+    {
+        text = 1000
+        height = 45
+        width = 400
+    }
+    container ButtonContainer 
+	{
+        layout = LAYOUT_FLOW
+        width = 450
+        height = 45
+        
+        button CancelGenerateObjectsButton 
+		{
+            text = Cancel
+            height = 45
+            width = 200
+        }
+        button ConfirmGenerateObjectsButton
+		{
+            text = Generate
+            height = 45
+            width = 200
+        }
+    } 
+
+}

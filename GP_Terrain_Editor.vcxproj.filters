@@ -158,6 +158,9 @@
     </None>
     <None Include="README.md" />
     <None Include="LICENSE.md" />
+    <None Include="res\generateObjects.form">
+      <Filter>res\UI forms</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />

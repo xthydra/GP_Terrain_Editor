@@ -222,6 +222,15 @@ void Main::initialize()
 	control = _loadForm->getControl("ConfirmLoadButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
+	_generateObjectsForm = Form::create("res/generateObjects.form");
+	_generateObjectsForm->setVisible(false);
+
+	control = _generateObjectsForm->getControl("CancelGenerateObjectsButton");
+	control->addListener(this, Control::Listener::CLICK);
+
+	control = _generateObjectsForm->getControl("ConfirmGenerateObjectsButton");
+	control->addListener(this, Control::Listener::CLICK);
+	//===============
 	_noiseForm = Form::create("res/generateNoise.form");
 	_noiseForm->setVisible(false);
 
@@ -567,9 +576,8 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "GenerateObjectsPosButton") == 0)
 	{
-		generateObjectsPosition();
-		//FilesSaver saver;
-		//std::thread(&FilesSaver::saveObjectsPos,saver, _pager->parameters.objectsPosition, _pager->parameters.objectsFilename[0]);
+		_mainForm->setVisible(false);
+		_generateObjectsForm->setVisible(true);
 	}
 	else if (strcmp(control->getId(), "GenerateNoiseButton") == 0)
 	{
@@ -1413,30 +1421,13 @@ void Main::update(float elapsedTime)
 
 	moveCamera(elapsedTime);
 
-	if (_mainForm)
-	{
-		_mainForm->update(elapsedTime);
-	}
-	if (_generateTerrainsForm)
-	{
-		_generateTerrainsForm->update(elapsedTime);
-	}
-	if (_generateBlendmapsForm)
-	{
-		_generateBlendmapsForm->update(elapsedTime);
-	}
-	if (_loadForm)
-	{
-		_loadForm->update(elapsedTime);
-	}
-	if (_saveForm)
-	{
-		_saveForm->update(elapsedTime);
-	}
-	if (_noiseForm)
-	{
-		_noiseForm->update(elapsedTime);
-	}
+	_mainForm->update(elapsedTime);
+	_generateTerrainsForm->update(elapsedTime);
+	_generateBlendmapsForm->update(elapsedTime);
+	_generateObjectsForm->update(elapsedTime);
+	_loadForm->update(elapsedTime);
+	_saveForm->update(elapsedTime);
+	_noiseForm->update(elapsedTime);
 }
 
 void Main::render(float elapsedTime)
@@ -1456,11 +1447,6 @@ void Main::render(float elapsedTime)
 		Node *ring = _selectionRing->_node->getFirstChild();
 		while (ring)
 		{
-			/*Model* select = ring->getModel();
-			if (select)
-			{
-				select->draw();
-			}*/
 			if (ring->getDrawable())
 			{
 				ring->getDrawable()->draw();
@@ -1468,38 +1454,37 @@ void Main::render(float elapsedTime)
 			ring = ring->getNextSibling();
 		}
 	}
-	/*Model * tree = _scene->getFirstNode()->getNextSibling()->getNextSibling()->getNextSibling()->getModel();
-	tree->draw();*/
-
-	//wtf is that? lol
-	//_scene->getFirstNode()->getNextSibling()->getNextSibling()->getNextSibling()->getDrawable()->draw();
 
 	// Visit all the nodes in the scene for drawing
-	_scene->visit(this, &Main::drawScene);
+	//_scene->visit(this, &Main::drawScene);
 
 	if (_mainForm->isVisible())
 	{
 		_mainForm->draw();
 	}
-	if (_generateTerrainsForm)
+	if (_generateTerrainsForm->isVisible())
 	{
 		_generateTerrainsForm->draw();
 	}
-	if (_generateBlendmapsForm)
+	if (_generateBlendmapsForm->isVisible())
 	{
 		_generateBlendmapsForm->draw();
 	}
-	if (_loadForm)
+	if (_loadForm->isVisible())
 	{
 		_loadForm->draw();
 	}
-	if (_saveForm)
+	if (_saveForm->isVisible())
 	{
 		_saveForm->draw();
 	}
-	if (_saveForm)
+	if (_saveForm->isVisible())
 	{
 		_noiseForm->draw();
+	}
+	if (_generateObjectsForm->isVisible())
+	{
+		_generateObjectsForm->draw();
 	}
 }
 

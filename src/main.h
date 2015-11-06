@@ -221,6 +221,11 @@ class Main : public Game, Control::Listener
 	Form* _sizeForm;
 
 	/**
+	* UI form for generating objects.
+	**/
+	Form* _generateObjectsForm;
+
+	/**
 	* UI form for generating terrains.
 	**/
 	Form* _generateTerrainsForm;

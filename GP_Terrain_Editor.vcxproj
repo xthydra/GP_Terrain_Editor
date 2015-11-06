@@ -324,6 +324,7 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
     <None Include="README.md" />
     <None Include="res\generateBlendmaps.form" />
     <None Include="res\generateNoise.form" />
+    <None Include="res\generateObjects.form" />
     <None Include="res\generateTerrains.form" />
     <None Include="res\load.form" />
     <None Include="res\main.form" />
