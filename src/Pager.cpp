@@ -297,7 +297,6 @@ void Pager::computePositions()
 			}
 		}
 	}
-
 }
 
 void Pager::removeObjects()
@@ -308,6 +307,7 @@ void Pager::removeObjects()
 		{
 			for (size_t g = 0; g < objects[i][j].size(); g++)
 			{
+				objects[i][j][g]->removeAllChildren();
 				_Scene->removeNode(objects[i][j][g]);
 				int refcount = objects[i][j][g]->getRefCount();
 				for (size_t f = 0; f < refcount; f++)
@@ -365,60 +365,62 @@ void Pager::PagingCheck()
 void Pager::render()
 {
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
-	{
-#ifdef DISTANCE1
-		//int ActualDistance = _Scene->getActiveCamera()->getNode()->getTranslationWorld().distance(parameters.loadedTerrains[i]->getNode()->getTranslationWorld());
-#endif
-#define DISTANCE2
-#ifdef DISTANCE2
-		Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
-		Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
+	{		
+		//BoundingBox bound = loadedTerrains[i]->getBoundingBox();
+		//if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
+		//{
+			Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+			Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
 
-		float dx = v.x - v2.x;
-		float dz = v.z - v2.z;
+			float dx = v.x - v2.x;
+			float dz = v.z - v2.z;
 
-		int ActualDistance = sqrt(dx * dx + dz * dz);
-#endif
-		if (ActualDistance < parameters.distanceTerrainMaxRender)
-		{
-			loadedTerrains[i]->draw(parameters.Debug);
-
-			int posX = (loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
-			int posZ = (loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
-
-			for (size_t j = 0; j < objects[posZ][posX].size(); j++)
+			int ActualDistance = sqrt(dx * dx + dz * dz);
+			
+			if (ActualDistance < parameters.distanceTerrainMaxRender)
 			{
-				if (objects[posZ][posX][j] != NULL)
+				loadedTerrains[i]->draw(parameters.Debug);
+
+				if (objects.size() > 0)
 				{
-					BoundingSphere bound = objects[posZ][posX][j]->getBoundingSphere();
-					if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
+					int posX = (loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
+					int posZ = (loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
+
+					for (size_t j = 0; j < objects[posZ][posX].size(); j++)
 					{
-						Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
-						Vector3 v2 = objects[posZ][posX][j]->getTranslationWorld();
-
-						float dx = v.x - v2.x;
-						float dz = v.z - v2.z;
-
-						int ActualDistance = sqrt(dx * dx + dz * dz);
-
-						if (ActualDistance < parameters.distanceMaxModelRender)
+						if (objects[posZ][posX][j] != NULL)
 						{
-							if (parameters.generatedObjects = true && !parameters.Debug)
+							BoundingSphere bound = objects[posZ][posX][j]->getBoundingSphere();
+							if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
 							{
-								if (objects[posZ][posX][j]->getDrawable())
+								Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+								Vector3 v2 = objects[posZ][posX][j]->getTranslationWorld();
+
+								float dx = v.x - v2.x;
+								float dz = v.z - v2.z;
+
+								int ActualDistance = sqrt(dx * dx + dz * dz);
+
+								if (ActualDistance < parameters.distanceMaxModelRender)
 								{
-									objects[posZ][posX][j]->getDrawable()->draw();
-								}
-								if (objects[posZ][posX][j]->getChildCount() > 0)
-								{
-									Node *childs = objects[posZ][posX][j]->getFirstChild();
-									while (childs)
+									if (parameters.generatedObjects = true && !parameters.Debug)
 									{
-										if (childs->getDrawable())
+										if (objects[posZ][posX][j]->getDrawable())
 										{
-											childs->getDrawable()->draw();
+											objects[posZ][posX][j]->getDrawable()->draw();
 										}
-										childs = childs->getNextSibling();
+										if (objects[posZ][posX][j]->getChildCount() > 0)
+										{
+											Node *childs = objects[posZ][posX][j]->getFirstChild();
+											while (childs)
+											{
+												if (childs->getDrawable())
+												{
+													childs->getDrawable()->draw();
+												}
+												childs = childs->getNextSibling();
+											}
+										}
 									}
 								}
 							}
@@ -426,62 +428,6 @@ void Pager::render()
 					}
 				}
 			}
-
-			//for example 
-			//get position of parameters.loadedTerrains[i]
-			//use the world position of the terrain to compute the vector position to access objects that are contained into it
-			//iterate all objects that are suposed to be on the terrain
-			//check against the distance between the camera and the object
-			//render it if needed
-		}
+		//}
 	}
-
-	//i can possibly lesser the amount of time it would iterate objects by checking against only loaded terrains
-
-	/*
-	for (size_t i = 0; i < objects.size();)
-	{
-		for (size_t j = 0; j < objects[i].size();)
-		{
-			for (size_t g = 0; g < objects[i][j].size(); g++)
-			{
-				if (objects[i][j][g] != NULL)
-				{
-					Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
-					Vector3 v2 = objects[i][j][g]->getTranslationWorld();
-
-					float dx = v.x - v2.x;
-					float dz = v.z - v2.z;
-
-					int ActualDistance = sqrt(dx * dx + dz * dz);
-
-					if (ActualDistance < parameters.distanceMaxModelRender)
-					{
-						if (parameters.generatedObjects = true && !parameters.Debug)
-						{
-							if (objects[i][j][g]->getDrawable())
-							{
-								objects[i][j][g]->getDrawable()->draw();
-							}
-							if (objects[i][j][g]->getChildCount() > 0)
-							{
-								Node *childs = objects[i][j][g]->getFirstChild();
-								while (childs)
-								{
-									if (childs->getDrawable())
-									{
-										childs->getDrawable()->draw();
-									}
-									childs = childs->getNextSibling();
-								}
-							}
-						}
-					}
-				} 
-			}
-			j++;
-		}
-		i++;
-	}
-	*/
 }

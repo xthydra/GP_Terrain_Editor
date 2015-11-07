@@ -89,7 +89,7 @@ void Main::initialize()
 	_scene->setAmbientColor(0.5,0.5,0.5);
 
 	// Setup a fly cam.
-	_camera.initialize(1.0f, 400000.0f, 45);
+	_camera.initialize(1.0f, 60000.0f, 45);
 	_camera.rotate(0.0f, -MATH_DEG_TO_RAD(10));
 	_scene->addNode(_camera.getRootNode());
 	_scene->setActiveCamera(_camera.getCamera());
