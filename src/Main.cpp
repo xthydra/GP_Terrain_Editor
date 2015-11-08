@@ -267,15 +267,17 @@ void Main::initialize()
 	parameters.generatedNormalmaps = false;
 	parameters.generatedHeightmaps = false;
 	parameters.generatedObjects = false;
-	parameters.tilesResolution = 2;			//TERRAIN_parametersETER_1
-	parameters.heightFieldResolution = 128;  //TERRAIN_parametersETER_2
+	parameters.tilesResolution = 2;
+	parameters.heightFieldResolution = 128;
 	//if you put LOD on 1 it will make terrain creation faster
-	parameters.lodQuality = 1;				//TERRAIN_parametersETER_3
-	parameters.textureScale = 40;			//TERRAIN_parametersETER_4
-	parameters.minHeight = 0;				//TERRAIN_parametersETER_5
-	parameters.maxHeight = 128;				//TERRAIN_parametersETER_6
-	parameters.skirtSize = 16;				//TERRAIN_parametersETER_7
-	parameters.patchSize = 32;				//TERRAIN_parametersETER_8
+	parameters.lodQuality = 1;
+	parameters.textureScale = 40;
+	parameters.minHeight = 0;
+	parameters.maxHeight = 128;
+	parameters.skirtSize = 16;
+	parameters.patchSize = 32;
+	//if you want to define dont expect the terrain editor tools to work because alot of functions are using heightfield resolution instead
+	//of the scale parameters sent to the paging class
 	parameters.scale = Vector3(parameters.heightFieldResolution, ((parameters.heightFieldResolution*parameters.tilesResolution)*0.10), parameters.heightFieldResolution);
 
 	parameters.boundingBox = (parameters.heightFieldResolution * parameters.heightFieldResolution) - parameters.heightFieldResolution;
@@ -291,12 +293,6 @@ void Main::initialize()
 		1,
 		true,
 		true);
-	//parameters.Scale = Vector3(parameters.heightFieldResolution, (parameters.heightFieldResolution /parameters.tilesResolution), parameters.heightFieldResolution);
-
-	//if you want to apply a second scale apply it like that
-	//E.G : parameters.Scale = parameters.Scale * 1.5; parameters.BoundingBox=parameters.BoundingBox* 1.5;
-	//but dont expect the terrain editor tools to work because alot of functions are using heightfield resolution instead
-	//of the scale parameters sent to the paging class
 
 	parameters.Debug = false;
 

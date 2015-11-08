@@ -39,7 +39,7 @@ struct TerrainEditor{
 	*
 	* @param x x coordinate for the center of the circle.
 	* @param z z coordinate for the center of the circle.
-	* @param scale the radius of the circle
+	* @param scale, the radius that's defining the vertexes selected to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size
@@ -60,7 +60,7 @@ struct TerrainEditor{
 	*
 	* @param x coordinate for the center of the circle.
 	* @param z coordinate for the center of the circle.
-	* @param scale the radius of the circle
+	* @param scale, the radius that's defining the vertexes selected to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size
@@ -81,7 +81,7 @@ struct TerrainEditor{
 	*
 	* @param x coordinate for the center of the circle.
 	* @param z coordinate for the center of the circle.
-	* @param scale the radius of the circle
+	* @param scale, the radius that's defining the vertexes selected to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size
@@ -102,7 +102,7 @@ struct TerrainEditor{
 	*
 	* @param x x coordinate for the center of the circle.
 	* @param z z coordinate for the center of the circle.
-	* @param scale the radius of the circle
+	* @param scale, the radius that's defining the vertexes selected to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size

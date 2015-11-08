@@ -338,8 +338,6 @@ void Pager::PagingCheck()
 	{
 		for (int j = 0; j < parameters.tilesResolution; j++)
 		{
-			//float ActualDistance = _Scene->getActiveCamera()->getNode()->getTranslationWorld().distance(zoneList[i][j]->getPosition());
-
 			Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
 			Vector3 v2 = zoneList[i][j]->getPosition();
 
@@ -365,11 +363,33 @@ void Pager::PagingCheck()
 void Pager::render()
 {
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
-	{		
-		//BoundingBox bound = loadedTerrains[i]->getBoundingBox();
-		//if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
-		//{
-			Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+	{	
+		BoundingBox bound=loadedTerrains[i]->getBoundingBox();
+
+		Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
+
+		if (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x > bound.max.x)
+		{
+			while (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x > bound.max.x)
+			{
+				int currentPosX = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x;
+				_Scene->getActiveCamera()->getNode()->getParent()->setTranslationX(currentPosX - bound.max.x);
+			}
+		}
+		if (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().z > bound.max.z)
+		{
+			while (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().z > bound.max.z)
+			{
+				int currentPosZ = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().z;
+				_Scene->getActiveCamera()->getNode()->getParent()->setTranslationZ(currentPosZ - bound.max.z);
+			} 
+		}
+
+		bool intersected = (_Scene->getActiveCamera()->getFrustum().intersects(bound));
+		_Scene->getActiveCamera()->getNode()->getParent()->setTranslation(v);
+
+		if (intersected)
+		{
 			Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
 
 			float dx = v.x - v2.x;
@@ -388,39 +408,33 @@ void Pager::render()
 
 					for (size_t j = 0; j < objects[posZ][posX].size(); j++)
 					{
-						if (objects[posZ][posX][j] != NULL)
+						if (_Scene->getActiveCamera()->getFrustum().intersects(
+							objects[posZ][posX][j]->getBoundingSphere()))
 						{
-							BoundingSphere bound = objects[posZ][posX][j]->getBoundingSphere();
-							if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
+							Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
+							Vector3 v2 = objects[posZ][posX][j]->getTranslationWorld();
+
+							float dx = v.x - v2.x;
+							float dz = v.z - v2.z;
+
+							int ActualDistance = sqrt(dx * dx + dz * dz);
+
+							if (ActualDistance < parameters.distanceMaxModelRender)
 							{
-								Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
-								Vector3 v2 = objects[posZ][posX][j]->getTranslationWorld();
-
-								float dx = v.x - v2.x;
-								float dz = v.z - v2.z;
-
-								int ActualDistance = sqrt(dx * dx + dz * dz);
-
-								if (ActualDistance < parameters.distanceMaxModelRender)
+								if (objects[posZ][posX][j]->getDrawable())
 								{
-									if (parameters.generatedObjects = true && !parameters.Debug)
+									objects[posZ][posX][j]->getDrawable()->draw();
+								}
+								if (objects[posZ][posX][j]->getChildCount() > 0)
+								{
+									Node *childs = objects[posZ][posX][j]->getFirstChild();
+									while (childs)
 									{
-										if (objects[posZ][posX][j]->getDrawable())
+										if (childs->getDrawable())
 										{
-											objects[posZ][posX][j]->getDrawable()->draw();
+											childs->getDrawable()->draw();
 										}
-										if (objects[posZ][posX][j]->getChildCount() > 0)
-										{
-											Node *childs = objects[posZ][posX][j]->getFirstChild();
-											while (childs)
-											{
-												if (childs->getDrawable())
-												{
-													childs->getDrawable()->draw();
-												}
-												childs = childs->getNextSibling();
-											}
-										}
+										childs = childs->getNextSibling();
 									}
 								}
 							}
@@ -428,6 +442,6 @@ void Pager::render()
 					}
 				}
 			}
-		//}
+		}
 	}
 }

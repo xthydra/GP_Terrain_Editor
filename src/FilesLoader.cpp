@@ -57,8 +57,13 @@ std::vector<std::vector<std::vector<Vector3*> > > FilesLoader::loadObjectsPos(co
 
 	std::string lastFile;
 
+
 	handle = _findfirst64(fileName.c_str(), &info);
-	while(handle && info.name != lastFile)
+	if (handle == -1)
+	{
+		printf("No files with .gpb extension were found inside %s", workingDir.c_str());
+	}
+	while(handle != -1 && info.name != lastFile)
 	{
 		//get the file extension
 		std::string foundFileName = info.name;
