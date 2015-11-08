@@ -364,10 +364,11 @@ void Pager::render()
 {
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{	
+		Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
+		/*
 		BoundingBox bound=loadedTerrains[i]->getBoundingBox();
 
-		Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
-
+		//simulate the camera position being within the terrain bounding box
 		if (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x > bound.max.x)
 		{
 			while (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x > bound.max.x)
@@ -387,9 +388,9 @@ void Pager::render()
 
 		bool intersected = (_Scene->getActiveCamera()->getFrustum().intersects(bound));
 		_Scene->getActiveCamera()->getNode()->getParent()->setTranslation(v);
-
+		
 		if (intersected)
-		{
+		{*/
 			Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
 
 			float dx = v.x - v2.x;
@@ -442,6 +443,6 @@ void Pager::render()
 					}
 				}
 			}
-		}
+		//}
 	}
 }
