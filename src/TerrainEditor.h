@@ -24,7 +24,7 @@
 struct TerrainEditor{
 
 	/**
-	* Aligning each vertexes at terrains extremity next to each others height to make it look smoother
+	* Aligning each vertexes at given terrains extremity next to each others height to make it look smoother
 	*
 	* @param heightfields vectors
 	* @param heightfield size
@@ -35,11 +35,11 @@ struct TerrainEditor{
 								  size_t);
 
 	/**
-	* Raise a circle of the terrain. The shape created is something like an egg.
+	* Raise a part of the terrain vertices defined by a radius and a position
 	*
 	* @param x x coordinate for the center of the circle.
 	* @param z z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes selected to be modified
+	* @param scale, the radius that's defining the vertexes height to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size
@@ -56,11 +56,11 @@ struct TerrainEditor{
 								std::vector<HeightField*>);
 
 	/**
-	* Lower a circle of the terrain. The shape created is something like an egg (inverted).
+	* Lower a part of the terrain vertices defined by a radius and a position
 	*
 	* @param x coordinate for the center of the circle.
 	* @param z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes selected to be modified
+	* @param scale, the radius that's defining the vertexes height to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size
@@ -77,11 +77,11 @@ struct TerrainEditor{
 								std::vector<HeightField*>);
 
 	/**
-	* Smooth the contents of a circle on the terrain.
+	* Smooth a part of the terrain vertices defined by a radius and a position
 	*
 	* @param x coordinate for the center of the circle.
 	* @param z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes selected to be modified
+	* @param scale, the radius that's defining the vertexes height to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size
@@ -102,7 +102,7 @@ struct TerrainEditor{
 	*
 	* @param x x coordinate for the center of the circle.
 	* @param z z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes selected to be modified
+	* @param scale, the radius that's defining the vertexes height to be modified
 	* @param vector containing loaded terrains
 	* @param an int pointing out to the terrain that got it by the ray
 	* @param heightfield size

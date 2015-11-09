@@ -364,40 +364,17 @@ void Pager::render()
 {
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{	
-		Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
-		/*
-		BoundingBox bound=loadedTerrains[i]->getBoundingBox();
-
-		//simulate the camera position being within the terrain bounding box
-		if (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x > bound.max.x)
+		BoundingSphere bound = BoundingSphere(loadedTerrains[i]->getNode()->getTranslationWorld(), parameters.boundingBox*0.75);
+		if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
 		{
-			while (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x > bound.max.x)
-			{
-				int currentPosX = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().x;
-				_Scene->getActiveCamera()->getNode()->getParent()->setTranslationX(currentPosX - bound.max.x);
-			}
-		}
-		if (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().z > bound.max.z)
-		{
-			while (_Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().z > bound.max.z)
-			{
-				int currentPosZ = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld().z;
-				_Scene->getActiveCamera()->getNode()->getParent()->setTranslationZ(currentPosZ - bound.max.z);
-			} 
-		}
-
-		bool intersected = (_Scene->getActiveCamera()->getFrustum().intersects(bound));
-		_Scene->getActiveCamera()->getNode()->getParent()->setTranslation(v);
-		
-		if (intersected)
-		{*/
+			Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
 			Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
 
 			float dx = v.x - v2.x;
 			float dz = v.z - v2.z;
 
 			int ActualDistance = sqrt(dx * dx + dz * dz);
-			
+
 			if (ActualDistance < parameters.distanceTerrainMaxRender)
 			{
 				loadedTerrains[i]->draw(parameters.Debug);
@@ -409,6 +386,7 @@ void Pager::render()
 
 					for (size_t j = 0; j < objects[posZ][posX].size(); j++)
 					{
+						BoundingSphere test = objects[posZ][posX][j]->getBoundingSphere();
 						if (_Scene->getActiveCamera()->getFrustum().intersects(
 							objects[posZ][posX][j]->getBoundingSphere()))
 						{
@@ -443,6 +421,6 @@ void Pager::render()
 					}
 				}
 			}
-		//}
+		}
 	}
 }
