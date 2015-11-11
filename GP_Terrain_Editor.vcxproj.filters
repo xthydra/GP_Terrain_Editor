@@ -161,6 +161,18 @@
     <None Include="res\generateObjects.form">
       <Filter>res\UI forms</Filter>
     </None>
+    <None Include="res\common\Tree.scene">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\materials\tree.material">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\materials\terrainDirectionallight.material">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\materials\terrainPointlight.material">
+      <Filter>res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />

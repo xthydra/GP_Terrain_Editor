@@ -1,0 +1,14 @@
+scene
+{
+    path = res/tree.gpb
+
+	node leaves
+	{
+		material = res/common/tree.material#leaves
+	}
+
+	node trunk
+	{
+		material = res/common/tree.material#trunk
+	}
+}

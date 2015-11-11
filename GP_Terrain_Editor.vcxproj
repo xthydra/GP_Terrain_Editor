@@ -298,8 +298,9 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\GamePlay\gameplay\src;..\gameplay\external-deps\lua\include;..\gameplay\external-deps\bullet\include;..\gameplay\external-deps\ogg\include;..\gameplay\external-deps\openal\include\AL;..\gameplay\external-deps\vorbis\include;..\gameplay\external-deps\png\include;..\gameplay\external-deps\zlib\include;..\gameplay\external-deps\glew\include;..\gameplay\external-deps\include</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -322,6 +323,7 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
     <None Include="game.config" />
     <None Include="LICENSE.md" />
     <None Include="README.md" />
+    <None Include="res\common\Tree.scene" />
     <None Include="res\generateBlendmaps.form" />
     <None Include="res\generateNoise.form" />
     <None Include="res\generateObjects.form" />
@@ -329,6 +331,9 @@ xcopy ..\GamePlay\gameplay\res\ui res\ui\* /s /y /d</Command>
     <None Include="res\load.form" />
     <None Include="res\main.form" />
     <None Include="res\materials\terrain.material" />
+    <None Include="res\materials\terrainDirectionallight.material" />
+    <None Include="res\materials\terrainPointlight.material" />
+    <None Include="res\materials\tree.material" />
     <None Include="res\save.form">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </None>

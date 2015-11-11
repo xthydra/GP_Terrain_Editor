@@ -332,7 +332,7 @@ void Pager::removeObjects()
 	objects.clear();
 }
 
-void Pager::PagingCheck()
+void Pager::pagingCheck()
 {
 	for (int i = 0; i < parameters.tilesResolution; i++)
 	{
@@ -364,9 +364,10 @@ void Pager::render()
 {
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{	
-		BoundingSphere bound = BoundingSphere(loadedTerrains[i]->getNode()->getTranslationWorld(), parameters.boundingBox*0.75);
+		/*
+		BoundingSphere bound = BoundingSphere(loadedTerrains[i]->getNode()->getTranslationWorld(), (loadedTerrains[i]->getBoundingBox().max.z * 2)*0.81);
 		if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
-		{
+		{*/
 			Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
 			Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
 
@@ -400,6 +401,7 @@ void Pager::render()
 
 							if (ActualDistance < parameters.distanceMaxModelRender)
 							{
+
 								if (objects[posZ][posX][j]->getDrawable())
 								{
 									objects[posZ][posX][j]->getDrawable()->draw();
@@ -411,6 +413,10 @@ void Pager::render()
 									{
 										if (childs->getDrawable())
 										{
+											//if(objectsParameters[0] > 0)
+											//Model* model = dynamic_cast<Model*>(childs->getDrawable());
+											//int texRepeat = objectsParameters[0]*(ActualDistance / parameters.distanceMaxModelRender);
+											//model->getMaterial()->getParameter("u_textureRepeat")->setValue(texRepeat);
 											childs->getDrawable()->draw();
 										}
 										childs = childs->getNextSibling();
@@ -421,6 +427,6 @@ void Pager::render()
 					}
 				}
 			}
-		}
+		//}
 	}
 }

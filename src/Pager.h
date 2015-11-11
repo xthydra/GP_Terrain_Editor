@@ -141,7 +141,7 @@ public:
 	void render();
 
 	/*it's used to define if a terrain should be created or deleted*/
-	void PagingCheck();
+	void pagingCheck();
 
 	/*it load a terrain
 	* @param int pointing to the Z positioning in the zonelist[][] vector
@@ -206,7 +206,6 @@ public:
 	* Files List to load.
 	**/
 	std::vector<std::vector<char*> >			   normalMapList;
-	std::vector<std::vector<char*> >			   heightMapPNGList;
 	std::vector<std::vector<char*> >			   heightMapRAWList;
 	std::vector<std::vector<std::vector<char*> > > blendMapList;
 

@@ -420,10 +420,8 @@ void Main::initialize()
 	tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 	tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-	_pager->PagingCheck();
-
 	Vector3 worldScale;//(1,1,1);
-	_pager->PagingCheck();
+	_pager->pagingCheck();
 	_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
 	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, parameters.scale.y, 1, parameters.heightFieldResolution, _pager->heightFieldList, tree);
@@ -787,71 +785,65 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		_mainForm->setVisible(true);
 		_generateTerrainsForm->setVisible(false);
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	else if (strcmp(control->getId(), "ConfirmGenerateTerrainsButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_generateTerrainsForm->setVisible(false);
 		this->generateNewTerrain();
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	//===========================
 	else if (strcmp(control->getId(), "CancelGenerateBlendmapsButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_generateBlendmapsForm->setVisible(false);
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	else if (strcmp(control->getId(), "ConfirmGenerateBlendmapsButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_generateBlendmapsForm->setVisible(false);
 		generateNewBlendmaps();
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	//===========================
 	else if (strcmp(control->getId(), "CancelLoadButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_loadForm->setVisible(false);
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	else if (strcmp(control->getId(), "ConfirmLoadButton") == 0)	
 	{
 		_mainForm->setVisible(true);
 		_loadForm->setVisible(false);
 		load();
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	//===========================
 	else if (strcmp(control->getId(), "CancelSaveButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_saveForm->setVisible(false);
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	//===========================
 	else if (strcmp(control->getId(), "CancelNoiseButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_noiseForm->setVisible(false);
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
 	}
 	else if (strcmp(control->getId(), "ConfirmNoiseButton") == 0)
 	{
 		_mainForm->setVisible(true);
 		_noiseForm->setVisible(false);
-		_mainForm->update(1);
-		_mainForm->getControl("GeneratorToolBar")->setPosition(0, 50);
+	}
+	//===========================
+	else if (strcmp(control->getId(), "CancelGenerateObjectsButton") == 0)
+	{
+		_mainForm->setVisible(true);
+		_generateObjectsForm->setVisible(false);
+	}
+	else if (strcmp(control->getId(), "ConfirmGenerateObjectsButton") == 0)
+	{
+		_mainForm->setVisible(true);
+		_generateObjectsForm->setVisible(false);
+		generateObjectsPosition();
 	}
 }
 
@@ -974,6 +966,8 @@ void Main::generateNewBlendmaps()
 
 void Main::generateObjectsPosition()
 {
+#define OLDOBJ
+#ifdef OLDOBJ
 	if (_pager)
 	{
 		if (_pager->heightFieldList.size() > 0)
@@ -981,6 +975,156 @@ void Main::generateObjectsPosition()
 			_pager->removeObjects();
 
 			Scene * Stree = Scene::load("res/tree.gpb");
+			Node* leaves = Stree->findNode("leaves");
+			Node* tree = Stree->findNode("trunk");
+			tree->setScale(Vector3(50, 50, 50));
+			leaves->setScale(Vector3(50, 50, 50));
+			Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
+			tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
+#define TRANSPARENCY
+#ifdef TRANSPARENCY
+			Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
+			tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
+#else
+			Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
+#endif
+
+#ifdef POINTLIGHT_TEST
+			//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+			tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
+			tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
+			tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+			//tempt2->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
+			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
+			tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+#else
+			tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
+			tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
+			tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
+			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
+			tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+#endif
+			// Set the ambient color of the material.
+			tempt->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
+			tempt2->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
+
+			Node* lightNode = _scene->findNode("light");
+#ifdef POINTLIGHT_TEST
+			tempt->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
+			tempt->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
+			tempt->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
+			tempt2->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
+			tempt2->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
+			tempt2->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
+#else
+			// Bind the light's color and direction to the material.
+			tempt->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
+			tempt->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
+			tempt2->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
+			tempt2->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
+#endif
+			// Load the texture from file.
+			Texture::Sampler* sampler = tempt->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/bark.png", true);
+			Texture::Sampler* sampler2 = tempt2->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/leave.png", true);
+
+			tempt->getMaterial()->getStateBlock()->setCullFace(true);
+			tempt->getMaterial()->getStateBlock()->setDepthTest(true);
+
+			tempt2->getMaterial()->getStateBlock()->setCullFace(true);
+			tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
+
+			_pager->pagingCheck();
+
+			Vector3 worldScale;//(1,1,1);
+			_pager->pagingCheck();
+			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
+
+			TerrainGenerator terrainGenerator;
+			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, _pager->parameters.scale.y, 1, _pager->parameters.heightFieldResolution, _pager->heightFieldList, tree);
+			std::vector<std::vector<std::vector<Node*> > > objs;
+			std::vector<Model*> models;
+
+			objs.resize(_pager->heightFieldList.size());
+			for (size_t i = 0; i < _pager->heightFieldList.size(); i++)
+			{
+				objs[i].resize(_pager->heightFieldList.size());
+				for (size_t j = 0; j < _pager->heightFieldList[i].size(); j++)
+				{
+					for (size_t g = 0; g < objsPos[i][j].size(); g++)
+					{
+						//if it would be the first node don't clone it and just position it
+						Node * tmp1 = tree->clone();
+						Node * tmp2 = leaves->clone();
+
+						Node * tree2 = Node::create("tree");
+
+						tree2->addChild(tmp2);
+						tree2->addChild(tmp1);
+
+						tree2->setTranslation(Vector3(
+							objsPos[i][j][g]->x,
+							objsPos[i][j][g]->y,
+							objsPos[i][j][g]->z));
+
+						_scene->addNode(tree2);
+
+						objs[i][j].push_back(tree2);
+					}
+				}
+			}
+			_pager->objects = objs;
+			_pager->objectsPosition = objsPos;
+			_pager->objectsFilename.push_back("tree.gpb");
+
+			/*threads.push_back(std::async(std::launch::async,
+				&FilesSaver::saveObjectsPos,
+				saver,
+				_pager->parameters.objectsPosition,
+				_pager->parameters.objectsFilename[0]));
+
+			Threads t3;
+			t3.objectBool();
+			saverThreads.push_back(t3);*/
+
+			tree->getDrawable()->draw();
+			leaves->getDrawable()->draw();
+			_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
+		}
+	}
+#else
+	if (_pager)
+	{
+		if (_pager->heightFieldList.size() > 0)
+		{
+			_pager->removeObjects();
+
+			Control * control;
+			TextBox * textBox;
+
+			control = _generateTerrainsForm->getControl("MaterialTextBox");
+			textBox = (TextBox *)control;
+			std::string material = textBox->getText();
+
+			control = _generateTerrainsForm->getControl("ObjectTextBox");
+			textBox = (TextBox *)control;
+			std::string fileName = textBox->getText();
+
+			control = _generateTerrainsForm->getControl("ChanceTextBox");
+			textBox = (TextBox *)control;
+			int chanceFactor = (strtol(textBox->getText(), NULL, 10));
+
+			Scene * tempScene = Scene::load(fileName.c_str());
+
+			Node * nodes = tempScene->getFirstNode();
+			Node * node = Node::create(fileName.c_str());
+			while (nodes)
+			{
+				node->addChild(nodes);
+				nodes = tempScene->getNext();
+			}
+
 			Node* leaves = Stree->findNode("leaves");
 			Node* tree = Stree->findNode("trunk");
 			tree->setScale(Vector3(50, 50, 50));
@@ -1085,10 +1229,10 @@ void Main::generateObjectsPosition()
 			_pager->objectsFilename.push_back("tree.gpb");
 
 			/*threads.push_back(std::async(std::launch::async,
-				&FilesSaver::saveObjectsPos,
-				saver,
-				_pager->parameters.objectsPosition,
-				_pager->parameters.objectsFilename[0]));
+			&FilesSaver::saveObjectsPos,
+			saver,
+			_pager->parameters.objectsPosition,
+			_pager->parameters.objectsFilename[0]));
 
 			Threads t3;
 			t3.objectBool();
@@ -1099,6 +1243,7 @@ void Main::generateObjectsPosition()
 			_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 		}
 	}
+#endif
 }
 
 void Main::generateNewTerrain()
@@ -1318,7 +1463,7 @@ void Main::generateNewTerrain()
 	_pager->parameters.distanceTerrainUnload = (_pager->parameters.boundingBox * _pager->parameters.maxHeight) * 1;
 	_pager->parameters.distanceTerrainMaxRender = (_pager->parameters.boundingBox * _pager->parameters.maxHeight) * 1;
 
-	_pager->PagingCheck();
+	_pager->pagingCheck();
 	_camera.setPosition(Vector3(0, _pager->zoneList[0][0]->getObjectInside()->terrain->getHeight(0, 0), 0));
 
 	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * .9;
@@ -1433,7 +1578,7 @@ void Main::render(float elapsedTime)
 
 	if (_pager)
 	{
-		_pager->PagingCheck();
+		_pager->pagingCheck();
 
 		_pager->render();
 	}
@@ -1474,7 +1619,7 @@ void Main::render(float elapsedTime)
 	{
 		_saveForm->draw();
 	}
-	if (_saveForm->isVisible())
+	if (_noiseForm->isVisible())
 	{
 		_noiseForm->draw();
 	}

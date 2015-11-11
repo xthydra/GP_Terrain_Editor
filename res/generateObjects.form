@@ -9,7 +9,7 @@ form GenerateForm
              
     label MaterialLabel
     {
-        text = Material
+        text = Material(Optional)
         height = 45
         width = 400
     }
@@ -21,19 +21,19 @@ form GenerateForm
     }
 	label ObjectLabel
     {
-        text = Object .gpd File
+        text = Object_.gpd_.scene_file
         height = 45
         width = 400
     }
     textbox ObjectTextBox
     {
-        text = .gpb
+        text = .gpb_or_.scene
         height = 45
         width = 400
     }
 	label ChanceLabel
     {
-        text = factor of chance that it would be created
+        text = factor_of_chance_that_it_would_be_created
         height = 45
         width = 400
     }
