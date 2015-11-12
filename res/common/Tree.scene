@@ -4,11 +4,11 @@ scene
 
 	node leaves
 	{
-		material = res/common/tree.material#leaves
+		material = res/materials/tree.material#leaves
 	}
 
 	node trunk
 	{
-		material = res/common/tree.material#trunk
+		material = res/materials/tree.material#trunk
 	}
 }

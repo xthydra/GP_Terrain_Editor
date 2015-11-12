@@ -832,7 +832,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		_mainForm->setVisible(true);
 		_noiseForm->setVisible(false);
-	}
+	} 
 	//===========================
 	else if (strcmp(control->getId(), "CancelGenerateObjectsButton") == 0)
 	{
@@ -1035,8 +1035,6 @@ void Main::generateObjectsPosition()
 			tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 			tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-			_pager->pagingCheck();
-
 			Vector3 worldScale;//(1,1,1);
 			_pager->pagingCheck();
 			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
@@ -1102,18 +1100,28 @@ void Main::generateObjectsPosition()
 
 			Control * control;
 			TextBox * textBox;
+			std::string fileName, material;
 
-			control = _generateTerrainsForm->getControl("MaterialTextBox");
+			control = _generateObjectsForm->getControl("MaterialTextBox");
 			textBox = (TextBox *)control;
-			std::string material = textBox->getText();
+			if (textBox)
+			{
+				material = textBox->getText();
+			}
 
-			control = _generateTerrainsForm->getControl("ObjectTextBox");
+			control = _generateObjectsForm->getControl("ObjectTextBox");
 			textBox = (TextBox *)control;
-			std::string fileName = textBox->getText();
+			if (textBox)
+			{
+				fileName = textBox->getText();
+			}
 
-			control = _generateTerrainsForm->getControl("ChanceTextBox");
+			control = _generateObjectsForm->getControl("ChanceTextBox");
 			textBox = (TextBox *)control;
-			int chanceFactor = (strtol(textBox->getText(), NULL, 10));
+			if (textBox)
+			{
+				int chanceFactor = (strtol(textBox->getText(), NULL, 10));
+			}
 
 			Scene * tempScene = Scene::load(fileName.c_str());
 
@@ -1125,41 +1133,8 @@ void Main::generateObjectsPosition()
 				nodes = tempScene->getNext();
 			}
 
-			Node* leaves = Stree->findNode("leaves");
-			Node* tree = Stree->findNode("trunk");
-			tree->setScale(Vector3(50, 50, 50));
-			leaves->setScale(Vector3(50, 50, 50));
-			Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
-			tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
-#define TRANSPARENCY
-#ifdef TRANSPARENCY
-			Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
-			tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
-#else
-			Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-#endif
-
-#ifdef POINTLIGHT_TEST
-			//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-			tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-			tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-			tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-			//tempt2->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-			tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-#else
-			tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-			tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-			tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-			tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-			tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-#endif
-			// Set the ambient color of the material.
-			tempt->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
-			tempt2->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
-
+			//TODO : set directional or pointlight depending if the material
+			/*
 			Node* lightNode = _scene->findNode("light");
 #ifdef POINTLIGHT_TEST
 			tempt->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
@@ -1175,24 +1150,14 @@ void Main::generateObjectsPosition()
 			tempt2->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
 			tempt2->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
 #endif
-			// Load the texture from file.
-			Texture::Sampler* sampler = tempt->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/bark.png", true);
-			Texture::Sampler* sampler2 = tempt2->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/leave.png", true);
-
-			tempt->getMaterial()->getStateBlock()->setCullFace(true);
-			tempt->getMaterial()->getStateBlock()->setDepthTest(true);
-
-			tempt2->getMaterial()->getStateBlock()->setCullFace(true);
-			tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
-
-			_pager->PagingCheck();
+			*/
 
 			Vector3 worldScale;//(1,1,1);
-			_pager->PagingCheck();
+			_pager->pagingCheck();
 			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
 			TerrainGenerator terrainGenerator;
-			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, _pager->parameters.scale.y, 1, _pager->parameters.heightFieldResolution, _pager->heightFieldList, tree);
+			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, _pager->parameters.scale.y, 1, _pager->parameters.heightFieldResolution, _pager->heightFieldList, nodes);
 			std::vector<std::vector<std::vector<Node*> > > objs;
 			std::vector<Model*> models;
 
@@ -1204,14 +1169,7 @@ void Main::generateObjectsPosition()
 				{
 					for (size_t g = 0; g < objsPos[i][j].size(); g++)
 					{
-						//if it would be the first node don't clone it and just position it
-						Node * tmp1 = tree->clone();
-						Node * tmp2 = leaves->clone();
-
-						Node * tree2 = Node::create("tree");
-
-						tree2->addChild(tmp2);
-						tree2->addChild(tmp1);
+						Node * tree2 = nodes->clone();
 
 						tree2->setTranslation(Vector3(
 							objsPos[i][j][g]->x,
@@ -1238,9 +1196,16 @@ void Main::generateObjectsPosition()
 			t3.objectBool();
 			saverThreads.push_back(t3);*/
 
-			tree->getDrawable()->draw();
-			leaves->getDrawable()->draw();
-			_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
+			Node * childs = nodes->getFirstChild();
+
+			while(childs)
+			{
+				if (childs->getDrawable())
+				{
+					childs->getDrawable()->draw();
+				}
+			}
+			_pager->parameters.distanceMaxModelRender = nodes->getBoundingSphere().radius * 5;
 		}
 	}
 #endif
