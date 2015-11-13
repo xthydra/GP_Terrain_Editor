@@ -40,6 +40,9 @@ struct PagerParameters
 	* Parameters used to create gameplay::Terrain.
 	**/
 	int lodQuality, textureScale, boundingBox, minHeight, maxHeight, patchSize, skirtSize;
+	
+	std::string terrainMaterialPath;
+
 	gameplay::Vector3 scale;
 	
 	/**

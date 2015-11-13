@@ -24,14 +24,18 @@ public:
 	/**
 	* Heightfield constructor
 	*
-	* @param heightfield
-	* @param level of detail quality
-	* @param scale of texture
-	* @param scene
-	* @param scale
-	* @param position
-	* @param blendmap1
-	* @param blendmap2
+	* @param (Heightfield*)heightfield
+	* @param (int)level of detail quality
+	* @param (int)scale of texture
+	* @param (int)skirt size
+	* @param (int)patch size
+	* @param (Vector3)scale
+	* @param (Vector3)position
+	* @param (std::string) normalmap
+	* @param (const char *)blendmap1
+	* @param (const char *)blendmap2
+	* @param (const char *)terrain material path
+	* @param (Scene*)scene
 	*
 	* @return void
 	**/
@@ -42,6 +46,7 @@ public:
 		int patchSize,
 		gameplay::Vector3,
 		gameplay::Vector3,
+		std::string,
 		const char*,
 		const char*,
 		const char*,

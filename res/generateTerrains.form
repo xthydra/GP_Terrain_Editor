@@ -1,10 +1,10 @@
 form GenerateForm
 {
     theme = res/common/default.theme
-    width = 400
+    width = 801
     height = 600
     alignment = ALIGN_VCENTER_HCENTER
-    layout = LAYOUT_VERTICAL
+    layout = LAYOUT_FLOW
     style = noBorder
              
     slider HeightFieldSizeSlider
@@ -77,7 +77,8 @@ form GenerateForm
         height = 45
         width = 400
     }
-    container NoiseContainer {
+    container NoiseContainer 
+	{
         layout = LAYOUT_FLOW
         width = 450
         height = 45
@@ -121,17 +122,32 @@ form GenerateForm
         height = 45
         width = 400
     }
-    container ButtonContainer {
+	label TerrainMaterialLabel
+    {
+        text = Terrrain Material
+        height = 45
+        width = 400
+    }
+    textbox TerrainMaterialBox
+    {
+        text = res/materials/terrain.material
+        height = 45
+        width = 400
+    }
+    container ButtonContainer 
+	{
         layout = LAYOUT_FLOW
         width = 450
         height = 45
         
-        button CancelGenerateTerrainsButton {
+        button CancelGenerateTerrainsButton 
+		{
             text = Cancel
             height = 45
             width = 200
         }
-        button ConfirmGenerateTerrainsButton {
+        button ConfirmGenerateTerrainsButton 
+		{
             text = Generate
             height = 45
             width = 200
