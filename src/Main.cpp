@@ -96,7 +96,6 @@ void Main::initialize()
 
 	// Create a light source.
 
-//#define POINTLIGHT_TEST
 #ifdef POINTLIGHT_TEST
 	_light = Light::createPoint(Vector3::one(), 800.0f);
 	Node* lightNode = _scene->addNode("light");
@@ -166,9 +165,6 @@ void Main::initialize()
 	control = _mainForm->getControl("GenerateObjectsPosButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	control = _mainForm->getControl("GenerateNoiseButton");
-	control->addListener(this, Control::Listener::CLICK);
-
 	control = _mainForm->getControl("LoadButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//=============
@@ -230,15 +226,6 @@ void Main::initialize()
 
 	control = _generateObjectsForm->getControl("ConfirmGenerateObjectsButton");
 	control->addListener(this, Control::Listener::CLICK);
-	//===============
-	_noiseForm = Form::create("res/generateNoise.form");
-	_noiseForm->setVisible(false);
-
-	control = _noiseForm->getControl("CancelNoiseButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _noiseForm->getControl("ConfirmNoiseButton");
-	control->addListener(this, Control::Listener::CLICK);
 	//===============GENERATE_N_SAVE
 	_saveForm = Form::create("res/save.form");
 	_saveForm->setVisible(false);
@@ -259,7 +246,6 @@ void Main::initialize()
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
 	
-#define EXAMPLE
 #ifdef EXAMPLE
 	//Generate heightfields for the terrain pager
 	PagerParameters parameters;
@@ -307,7 +293,6 @@ void Main::initialize()
 
 	_pager->computePositions();
 
-#define CREATE_BLENDMAPS
 #ifdef CREATE_BLENDMAPS
 	_pager->blendMaps =
 		terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
@@ -333,7 +318,6 @@ void Main::initialize()
 
 #endif
 
-#define CREATE_NORMALMAPS
 #ifdef CREATE_NORMALMAPS
 	_pager->normalMaps = 
 		terrainGenerator.createNormalmaps(parameters.scale.y, 
@@ -359,8 +343,7 @@ void Main::initialize()
 
 	_selectionRing = new SelectionRing(_scene);
 
-#define CREATE_TREE
-#ifdef CREATE_TREE
+#ifdef CREATE_TREES
 	Scene * Stree = Scene::load("res/tree.gpb");
 	Node* leaves = Stree->findNode("leaves");
 	Node* tree = Stree->findNode("trunk");
@@ -368,13 +351,8 @@ void Main::initialize()
 	leaves->setScale(Vector3(50, 50, 50));
 	Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
 	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
-#define TRANSPARENCY
-#ifdef TRANSPARENCY
 	Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
 	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
-#else
-	Material* material2 = leaves->getModel()->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-#endif
 
 #ifdef POINTLIGHT_TEST
 	//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
@@ -421,7 +399,7 @@ void Main::initialize()
 	tempt2->getMaterial()->getStateBlock()->setCullFace(true);
 	tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
 
-	Vector3 worldScale;//(1,1,1);
+	Vector3 worldScale;
 	_pager->pagingCheck();
 	_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
@@ -447,7 +425,7 @@ void Main::initialize()
 
 				tree2->setTranslation(Vector3(
 					objsPos[i][j][g]->x,
-					objsPos[i][j][g]->y+30,
+					objsPos[i][j][g]->y,
 					objsPos[i][j][g]->z));
 
 				_scene->addNode(tree2);
@@ -573,11 +551,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		_mainForm->setVisible(false);
 		_generateObjectsForm->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "GenerateNoiseButton") == 0)
-	{
-		_mainForm->setVisible(false);
-		_noiseForm->setVisible(true);
 	}
 	else if (strcmp(control->getId(), "LoadButton") == 0)
 	{
@@ -823,17 +796,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		_mainForm->setVisible(true);
 		_saveForm->setVisible(false);
 	}
-	//===========================
-	else if (strcmp(control->getId(), "CancelNoiseButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_noiseForm->setVisible(false);
-	}
-	else if (strcmp(control->getId(), "ConfirmNoiseButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_noiseForm->setVisible(false);
-	} 
 	//===========================
 	else if (strcmp(control->getId(), "CancelGenerateObjectsButton") == 0)
 	{
@@ -1185,20 +1147,20 @@ void Main::generateNewTerrain()
 	if (radioButton->isSelected()) { noise = 1; }
 
 	//getting Noiser settings
-	control = _noiseForm->getControl("AmplitudeSlider");
+	control = _generateTerrainsForm->getControl("AmplitudeSlider");
 	slider = (Slider *)control;
 	int amplitude = (slider->getValue());
 
-	control = _noiseForm->getControl("GainSlider");
+	control = _generateTerrainsForm->getControl("GainSlider");
 	slider = (Slider *)control;
 	int gain = (slider->getValue());
 
-	control = _noiseForm->getControl("AmplitudeNegativeRadio");
+	control = _generateTerrainsForm->getControl("AmplitudeNegativeRadio");
 	radioButton = (RadioButton *)control;
 	bool bAmp = true;
 	if (radioButton->isSelected()) { bAmp = false; }
 
-	control = _noiseForm->getControl("GainNegativeRadio");
+	control = _generateTerrainsForm->getControl("GainNegativeRadio");
 	radioButton = (RadioButton *)control;
 	bool bGain = true;
 	if (radioButton->isSelected()) { bGain = false; }
@@ -1411,7 +1373,6 @@ void Main::update(float elapsedTime)
 	_generateObjectsForm->update(elapsedTime);
 	_loadForm->update(elapsedTime);
 	_saveForm->update(elapsedTime);
-	_noiseForm->update(elapsedTime);
 }
 
 void Main::render(float elapsedTime)
@@ -1462,10 +1423,6 @@ void Main::render(float elapsedTime)
 	{
 		_saveForm->draw();
 	}
-	if (_noiseForm->isVisible())
-	{
-		_noiseForm->draw();
-	}
 	if (_generateObjectsForm->isVisible())
 	{
 		_generateObjectsForm->draw();
@@ -1491,7 +1448,6 @@ bool Main::drawScene(Node* node)
 			}
 		}
 	}
-
 	return true;
 }
 

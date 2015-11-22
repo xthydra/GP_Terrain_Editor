@@ -167,7 +167,6 @@
     <None Include="README.md" />
     <None Include="res\common\Tree.scene" />
     <None Include="res\generateBlendmaps.form" />
-    <None Include="res\generateNoise.form" />
     <None Include="res\generateObjects.form" />
     <None Include="res\generateTerrains.form" />
     <None Include="res\load.form" />

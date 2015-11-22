@@ -26,7 +26,8 @@
 float returnHeight(int scaleY,
 				   float x,
 				   float z,
-				   gameplay::HeightField * field, size_t _heightFieldSize)
+				   gameplay::HeightField * field,
+				   size_t _heightFieldSize)
 {
 	// Calculate the correct x, z position relative to the heightfield data.
 	float cols = field->getColumnCount();
@@ -119,6 +120,9 @@ std::vector<std::vector<std::vector<Vector3*> > >
 
 						worldy *= worldScale.y;
 
+						float posYOffset = object->getBoundingSphere().radius / 2;
+
+						//TODO : the positioning doesn't seem to work as intented
 						Vector3 truePos(worldx + ((worldmaxx * 2) * j), worldy, worldz + ((worldmaxx * 2) * i));
 						tempObj->setTranslation(truePos);
 

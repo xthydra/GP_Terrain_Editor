@@ -206,12 +206,6 @@ form MainForm
             height = 45
             width = 120
         }
-		button GenerateNoiseButton
-        {
-            text = Noise Generator
-            height = 45
-            width = 120
-        }
 		button LoadButton
         {
             text = Load

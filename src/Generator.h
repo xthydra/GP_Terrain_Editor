@@ -34,7 +34,7 @@ public:
 	*
 	* @param worldscale
 	* @param terrain scaleY
-	* @param Randomness of the item spawn
+	* @param pourcentage of chance that the given object is going to spawn (1-100)
 	* @param Heightfield resolution
 	* @param Heightfields vectors
 	* @param object Node

@@ -43,46 +43,46 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DiamondSquareNoise.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\FilesLoader.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\FilesSaver.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\FirstPersonCamera.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\INoiseAlgorithm.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\LodePNG.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\SelectionRing.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\SimplexNoise.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Terrain.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\TerrainEditor.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Main.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Generator.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Pager.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\AutoBindingResolver.h">
-      <Filter>src\headers</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -118,9 +118,6 @@
       <Filter>res\shaders</Filter>
     </None>
     <None Include="res\generateBlendmaps.form">
-      <Filter>res\UI forms</Filter>
-    </None>
-    <None Include="res\generateNoise.form">
       <Filter>res\UI forms</Filter>
     </None>
     <None Include="res\generateTerrains.form">
@@ -190,7 +187,7 @@
     <Filter Include="res\UI forms">
       <UniqueIdentifier>{1b2cdcec-0110-4726-b1ac-229cef33427d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\headers">
+    <Filter Include="headers">
       <UniqueIdentifier>{42106bf8-5cb5-481e-bc1a-c1bb98885882}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

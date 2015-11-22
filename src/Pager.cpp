@@ -365,10 +365,16 @@ void Pager::render()
 {
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{	
-		/*
-		BoundingSphere bound = BoundingSphere(loadedTerrains[i]->getNode()->getTranslationWorld(), (loadedTerrains[i]->getBoundingBox().max.z * 2)*0.81);
+		BoundingBox bound(
+			(loadedTerrains[i]->getNode()->getTranslationWorld().x - (parameters.boundingBox*0.5)),
+			loadedTerrains[i]->getBoundingBox().min.y,
+			(loadedTerrains[i]->getNode()->getTranslationWorld().z - (parameters.boundingBox*0.5)),
+			(loadedTerrains[i]->getNode()->getTranslationWorld().x + (parameters.boundingBox*0.5)),
+			loadedTerrains[i]->getBoundingBox().max.y,
+			(loadedTerrains[i]->getNode()->getTranslationWorld().z + (parameters.boundingBox*0.5))
+			);
 		if (_Scene->getActiveCamera()->getFrustum().intersects(bound))
-		{*/
+		{
 			Vector3 v = _Scene->getActiveCamera()->getNode()->getParent()->getTranslationWorld();
 			Vector3 v2 = loadedTerrains[i]->getNode()->getTranslationWorld();
 
@@ -428,6 +434,6 @@ void Pager::render()
 					}
 				}
 			}
-		//}
+		}
 	}
 }

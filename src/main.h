@@ -23,6 +23,15 @@
 
 #include "gameplay.h"
 
+#define EXAMPLE
+#ifdef EXAMPLE
+#define CREATE_NORMALMAPS
+#define CREATE_BLENDMAPS
+#define CREATE_TREES
+#define POINTLIGHT_TEST
+#endif
+
+
 #pragma once
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -234,11 +243,6 @@ class Main : public Game, Control::Listener
 	* UI form for modiying blendmaps intensity.
 	**/
 	Form* _generateBlendmapsForm;
-
-	/**
-	* UI form for modiying noise parameters.
-	**/
-	Form* _noiseForm;
 
 	/**
 	* UI form for loading files.
