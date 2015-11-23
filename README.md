@@ -16,7 +16,7 @@
 
 2) it can create trees on the terrains
 
-3) it will page the terrains in a vector, render terrains and trees based on distance
+3) it will page the terrains and objects in vectors then render terrains and trees based on distance and camera frustum
 
 4) it can generate blendmaps and normalmaps based on the heightfield and save it in PNG image format
 

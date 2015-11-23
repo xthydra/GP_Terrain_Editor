@@ -1,11 +1,11 @@
 =====================UPCOMING_FEATURES
 ------------------------PRIOR
-Generate Objects Position Button
-Load/Save Objects Positions Button
-Load/Save Objects Position in a Binary File
+??
 ------------------------------
 
 -------------------------MAJOR
+
+add object material name inside the filenames. for e.g : field-0-0.bin.terrain.material , 0-0-objects.gbp.object.material, 0-0-objects.gbp.objects.scene
 
 Toggling between last editing tool and Nagivate by pressing TAB
 Angular terrain editing tools
