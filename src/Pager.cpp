@@ -206,8 +206,8 @@ void Pager::removeTerrains()
 	std::vector<int> PosX, PosZ;
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{
-		PosX.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1));
-		PosZ.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1));
+		PosX.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.scale.x) / (parameters.heightFieldResolution - 1));
+		PosZ.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.scale.x) / (parameters.heightFieldResolution - 1));
 	}
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{
@@ -222,8 +222,8 @@ void Pager::reloadTerrains()
 	std::vector<int> PosX, PosZ;
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{
-		PosX.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1));
-		PosZ.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1));
+		PosX.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.scale.x) / (parameters.heightFieldResolution - 1));
+		PosZ.push_back((loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.scale.x) / (parameters.heightFieldResolution - 1));
 	}
 	for (size_t i = 0; i < loadedTerrains.size(); i++)
 	{
@@ -245,8 +245,8 @@ void Pager::reload(std::vector<int> pos)
 	for (size_t i = 0; i < pos.size(); i++)
 	{
 		//get the heightfield vector position by dividing by scaling then divide by heightfield resolution
-		int fieldX = (PosX[i] / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
-		int fieldZ = (PosZ[i] / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
+		int fieldX = (PosX[i] / parameters.scale.x) / (parameters.heightFieldResolution - 1);
+		int fieldZ = (PosZ[i] / parameters.scale.x) / (parameters.heightFieldResolution - 1);
 
 		removeTerrain(fieldZ, fieldX);
 		loadTerrain(fieldZ, fieldX);
@@ -389,8 +389,8 @@ void Pager::render()
 
 				if (objects.size() > 0)
 				{
-					int posX = (loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
-					int posZ = (loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.heightFieldResolution) / (parameters.heightFieldResolution - 1);
+					int posX = (loadedTerrains[i]->getNode()->getTranslationWorld().x / parameters.scale.x) / (parameters.heightFieldResolution - 1);
+					int posZ = (loadedTerrains[i]->getNode()->getTranslationWorld().z / parameters.scale.x) / (parameters.heightFieldResolution - 1);
 
 					for (size_t j = 0; j < objects[posZ][posX].size(); j++)
 					{

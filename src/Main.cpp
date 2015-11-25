@@ -273,6 +273,7 @@ void Main::initialize()
 	std::vector<std::vector<gameplay::HeightField*>> heightfields;
 	heightfields = terrainGenerator.buildTerrainTiles(parameters.heightFieldResolution,
 		parameters.tilesResolution,
+		parameters.scale.x,
 		parameters.minHeight,
 		parameters.maxHeight,
 		0,
@@ -296,6 +297,7 @@ void Main::initialize()
 #ifdef CREATE_BLENDMAPS
 	_pager->blendMaps =
 		terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
+														   _pager->parameters.scale.x,
 														   0,
 														   50,
 														   0,
@@ -321,6 +323,7 @@ void Main::initialize()
 #ifdef CREATE_NORMALMAPS
 	_pager->normalMaps = 
 		terrainGenerator.createNormalmaps(parameters.scale.y, 
+										  _pager->parameters.scale.x,
 										  _pager->parameters.heightFieldResolution, 
 										  _pager->heightFieldList);
 
@@ -403,7 +406,7 @@ void Main::initialize()
 	_pager->pagingCheck();
 	_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
-	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, parameters.scale.y, 1, parameters.heightFieldResolution, _pager->heightFieldList, tree);
+	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, parameters.scale.y, _pager->parameters.scale.x, 1, parameters.heightFieldResolution, _pager->heightFieldList, tree);
 	std::vector<std::vector<std::vector<Node*> > > objs;
 	std::vector<Model*> models;
 
@@ -532,7 +535,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 			if (_pager->heightFieldList.size() > 0)
 			{
 				TerrainGenerator terrainGenerator;
-				terrainGenerator.createNormalmaps(_pager->parameters.scale.y, _pager->parameters.heightFieldResolution, _pager->heightFieldList);
+				terrainGenerator.createNormalmaps(_pager->parameters.scale.y, _pager->parameters.scale.x, _pager->parameters.heightFieldResolution, _pager->heightFieldList);
 			}
 		}
 	}
@@ -623,7 +626,8 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		TerrainEditor TerrEdit;
 		TerrEdit.aligningTerrainsVertexes(_pager->heightFieldList,
-			_pager->parameters.heightFieldResolution);
+			_pager->parameters.heightFieldResolution,
+			_pager->parameters.scale.x);
 		_pager->reloadTerrains();
 	}
 	else if (strcmp(control->getId(), "RaiseButton") == 0)
@@ -632,26 +636,14 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
-			int posX = _selectionRing->getPositionX();
-			int posZ = _selectionRing->getPositionZ();
-
-			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
-			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
-
-			int Xarray = worldPos.x / (terrainBox.max.x * 2);
-			posX -= (Xarray)*(terrainBox.max.x * 2);
-
-			int Zarray = worldPos.z / (terrainBox.max.z * 2);
-			posZ -= (Zarray)*(terrainBox.max.z * 2);
+			Vector3 ringPos = _selectionRing->getPosition();
 
 			std::vector<int> heightfields =
-				TerrEdit.raiseTiles(posX,
-				posZ,
-				_selectionRing->getScale(),
+				TerrEdit.raise(
+				BoundingSphere(ringPos, _selectionRing->getScale()),
+				_pager->parameters.scale.x,
+				_pager->parameters.scale.y,
 				_pager->loadedTerrains,
-				nearest,
-				_pager->parameters.heightFieldResolution,
 				_pager->loadedHeightfields);
 
 			_pager->reload(heightfields);
@@ -667,27 +659,15 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
-			int posX = _selectionRing->getPositionX();
-			int posZ = _selectionRing->getPositionZ();
-
-			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
-			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
-
-			int Xarray = worldPos.x / (terrainBox.max.x * 2);
-			posX -= (Xarray)*(terrainBox.max.x * 2);
-
-			int Zarray = worldPos.z / (terrainBox.max.z * 2);
-			posZ -= (Zarray)*(terrainBox.max.z * 2);
+			Vector3 ringPos = _selectionRing->getPosition();
 
 			std::vector<int> heightfields =
-				TerrEdit.lowerTiles(posX,
-				posZ,
-				_selectionRing->getScale(),
-				_pager->loadedTerrains,
-				nearest,
-				_pager->parameters.heightFieldResolution,
-				_pager->loadedHeightfields);
+				TerrEdit.lower(
+					BoundingSphere(ringPos, _selectionRing->getScale()),
+					_pager->parameters.scale.x,
+					_pager->parameters.scale.y,
+					_pager->loadedTerrains,
+					_pager->loadedHeightfields);
 
 			_pager->reload(heightfields);
 		}
@@ -698,61 +678,22 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
 		{
-			int posX = _selectionRing->getPositionX();
-			int posZ = _selectionRing->getPositionZ();
-
-			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
-			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
-
-			int Xarray = worldPos.x / (terrainBox.max.x * 2);
-			posX -= (Xarray)*(terrainBox.max.x * 2);
-
-			int Zarray = worldPos.z / (terrainBox.max.z * 2);
-			posZ -= (Zarray)*(terrainBox.max.z * 2);
+			Vector3 ringPos = _selectionRing->getPosition();
 
 			std::vector<int> heightfields =
-				TerrEdit.flattenTiles(posX,
-				posZ,
-				_selectionRing->getScale(),
-				_pager->loadedTerrains,
-				nearest,
-				_pager->parameters.heightFieldResolution,
-				_pager->loadedHeightfields);
+				TerrEdit.flatten(
+					BoundingSphere(ringPos, _selectionRing->getScale()),
+					_pager->parameters.scale.x,
+					_pager->parameters.scale.y,
+					_pager->loadedTerrains,
+					_pager->loadedHeightfields);
 
 			_pager->reload(heightfields);
 		}
 	}
 	else if (strcmp(control->getId(), "SmoothButton") == 0)
 	{
-		TerrainEditor TerrEdit;
-		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-		if (nearest != -1)
-		{
-			int posX = _selectionRing->getPositionX();
-			int posZ = _selectionRing->getPositionZ();
-
-			Vector3 worldPos = _pager->loadedTerrains[nearest]->getNode()->getTranslationWorld();
-			BoundingBox terrainBox = _pager->loadedTerrains[nearest]->getBoundingBox();
-
-			//reposition the ray hit as if the terrain underneath the ray was at position 0
-			int Xarray = worldPos.x / (terrainBox.max.x * 2);
-			posX -= (Xarray)*(terrainBox.max.x * 2);
-
-			int Zarray = worldPos.z / (terrainBox.max.z * 2);
-			posZ -= (Zarray)*(terrainBox.max.z * 2);
-
-			std::vector<int> heightfields =
-				TerrEdit.smoothTiles(posX,
-				posZ,
-				_selectionRing->getScale(),
-				_pager->loadedTerrains,
-				nearest,
-				_pager->parameters.heightFieldResolution,
-				_pager->loadedHeightfields);
-
-			_pager->reload(heightfields);
-		}
+		//TODO: make a function like flatten
 	}
 	//=============================
 	else if (strcmp(control->getId(), "CancelGenerateTerrainsButton") == 0)
@@ -892,6 +833,7 @@ void Main::generateNewBlendmaps()
 		TerrainGenerator terrainGenerator;
 
 		_pager->blendMaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
+			_pager->parameters.scale.x,
 			Intensity1,
 			Intensity2,
 			Opacity1,
@@ -970,7 +912,7 @@ void Main::generateObjectsPosition()
 				nodes = tempScene->getNext();
 			}
 
-			//TODO : set directional or pointlight depending if the material
+			//TODO : set directional or pointlight depending if the material support it
 			/*
 			Node* lightNode = _scene->findNode("light");
 #ifdef POINTLIGHT_TEST
@@ -994,7 +936,14 @@ void Main::generateObjectsPosition()
 			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
 			TerrainGenerator terrainGenerator;
-			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, _pager->parameters.scale.y, 1, _pager->parameters.heightFieldResolution, _pager->heightFieldList, nodes);
+			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, 
+				_pager->parameters.scale.y, 
+				_pager->parameters.scale.x,
+				1, 
+				_pager->parameters.heightFieldResolution, 
+				_pager->heightFieldList, 
+				nodes);
+
 			std::vector<std::vector<std::vector<Node*> > > objs;
 			std::vector<Model*> models;
 
@@ -1116,11 +1065,11 @@ void Main::generateNewTerrain()
 
 	control = _generateTerrainsForm->getControl("ScaleYSlider");
 	slider = (Slider *)control;
-	float scaley = slider->getValue();
+	float scaleY = slider->getValue();
 
-	/*control = _generateForm->getControl("ScaleXZSlider");
+	control = _generateTerrainsForm->getControl("ScaleXZSlider");
 	slider = (Slider *) control;
-	xz = slider->getValue();*/
+	int scaleXZ = slider->getValue();
 
 	control = _generateTerrainsForm->getControl("SeedTextBox");
 	textBox = (TextBox *)control;
@@ -1165,14 +1114,14 @@ void Main::generateNewTerrain()
 	bool bGain = true;
 	if (radioButton->isSelected()) { bGain = false; }
 
-	//_pager->parameters.maxHeight = 128;
-	//_pager->parameters.maxHeight = _pager->parameters.heightFieldResolution / 2;
+	_pager->parameters.scale = Vector3(scaleXZ, scaleY, scaleXZ);
 
 	//creating heightfields
 	TerrainGenerator terrainGenerator;
 
 	_pager->heightFieldList = terrainGenerator.buildTerrainTiles(_pager->parameters.heightFieldResolution,
 		_pager->parameters.tilesResolution,
+		_pager->parameters.scale.x,
 		_pager->parameters.minHeight,
 		_pager->parameters.maxHeight,
 		noise,
@@ -1181,9 +1130,7 @@ void Main::generateNewTerrain()
 		bGain,
 		bAmp);
 
-	_pager->parameters.scale = Vector3(_pager->parameters.heightFieldResolution, scaley, _pager->parameters.heightFieldResolution);
-
-	_pager->parameters.boundingBox = (_pager->parameters.heightFieldResolution * _pager->parameters.heightFieldResolution) - _pager->parameters.heightFieldResolution;
+	_pager->parameters.boundingBox = ((_pager->parameters.heightFieldResolution-1) * scaleXZ);
 
 	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * .9;
 	_pager->parameters.distanceTerrainUnload = _pager->parameters.boundingBox * 1;
@@ -1191,9 +1138,11 @@ void Main::generateNewTerrain()
 
 	_pager->computePositions();
 
+	//aligning vertexes for aesthetic
 	TerrainEditor terrEdit;
-	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList, _pager->parameters.heightFieldResolution);
+	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList, _pager->parameters.heightFieldResolution, _pager->parameters.scale.x);
 
+	//configuring blend maps generation
 	control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");
 	slider = (Slider *)control;
 	int Intensity1 = slider->getValue();
@@ -1210,7 +1159,9 @@ void Main::generateNewTerrain()
 	slider = (Slider *)control;
 	int Opacity2 = slider->getValue();
 
+	//generating blendmaps
 	_pager->blendMaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
+		_pager->parameters.scale.x,
 		Intensity1,
 		Intensity2,
 		Opacity1,
@@ -1220,6 +1171,7 @@ void Main::generateNewTerrain()
 	_pager->parameters.blendMapDIR = createTMPFolder();
 	_pager->parameters.generatedBlendmaps = false;
 
+	//configuring a thread to save blendmaps
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		if (saverThreads[i].blendmap == true)
@@ -1235,6 +1187,7 @@ void Main::generateNewTerrain()
 	t.blendBool();
 	saverThreads.push_back(t);
 
+	//create a thread to save blendmaps into PNG images format
 	threads.push_back(std::thread(&FilesSaver::saveBlendmaps,
 		saver,
 		_pager->blendMaps,
@@ -1246,6 +1199,7 @@ void Main::generateNewTerrain()
 
 	_pager->normalMaps =
 		terrainGenerator.createNormalmaps(_pager->parameters.scale.y,
+		_pager->parameters.scale.x,
 		_pager->parameters.heightFieldResolution,
 		_pager->heightFieldList);
 

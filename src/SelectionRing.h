@@ -42,14 +42,9 @@ private:
 	float _scale;
 
 	/**
-	* The x coordinate of the selection
+	* The world position of the selection ring
 	**/
-	float _x;
-
-	/**
-	* The z coordinate of the selection
-	**/
-	float _z;
+	Vector3 _position;
 
 	/**
 	* How many renderable nodes to paint around the selection circle.
@@ -69,18 +64,11 @@ public:
 	Node *_node;
 
 	/**
-	* Getter for the x position
+	* Get the world position of the selection ring
 	*
-	* @return float
+	* @return Vector3
 	**/
-	float getPositionX();
-
-	/**
-	* Getter for the y position
-	*
-	* @return float
-	**/
-	float getPositionZ();
+	Vector3 getPosition();
 
 	/**
 	* Getter for the scale of the ring (radius)

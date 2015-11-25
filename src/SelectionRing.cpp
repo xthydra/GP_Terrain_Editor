@@ -56,14 +56,9 @@ SelectionRing::SelectionRing(Scene* scene)
 
 	_scene->addNode(_node);
 }
-float SelectionRing::getPositionX()
+Vector3 SelectionRing::getPosition()
 {
-	return _x;
-}
-
-float SelectionRing::getPositionZ()
-{
-	return _z;
+	return _position;
 }
 
 float SelectionRing::getScale()
@@ -79,8 +74,8 @@ SelectionRing::~SelectionRing()
 
 void SelectionRing::setPosition(float x, float z, Terrain *terrain)
 {
-	_x = x;
-	_z = z;
+	_position.x = x;
+	_position.z = z;
 
 	this->setRingNodeHeights(terrain);
 }
@@ -90,8 +85,8 @@ void SelectionRing::setRingNodeHeights(Terrain *terrain)
 	Node *ring = _node->getFirstChild();
 	int i = 0;
 
-	float tmpx = _x;
-	float tmpz = _z;
+	float tmpx = _position.x;
+	float tmpz = _position.z;
 
 	//reposition the ray hit as if the terrain underneath the ray was at position 0
 	int Xarray = terrain->getNode()->getTranslationWorld().x
@@ -102,19 +97,31 @@ void SelectionRing::setRingNodeHeights(Terrain *terrain)
 		/ (terrain->getBoundingBox().max.z * 2);
 	tmpz -= (Zarray)*(terrain->getBoundingBox().max.z * 2);
 
+	std::vector<float> cumulativeHeight;
+
 	// Adjust the height of each node in the ring so it sits just above the terrain.
-	while (ring) {
+	while (ring) 
+	{
 		float offsetx = sin((float)i / _ringCount * MATH_PIX2) * _scale;
 		float offsetz = cos((float)i / _ringCount * MATH_PIX2) * _scale;
 
 		// adjust the height seperately for each node in the ring.
 		float height = terrain->getHeight(offsetx + tmpx, offsetz + tmpz) + (_scale / 8.0f);
 
+		cumulativeHeight.push_back(height);
+
 		ring->setScale(_scale / 8.0f);
-		ring->setTranslation(offsetx + _x, height, offsetz + _z);
+		ring->setTranslation(offsetx + _position.x, height, offsetz + _position.z);
 		ring = ring->getNextSibling();
 		i++;
 	}
+	//get the cumulative height of all the rings
+	float cumulativeHeight2=0;
+	for (size_t i = 0; i <cumulativeHeight.size(); i++)
+	{
+		cumulativeHeight2 += cumulativeHeight[i];
+	}
+	_position.y = cumulativeHeight2 / _ringCount;
 }
 
 void SelectionRing::setScale(float scale, Terrain *terrain)

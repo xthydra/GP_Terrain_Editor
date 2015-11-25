@@ -24,10 +24,11 @@
 * @return float
 **/
 float returnHeight(int scaleY,
+				   int scaleXZ,
 				   float x,
 				   float z,
 				   gameplay::HeightField * field,
-				   size_t _heightFieldSize)
+				   size_t heightFieldSize)
 {
 	// Calculate the correct x, z position relative to the heightfield data.
 	float cols = field->getColumnCount();
@@ -36,17 +37,17 @@ float returnHeight(int scaleY,
 	GP_ASSERT(cols > 0);
 	GP_ASSERT(rows > 0);
 
-	Matrix _inverseWorldMatrix = Matrix::identity();
+	Matrix inverseWorldMatrix = Matrix::identity();
 
 	// Apply local scale and invert
-	_inverseWorldMatrix.scale(_heightFieldSize);
-	_inverseWorldMatrix.invert();
+	inverseWorldMatrix.scale(scaleXZ);
+	inverseWorldMatrix.invert();
 
 
 	// Since the specified coordinates are in world space, we need to use the 
 	// inverse of our world matrix to transform the world x,z coords back into
 	// local heightfield coordinates for indexing into the height array.
-	Vector3 v = _inverseWorldMatrix * Vector3(x, 0.0f, z);
+	Vector3 v = inverseWorldMatrix * Vector3(x, 0.0f, z);
 	x = v.x + (cols - 1) * 0.5f;
 	z = v.z + (rows - 1) * 0.5f;
 
@@ -80,43 +81,49 @@ void calculateNormal(
 std::vector<std::vector<std::vector<Vector3*> > > 
 	TerrainGenerator::generateObjectsPosition(Vector3 worldScale,
 											  int scaleY,
+											  int scaleXZ,
 											  int random,
-											  size_t _heightFieldSize,
-											  std::vector<std::vector<gameplay::HeightField *> >_heightFields,
+											  size_t heightFieldSize,
+											  std::vector<std::vector<gameplay::HeightField *> >heightFields,
 											  Node * object)
 {
+	//it's the bounding box
+	float worldminx = -(scaleXZ * (heightFieldSize - 1) * 0.5);
+	float worldminz = -(scaleXZ * (heightFieldSize - 1) * 0.5);
+	float worldmaxx = (scaleXZ * (heightFieldSize - 1) * 0.5);
+	float worldmaxz = (scaleXZ * (heightFieldSize - 1) * 0.5);
+
 	Node * tempObj = object->clone();
 	std::vector<std::vector<std::vector<Vector3*> > > objectPos;
 	std::vector<std::vector<std::vector<BoundingSphere> > > bounds;
-	bounds.resize(_heightFields.size());
-	objectPos.resize(_heightFields.size());
-	for (size_t i = 0; i < _heightFields.size(); i++)
+	bounds.resize(heightFields.size());
+	objectPos.resize(heightFields.size());
+
+	for (size_t i = 0; i < heightFields.size(); i++)
 	{
-		bounds[i].resize(_heightFields[i].size());
-		objectPos[i].resize(_heightFields[i].size());
-		for (size_t j = 0; j < _heightFields[i].size(); j++)
+		bounds[i].resize(heightFields[i].size());
+		objectPos[i].resize(heightFields[i].size());
+		for (size_t j = 0; j < heightFields[i].size(); j++)
 		{
 			size_t x, z, k;
-			float worldx, worldz, worldy;
 
-			float worldminx = -(_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-			float worldminz = -(_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-			float worldmaxx = (_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-			float worldmaxz = (_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-
-			for (x = 0; x < _heightFieldSize; x++)
+			for (x = 0; x < heightFieldSize; x++)
 			{
-				for (z = 0; z < _heightFieldSize; z++)
+				for (z = 0; z < heightFieldSize; z++)
 				{
 					int r = rand() % 100;
 					if (random > r)
 					{
-						k = x + (z * _heightFieldSize);
+						float worldx, worldz, worldy;
 
-						worldx = ((float)x / (float)_heightFieldSize) * (worldmaxx - worldminx) + worldminx;
-						worldz = ((float)z / (float)_heightFieldSize) * (worldmaxz - worldminz) + worldminz;
+						k = x + (z * heightFieldSize);
 
-						worldy = returnHeight(scaleY, worldx, worldz, _heightFields[i][j], _heightFieldSize);
+						worldx = ((float)x / (float)heightFieldSize) * (worldmaxx - worldminx) + worldminx;
+						worldz = ((float)z / (float)heightFieldSize) * (worldmaxz - worldminz) + worldminz;
+
+						worldy = heightFields[i][j]->getHeight(x, z);
+
+						worldy *= scaleY;
 
 						worldy *= worldScale.y;
 
@@ -157,19 +164,32 @@ std::vector<std::vector<std::vector<Vector3*> > >
 	return objectPos;
 }
 
+float getHeight(float* heights, int width, int height, int x, int y)
+{
+	if (x < 0)
+		x = 0;
+	else if (x >= width)
+		x = width - 1;
+	if (y < 0)
+		y = 0;
+	else if (y >= height)
+		y = height - 1;
+	return heights[y*width + x];
+}
+
 std::vector<std::vector<std::vector<unsigned char> > >
 	TerrainGenerator::createNormalmaps(int scaleY,
-									   size_t _heightFieldSize,
-									   std::vector<std::vector<gameplay::HeightField *> >_heightFields)
+									   int scaleXZ,
+									   size_t heightFieldSize,
+									   std::vector<std::vector<gameplay::HeightField *> > heightFields)
 {
-	size_t normalMapResolution = _heightFieldSize;
+	size_t normalMapResolution = heightFieldSize;
 
-	float worldminx = -(_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-	float worldminz = -(_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-	float worldmaxx = (_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-	float worldmaxz = (_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-
-	Vector2 scale((_heightFieldSize * (_heightFieldSize - 1) * 0.5) / (normalMapResolution), (_heightFieldSize * (_heightFieldSize - 1) * 0.5) / (normalMapResolution));
+	//TODO: i don't know what that vector2d named scale is used for
+	//Vector2 scale((scaleXZ * (heightFieldSize - 1) * 0.5) / normalMapResolution, (scaleXZ * (heightFieldSize - 1) * 0.5) / normalMapResolution);
+	//Vector2 scale((heightFieldSize * (heightFieldSize - 1) * 0.5) / normalMapResolution, (heightFieldSize * (heightFieldSize - 1) * 0.5) / normalMapResolution);
+	/*Vector2 scale(((scaleXZ * (heightFieldSize - 1)) * 0.5) / (normalMapResolution-1), 
+		((scaleXZ * (heightFieldSize - 1)) * 0.5) / (normalMapResolution - 1));*/
 
 	struct Face
 	{
@@ -179,45 +199,64 @@ std::vector<std::vector<std::vector<unsigned char> > >
 
 	std::vector<std::vector<std::vector<unsigned char> > > normalmaps;
 
-	normalmaps.resize(_heightFields.size());
-	for (size_t i = 0; i < _heightFields.size(); i++)
+	normalmaps.resize(heightFields.size());
+	for (size_t i = 0; i < heightFields.size(); i++)
 	{
-		normalmaps[i].resize(_heightFields[i].size());
-		for (size_t j = 0; j < _heightFields[i].size(); j++)
+		normalmaps[i].resize(heightFields[i].size());
+		for (size_t j = 0; j < heightFields[i].size(); j++)
 		{
-			//std::vector<unsigned char> blend1;
 			size_t x, z, k;
-			float worldx, worldz;
 
-			normalmaps[i][j].resize(normalMapResolution * normalMapResolution * 4);
+			normalmaps[i][j].resize((normalMapResolution * normalMapResolution) * 4);
 
-			Face* faceNormals = new Face[(normalMapResolution)* (normalMapResolution)];
+			Face* faceNormals = new Face[(normalMapResolution-1)* (normalMapResolution-1)];
 
-			for (x = 0; x < normalMapResolution; x++)
+			float * heights = heightFields[i][j]->getArray();
+
+			for (x = 0; x < normalMapResolution-1; x++)
 			{
-				for (z = 0; z < normalMapResolution; z++)
+				for (z = 0; z < normalMapResolution-1; z++)
 				{
-					worldx = ((float)x / (float)normalMapResolution) * (worldmaxx - worldminx) + worldminx;
-					worldz = ((float)z / (float)normalMapResolution) * (worldmaxz - worldminz) + worldminz;
+					/*
+					float topLeftHeight = heightFields[i][j]->getHeight(x, z);
+					float bottomLeftHeight = heightFields[i][j]->getHeight(x, z+1);
+					float bottomRightHeight = heightFields[i][j]->getHeight(x + 1, z + 1);
+					float topRightHeight = heightFields[i][j]->getHeight(x + 1, z);*/
 
-					float topLeftHeight = (returnHeight(scaleY, worldx, worldz, _heightFields[i][j], _heightFieldSize));
-					float bottomLeftHeight = (returnHeight(scaleY, worldx, worldz + _heightFieldSize, _heightFields[i][j], _heightFieldSize));
-					float bottomRightHeight = (returnHeight(scaleY, worldx + _heightFieldSize, worldz + _heightFieldSize, _heightFields[i][j], _heightFieldSize));
-					float topRightHeight = (returnHeight(scaleY, worldx + _heightFieldSize, worldz, _heightFields[i][j], _heightFieldSize));
+					float topLeftHeight = getHeight(heights, normalMapResolution, normalMapResolution, x, z);
+					float bottomLeftHeight = getHeight(heights, normalMapResolution, normalMapResolution, x, z + 1);
+					float bottomRightHeight = getHeight(heights, normalMapResolution, normalMapResolution, x + 1, z + 1);
+					float topRightHeight = getHeight(heights, normalMapResolution, normalMapResolution, x + 1, z);
 
+					
+					// Triangle 1
+					calculateNormal(
+						(float)x, bottomLeftHeight, (float)(z + 1),
+						(float)x, topLeftHeight, (float)z,
+						(float)(x + 1), topRightHeight, (float)z,
+						&faceNormals[z*(normalMapResolution - 1) + x].normal1);
+
+					// Triangle 2
+					calculateNormal(
+						(float)x, bottomLeftHeight, (float)(z + 1),
+						(float)(x + 1), topRightHeight, (float)z,
+						(float)(x + 1), bottomRightHeight, (float)(z + 1),
+						&faceNormals[z*(normalMapResolution - 1) + x].normal2);
+					/*
 					// Triangle 1
 					calculateNormal(
 						(float)x*scale.x, bottomLeftHeight, (float)(z + 1)*scale.y,
 						(float)x*scale.x, topLeftHeight, (float)z*scale.y,
 						(float)(x + 1)*scale.x, topRightHeight, (float)z*scale.y,
-						&faceNormals[z*(normalMapResolution)+x].normal1);
+						&faceNormals[z*(normalMapResolution - 1) + x].normal1);
 
 					// Triangle 2
 					calculateNormal(
 						(float)x*scale.x, bottomLeftHeight, (float)(z + 1)*scale.y,
 						(float)(x + 1)*scale.x, topRightHeight, (float)z*scale.y,
 						(float)(x + 1)*scale.x, bottomRightHeight, (float)(z + 1)*scale.y,
-						&faceNormals[z*(normalMapResolution)+x].normal2);
+						&faceNormals[z*(normalMapResolution - 1) + x].normal2);
+						*/
 				}
 			}
 
@@ -236,14 +275,14 @@ std::vector<std::vector<std::vector<unsigned char> > >
 						if (z > 0)
 						{
 							// Top left
-							normal.add(faceNormals[(z - 1)*(normalMapResolution)+(x - 1)].normal2);
+							normal.add(faceNormals[(z - 1)*(normalMapResolution-1)+(x - 1)].normal2);
 						}
 
-						if (z < (normalMapResolution))
+						if (z < (normalMapResolution - 1))
 						{
 							// Bottom left
-							normal.add(faceNormals[z*(normalMapResolution)+(x - 1)].normal1);
-							normal.add(faceNormals[z*(normalMapResolution)+(x - 1)].normal2);
+							normal.add(faceNormals[z*(normalMapResolution-1)+(x - 1)].normal1);
+							normal.add(faceNormals[z*(normalMapResolution-1)+(x - 1)].normal2);
 						}
 					}
 
@@ -252,14 +291,14 @@ std::vector<std::vector<std::vector<unsigned char> > >
 						if (z > 0)
 						{
 							// Top right
-							normal.add(faceNormals[(z - 1)*(normalMapResolution)+x].normal1);
-							normal.add(faceNormals[(z - 1)*(normalMapResolution)+x].normal2);
+							normal.add(faceNormals[(z - 1)*(normalMapResolution-1)+x].normal1);
+							normal.add(faceNormals[(z - 1)*(normalMapResolution-1)+x].normal2);
 						}
 
-						if (z < (normalMapResolution))
+						if (z < (normalMapResolution-1))
 						{
 							// Bottom right
-							normal.add(faceNormals[z*(normalMapResolution)+x].normal1);
+							normal.add(faceNormals[z*(normalMapResolution-1)+x].normal1);
 						}
 					}
 
@@ -268,7 +307,7 @@ std::vector<std::vector<std::vector<unsigned char> > >
 					// guarantees that all triangles have the same surface area.
 					normal.normalize();
 
-					k = 4 * x + (z * normalMapResolution * 4);
+					k = (4 * x) + ((z * normalMapResolution) * 4);
 
 					normalmaps[i][j][k] = (float)((normal.x + 1.0f) * 0.5f * 255.0f);
 					normalmaps[i][j][k + 1] = (float)((normal.y + 1.0f) * 0.5f * 255.0f);
@@ -280,190 +319,54 @@ std::vector<std::vector<std::vector<unsigned char> > >
 		}
 	}
 	return normalmaps;
-#ifdef OLD_NORMAL
-#ifdef WIN32
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mktemp(tmpdir);
-	_mkdir("res/tmp");
-	_mkdir(tmpdir);
-#else
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mkdtemp(tmpdir);
-#endif
-	size_t normalMapResolution = _heightFieldSize;
-
-	float worldminx = -(_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-	float worldminz = -(_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-	float worldmaxx = (_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-	float worldmaxz = (_heightFieldSize * (_heightFieldSize - 1) * 0.5);
-
-	Vector2 scale((_heightFieldSize * (_heightFieldSize - 1) * 0.5) / (normalMapResolution), (_heightFieldSize * (_heightFieldSize - 1) * 0.5) / (normalMapResolution));
-
-	struct Face
-	{
-		Vector3 normal1;
-		Vector3 normal2;
-	};
-
-	for (size_t i = 0; i < _heightFields.size(); i++)
-	{
-		for (size_t j = 0; j < _heightFields[i].size(); j++)
-		{
-			std::vector<unsigned char> blend1;
-			size_t x, z, k;
-			float worldx, worldz;
-
-			blend1.resize(normalMapResolution * normalMapResolution * 4);
-
-			Face* faceNormals = new Face[(normalMapResolution)* (normalMapResolution)];
-
-			for (x = 0; x < normalMapResolution; x++)
-			{
-				for (z = 0; z < normalMapResolution; z++)
-				{
-					worldx = ((float)x / (float)normalMapResolution) * (worldmaxx - worldminx) + worldminx;
-					worldz = ((float)z / (float)normalMapResolution) * (worldmaxz - worldminz) + worldminz;
-
-					float topLeftHeight = (returnHeight(scaleY, worldx, worldz, _heightFields[i][j], _heightFieldSize));
-					float bottomLeftHeight = (returnHeight(scaleY, worldx, worldz + _heightFieldSize, _heightFields[i][j], _heightFieldSize));
-					float bottomRightHeight = (returnHeight(scaleY, worldx + _heightFieldSize, worldz + _heightFieldSize, _heightFields[i][j], _heightFieldSize));
-					float topRightHeight = (returnHeight(scaleY, worldx + _heightFieldSize, worldz, _heightFields[i][j], _heightFieldSize));
-
-					// Triangle 1
-					calculateNormal(
-						(float)x*scale.x, bottomLeftHeight, (float)(z + 1)*scale.y,
-						(float)x*scale.x, topLeftHeight, (float)z*scale.y,
-						(float)(x + 1)*scale.x, topRightHeight, (float)z*scale.y,
-						&faceNormals[z*(normalMapResolution)+x].normal1);
-
-					// Triangle 2
-					calculateNormal(
-						(float)x*scale.x, bottomLeftHeight, (float)(z + 1)*scale.y,
-						(float)(x + 1)*scale.x, topRightHeight, (float)z*scale.y,
-						(float)(x + 1)*scale.x, bottomRightHeight, (float)(z + 1)*scale.y,
-						&faceNormals[z*(normalMapResolution)+x].normal2);
-				}
-			}
-
-			for (x = 0; x < normalMapResolution; x++)
-			{
-				for (z = 0; z < normalMapResolution; z++)
-				{
-					// Smooth normals by taking an average for each vertex
-					Vector3 normal;
-
-					// Reset normal sum
-					normal.set(0, 0, 0);
-
-					if (x > 0)
-					{
-						if (z > 0)
-						{
-							// Top left
-							normal.add(faceNormals[(z - 1)*(normalMapResolution)+(x - 1)].normal2);
-						}
-
-						if (z < (normalMapResolution))
-						{
-							// Bottom left
-							normal.add(faceNormals[z*(normalMapResolution)+(x - 1)].normal1);
-							normal.add(faceNormals[z*(normalMapResolution)+(x - 1)].normal2);
-						}
-					}
-
-					if (x < (normalMapResolution - 1))
-					{
-						if (z > 0)
-						{
-							// Top right
-							normal.add(faceNormals[(z - 1)*(normalMapResolution)+x].normal1);
-							normal.add(faceNormals[(z - 1)*(normalMapResolution)+x].normal2);
-						}
-
-						if (z < (normalMapResolution))
-						{
-							// Bottom right
-							normal.add(faceNormals[z*(normalMapResolution)+x].normal1);
-						}
-					}
-
-					// We don't have to worry about weighting the normals by
-					// the surface area of the triangles since a heightmap
-					// guarantees that all triangles have the same surface area.
-					normal.normalize();
-
-					k = 4 * x + (z * normalMapResolution * 4);
-
-					blend1[k] = (float)((normal.x + 1.0f) * 0.5f * 255.0f);
-					blend1[k + 1] = (float)((normal.y + 1.0f) * 0.5f * 255.0f);
-					blend1[k + 2] = (float)((normal.z + 1.0f) * 0.5f * 255.0f);
-					blend1[k + 3] = ((float)((normal.x + 1.0f) * 0.5f * 255.0f) + (float)((normal.y + 1.0f) * 0.5f * 255.0f) + (float)((normal.z + 1.0f) * 0.5f * 255.0f)) / 3;
-
-				}
-			}
-
-			//E.G //field-0-0.png
-			std::string fieldName;
-
-			fieldName += tmpdir;
-			fieldName += "/";
-			fieldName += "normalMap-";
-			fieldName += std::to_string(i);
-			fieldName += "-";
-			fieldName += std::to_string(j);
-			fieldName += ".png";
-
-			// Generate the png.
-			lodepng::encode(fieldName.c_str(), blend1, normalMapResolution, normalMapResolution);
-		}
-	}
-#endif
 }
 
 std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 	TerrainGenerator::createTiledTransparentBlendImages(int scaleY,
+														int scaleXZ,
 														float intensity1,
 														float intensity2,
 														float opacity1,
 														float opacity2,
-														size_t _heightFieldSize,
-														std::vector<std::vector<gameplay::HeightField *> >_heightFields)
+														size_t heightFieldSize,
+														std::vector<std::vector<gameplay::HeightField *> > heightFields)
 {
-	size_t _blendResolution = _heightFieldSize;
+	size_t blendResolution = heightFieldSize;
 	std::vector<
 		std::vector<
 			std::vector<
 				std::vector<unsigned char> > > > blendmaps;
 
 	float terrainminheight = 0.0f, terrainmaxheight = 0.0f;
-	float worldminx = -((_heightFieldSize * (_heightFieldSize - 1)) * 0.5);
-	float worldminz = -((_heightFieldSize * (_heightFieldSize - 1)) * 0.5);
-	float worldmaxx = ((_heightFieldSize * (_heightFieldSize - 1)) * 0.5);
-	float worldmaxz = ((_heightFieldSize * (_heightFieldSize - 1)) * 0.5);
+	float worldminx = -((scaleXZ * (heightFieldSize - 1)) * 0.5);
+	float worldminz = -((scaleXZ * (heightFieldSize - 1)) * 0.5);
+	float worldmaxx = ((scaleXZ * (heightFieldSize - 1)) * 0.5);
+	float worldmaxz = ((scaleXZ * (heightFieldSize - 1)) * 0.5);
 
-	blendmaps.resize(_heightFields.size());
-	for (size_t i = 0; i < _heightFields.size(); i++)
+	blendmaps.resize(heightFields.size());
+	for (size_t i = 0; i < heightFields.size(); i++)
 	{
-		blendmaps[i].resize(_heightFields.size());
-		for (size_t j = 0; j < _heightFields[i].size(); j++)
+		blendmaps[i].resize(heightFields.size());
+		for (size_t j = 0; j < heightFields[i].size(); j++)
 		{
 			size_t x, z, k;
 			float worldx, worldz, worldy, intensity;
 
 			blendmaps[i][j].resize(2);
-			blendmaps[i][j][0].resize((_blendResolution * _blendResolution) * 4);
-			blendmaps[i][j][1].resize((_blendResolution * _blendResolution) * 4);
+			blendmaps[i][j][0].resize((blendResolution * blendResolution) * 4);
+			blendmaps[i][j][1].resize((blendResolution * blendResolution) * 4);
 
-			for (x = 0; x < _blendResolution; x++)
+			for (x = 0; x < blendResolution; x++)
 			{
-				for (z = 0; z < _blendResolution; z++)
+				for (z = 0; z < blendResolution; z++)
 				{
-					k = 4 * x + (z * _blendResolution * 4);
+					k = 4 * x + (z * blendResolution * 4);
 
-					worldx = ((float)x / (float)_blendResolution) * (worldmaxx - worldminx) + worldminx;
-					worldz = ((float)z / (float)_blendResolution) * (worldmaxz - worldminz) + worldminz;
+					worldx = ((float)x / (float)blendResolution) * (worldmaxx - worldminx) + worldminx;
+					worldz = ((float)z / (float)blendResolution) * (worldmaxz - worldminz) + worldminz;
 
-					worldy = returnHeight(scaleY, worldx, worldz, _heightFields[i][j], _heightFieldSize);
+					//worldy = returnHeight(scaleY, scaleXZ, worldx, worldz, heightFields[i][j], heightFieldSize);
+					worldy = (heightFields[i][j]->getHeight(x, z) * scaleY);
 
 					// In the first pass we determine the min and max for all the tiles.
 					if (worldy < terrainminheight || (j == 0 && i == 0)) {
@@ -486,10 +389,10 @@ std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 #define DEFAULT
 #ifdef DEFAULT
 					// And work out the value for the purely slope based map.
-					intensity = abs(returnHeight(scaleY, worldx - 100, worldz, _heightFields[i][j], _heightFieldSize) - worldy);
-					intensity += abs(returnHeight(scaleY, worldx + 100, worldz, _heightFields[i][j], _heightFieldSize) - worldy);
-					intensity += abs(returnHeight(scaleY, worldx, worldz - 100, _heightFields[i][j], _heightFieldSize) - worldy);
-					intensity += abs(returnHeight(scaleY, worldx, worldz + 100, _heightFields[i][j], _heightFieldSize) - worldy);
+					intensity = abs(returnHeight(scaleY, scaleXZ, worldx - 100, worldz, heightFields[i][j], heightFieldSize) - worldy);
+					intensity += abs(returnHeight(scaleY, scaleXZ, worldx + 100, worldz, heightFields[i][j], heightFieldSize) - worldy);
+					intensity += abs(returnHeight(scaleY, scaleXZ, worldx, worldz - 100, heightFields[i][j], heightFieldSize) - worldy);
+					intensity += abs(returnHeight(scaleY, scaleXZ, worldx, worldz + 100, heightFields[i][j], heightFieldSize) - worldy);
 
 					intensity /= 400.0f;
 #endif
@@ -521,23 +424,23 @@ std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 			}
 		}
 	}
-	for (size_t i = 0; i < _heightFields.size(); i++)
+	for (size_t i = 0; i < heightFields.size(); i++)
 	{
-		for (size_t j = 0; j < _heightFields[i].size(); j++)
+		for (size_t j = 0; j < heightFields[i].size(); j++)
 		{
 			size_t x, z, k, k1, k2, k3, k4;
 			float worldx, worldz, worldy, intensity;
 
 			// Layer 1 is determined purely by the height.
-			for (x = 0; x < _blendResolution; x++) {
-				for (z = 0; z < _blendResolution; z++) {
-					k = 4 * x + (z * _blendResolution * 4);
+			for (x = 0; x < blendResolution; x++) {
+				for (z = 0; z < blendResolution; z++) {
+					k = 4 * x + (z * blendResolution * 4);
 
 					// Purely height based.
-					worldx = ((float)x / (float)_blendResolution) * (worldmaxx - worldminx) + worldminx;
-					worldz = ((float)z / (float)_blendResolution) * (worldmaxz - worldminz) + worldminz;
+					worldx = ((float)x / (float)blendResolution) * (worldmaxx - worldminx) + worldminx;
+					worldz = ((float)z / (float)blendResolution) * (worldmaxz - worldminz) + worldminz;
 
-					worldy = returnHeight(scaleY, worldx, worldz, _heightFields[i][j], _heightFieldSize);
+					worldy = returnHeight(scaleY, scaleXZ, worldx, worldz, heightFields[i][j], heightFieldSize);
 
 //#define OPACITY2
 #ifdef OPACITY2
@@ -609,10 +512,10 @@ std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 					blendmaps[i][j][0][k + 3] = intensity;
 
 					// Average the slope blends (a bit smoother).
-					k1 = 4 * ((x - 1) % _blendResolution) + (z * _blendResolution * 4);
-					k2 = 4 * ((x + 1) % _blendResolution) + (z * _blendResolution * 4);
-					k3 = 4 * (x)+(((z - 1) % _blendResolution) * _blendResolution * 4);
-					k4 = 4 * (x)+(((z + 1) % _blendResolution) * _blendResolution * 4);
+					k1 = 4 * ((x - 1) % blendResolution) + (z * blendResolution * 4);
+					k2 = 4 * ((x + 1) % blendResolution) + (z * blendResolution * 4);
+					k3 = 4 * (x)+(((z - 1) % blendResolution) * blendResolution * 4);
+					k4 = 4 * (x)+(((z + 1) % blendResolution) * blendResolution * 4);
 					blendmaps[i][j][1][k] = (blendmaps[i][j][1][k] + blendmaps[i][j][1][k1] + blendmaps[i][j][1][k2] + blendmaps[i][j][1][k3] + blendmaps[i][j][1][k4]) / 5.0f;
 					blendmaps[i][j][1][k + 1] = blendmaps[i][j][1][k + 2] = blendmaps[i][j][1][k + 3] = blendmaps[i][j][1][k];
 				}
@@ -625,6 +528,7 @@ std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 std::vector<std::vector<gameplay::HeightField*> > 
 	TerrainGenerator::buildTerrainTiles(size_t heightmapResolution,
 										size_t tilesResolution,
+										int scaleXZ,
 										int minHeight,
 										int maxHeight,
 										int type,
@@ -688,7 +592,7 @@ std::vector<std::vector<gameplay::HeightField*> >
 	delete noise;
 
 	TerrainEditor terrEdit;
-	terrEdit.aligningTerrainsVertexes(heightfields, heightmapResolution);
+	terrEdit.aligningTerrainsVertexes(heightfields, heightmapResolution, scaleXZ);
 
 	return heightfields;
 }

@@ -28,94 +28,80 @@ struct TerrainEditor{
 	*
 	* @param heightfields vectors
 	* @param heightfield size
+	* @param terrain XZ scale(must be squared)
 	*
 	* @return void
 	**/
 	void aligningTerrainsVertexes(std::vector<std::vector<HeightField*> >, 
-								  size_t);
+								  size_t,
+								  int);
 
 	/**
-	* Raise a part of the terrain vertices defined by a radius and a position
+	* Raise a part of the terrains vertices defined by a radius and a position
 	*
-	* @param x x coordinate for the center of the circle.
-	* @param z z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes height to be modified
+	* @param (BoundingSphere)Selection ring BoundingSphere in world space
+	* @param (int)terrain XZ scale(must be squared)
+	* @param (int)terrain Y scale
 	* @param vector containing loaded terrains
-	* @param an int pointing out to the terrain that got it by the ray
-	* @param heightfield size
 	* @param heightfields vector stack
 	*
 	* @return returning int pointing out to modified terrains from the vector stack
 	**/
-	std::vector<int> raiseTiles(float,
-								float,
-								float,
+	std::vector<int> raise(BoundingSphere,
+								int,
+								int,
 								std::vector<gameplay::Terrain*>,
-								int,
-								int,
 								std::vector<HeightField*>);
 
 	/**
-	* Lower a part of the terrain vertices defined by a radius and a position
+	* Lower a part of the terrains vertices defined by a radius and a position
 	*
-	* @param x coordinate for the center of the circle.
-	* @param z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes height to be modified
+	* @param (BoundingSphere)Selection ring BoundingSphere in world space
+	* @param (int)terrain XZ scale(must be squared)
+	* @param (int)terrain Y scale
 	* @param vector containing loaded terrains
-	* @param an int pointing out to the terrain that got it by the ray
-	* @param heightfield size
 	* @param heightfields vector stack
 	*
 	* @return returning int pointing out to modified terrains from the vector stack
 	**/
-	std::vector<int> lowerTiles(float,
-								float,
-								float,
-								std::vector<gameplay::Terrain*>,
-								int,
-								int,
-								std::vector<HeightField*>);
+	std::vector<int> lower(BoundingSphere,
+		int,
+		int,
+		std::vector<gameplay::Terrain*>,
+		std::vector<HeightField*>);
 
 	/**
-	* Smooth a part of the terrain vertices defined by a radius and a position
+	* it doesn't have a function right now
 	*
-	* @param x coordinate for the center of the circle.
-	* @param z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes height to be modified
+	* @param (BoundingSphere)Selection ring BoundingSphere in world space
+	* @param (int)terrain XZ scale(must be squared)
+	* @param (int)terrain Y scale
 	* @param vector containing loaded terrains
-	* @param an int pointing out to the terrain that got it by the ray
-	* @param heightfield size
 	* @param heightfields vector stack
 	*
 	* @return returning int pointing out to modified terrains from the vector stack
 	**/
-	std::vector<int> smoothTiles(float,
-								 float,
-								 float, 
-								 std::vector<gameplay::Terrain*>, 
-								 int, 
-								 int, 
-								 std::vector<HeightField*>);
+	std::vector<int> smooth(BoundingSphere,
+		int,
+		int,
+		std::vector<gameplay::Terrain*>,
+		std::vector<HeightField*>);
 
 	/**
 	* Flatten a circle of the terrain. The contents of the circle are all brought to the average - and some smoothing is done to the edges.
 	*
-	* @param x x coordinate for the center of the circle.
-	* @param z z coordinate for the center of the circle.
-	* @param scale, the radius that's defining the vertexes height to be modified
+	* @param (BoundingSphere)Selection ring BoundingSphere in world space
+	* @param (int)terrain XZ scale(must be squared)
+	* @param (int)terrain Y scale
 	* @param vector containing loaded terrains
-	* @param an int pointing out to the terrain that got it by the ray
-	* @param heightfield size
 	* @param heightfields vector stack
 	*
 	* @return returning int pointing out to modified terrains from the vector stack
 	**/
-	std::vector<int> flattenTiles(float,
-								  float,
-								  float,
-								  std::vector<gameplay::Terrain*>,
-								  int,
-								  int,
-								  std::vector<HeightField*>);
+	std::vector<int> flatten(BoundingSphere,
+		int,
+		int,
+		std::vector<gameplay::Terrain*>,
+		std::vector<HeightField*>);
 
 };

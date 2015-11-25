@@ -32,17 +32,19 @@ public:
 	/**
 	* Generate positions from a given object on every heightfields
 	*
-	* @param worldscale
-	* @param terrain scaleY
-	* @param pourcentage of chance that the given object is going to spawn (1-100)
-	* @param Heightfield resolution
-	* @param Heightfields vectors
-	* @param object Node
+	* @param (Vector3) Worldscale(terrain world matrix scale)
+	* @param (int) Terrains scaleXZ
+	* @param (int) Terrains scaleY
+	* @param (int) pourcentage of chance that the given object is going to spawn (1-100)
+	* @param (size_t) Heightfield resolution
+	* @param (std::vector<std::vector<gameplay::Heightfield*> >) Heightfields vectors
+	* @param (gameplay::Node*) object Node
 	*
 	* @return std::vector<Vector3> objectsPosition
 	**/
 	std::vector<std::vector<std::vector<Vector3*> > >
 		generateObjectsPosition(Vector3,
+								int,
 								int,
 								int,
 								size_t,
@@ -53,6 +55,7 @@ public:
 	* Generate normalmaps as a PNG extension
 	*
 	* @param terrain scaleY
+	* @param terrain scaleXZ
 	* @param Heightfield resolution
 	* @param Heightfields vectors
 	*
@@ -60,6 +63,7 @@ public:
 	**/
 	std::vector<std::vector<std::vector<unsigned char> > >
 		createNormalmaps(int,
+						 int,
 						 size_t,
 						 std::vector<std::vector<gameplay::HeightField *> >);
 
@@ -68,6 +72,7 @@ public:
 	*
 	* @param Heightfield resolution
 	* @param Tiles resolution
+	* @param Scale XZ
 	* @param minimum height of the terrains
 	* @param maximum height of the terrains
 	* @param Noise generator type
@@ -85,13 +90,15 @@ public:
 																	   int,
 																	   int,
 																	   int,
+																	   int,
 																	   bool,
 																	   bool);
 
 	/**
 	* Generate new blend images for the texture mapping. The blend maps are based on characteristics of the terrain like height or slope.
 	*
-	* @param Terrain ScaleY
+	* @param Terrains ScaleY
+	* @param Terrains ScaleXZ
 	* @param Intensity of Blendmap_1
 	* @param Intensity of Blendmap_2
 	* @param Opacity of Blendmap_1
@@ -103,6 +110,7 @@ public:
 	**/
 	std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 		TerrainGenerator::createTiledTransparentBlendImages(int,
+															int,
 															float,
 															float,
 															float,
