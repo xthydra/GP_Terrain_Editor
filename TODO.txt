@@ -12,6 +12,8 @@ add blendmap settings in the UI form that generate terrains
 
 add object material name inside the filenames. for e.g : field-0-0.bin.terrain.material , 0-0-objects.gbp.object.material, 0-0-objects.gbp.objects.scene
 
+when in editing mode mouse wheel should be able to increase or decrease selection ring size
+
 Toggling between last editing tool and Nagivate by pressing TAB
 Angular terrain editing tools
 Generate terrains,normalmaps,blendmaps and object positions on a GPU(if possible)
@@ -20,7 +22,6 @@ terrain LOD sliding bar in the navigation UI form
 implement vertical paging
 optimize long distance traveling by virtually moving terrains and objects around as a virtual camera
 optimize the virtual camera by preventing buffer overflow on the position value
-have gameplay highlight a button when clicked on to define currently active editing tool to make editing tools less clicky and more volatile
 Texture Painting tool
 	
 if i had maximum height from when creating terrains then i wouldn't need to generate all blendmaps all at once before starting the lazy thread that's encoding blendmaps into PNGs...that would be an optimization

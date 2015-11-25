@@ -177,12 +177,23 @@ class Main : public Game, Control::Listener
 	/**
 	* Used by the ui to switch input states.
 	**/
-	enum INPUT_MODE { NAVIGATION, TERRAIN, PAINT, GENERATOR };
+	enum INPUT_MODE
+	{
+		NAVIGATION, 
+		EDITING,
+		PAINT,
+		GENERATOR
+	};
 
 	/**
 	* Movement speed of the camera.
 	**/
 	float MOVE_SPEED;
+
+	/**
+	* Used in editing tools to toggle tools
+	**/
+	Vector4 activeButton, normalButton;
 
 	/**
 	* The Pager will take care of loading,unloading and rendering various objects based on distance

@@ -231,7 +231,6 @@ std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleX
 		}
 	}
 	return fields;
-#endif
 }
 
 std::vector<int> TerrainEditor::lower(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)

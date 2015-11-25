@@ -172,9 +172,6 @@ void Main::initialize()
 	//=============TERRAIN_EDITOR
 	control = _mainForm->getControl("AlignButton");
 	control->addListener(this, Control::Listener::CLICK);
-	Button * button = (Button *)control;
-	Vector4 normalColor = button->getSkinColor(Control::State::NORMAL);
-	Vector4 activeColor = button->getSkinColor(Control::State::ACTIVE);
 
 	control = _mainForm->getControl("RaiseButton");
 	control->addListener(this, Control::Listener::CLICK);
@@ -245,6 +242,17 @@ void Main::initialize()
 	control = _saveForm->getControl("CancelSaveButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
+
+	/*
+	Button * button = (Button *)control;
+	Vector4 normalColor = button->getSkinColor(Control::State::NORMAL);
+	Vector4 activeColor = button->getSkinColor(Control::State::ACTIVE);*/
+
+
+	control = _mainForm->getControl("RaiseButton");
+	Button * button = (Button *)control;
+	normalButton = button->getSkinColor(gameplay::Control::State::NORMAL);
+	activeButton = button->getSkinColor(gameplay::Control::State::ACTIVE);
 	
 #ifdef EXAMPLE
 	//Generate heightfields for the terrain pager
@@ -482,7 +490,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "EditorButton") == 0)
 	{
-		_inputMode = TERRAIN;
+		_inputMode = EDITING;
 		_mainForm->getControl("NavigateToolBar")->setVisible(false);
 		//_mainForm->getControl("PaintToolbar")->setVisible(false);
 		_mainForm->getControl("GeneratorToolBar")->setVisible(false);
@@ -632,6 +640,22 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "RaiseButton") == 0)
 	{
+		control = _mainForm->getControl("RaiseButton");
+		Button * button = (Button *)control;
+		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
+		control = _mainForm->getControl("LowerButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = _mainForm->getControl("FlattenButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		/*
 		TerrainEditor TerrEdit;
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
@@ -648,13 +672,27 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 
 			_pager->reload(heightfields);
 		}
+		*/
 	}
 	else if (strcmp(control->getId(), "LowerButton") == 0)
 	{
-		//control = _mainForm->getControl("LowerButton");
-		//Button * button = (Button *)control;
+		control = _mainForm->getControl("LowerButton");
+		Button * button = (Button *)control;
+		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
+		control = _mainForm->getControl("RaiseButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = _mainForm->getControl("FlattenButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
 		//button->setSkinColor(button->getSkinColor(Control::State::ACTIVE), gameplay::Control::State::NORMAL);
-
+		/*
 		TerrainEditor TerrEdit;
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
@@ -671,9 +709,26 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 
 			_pager->reload(heightfields);
 		}
+		*/
 	}
 	else if (strcmp(control->getId(), "FlattenButton") == 0)
 	{
+		control = _mainForm->getControl("FlattenButton");
+		Button * button = (Button *)control;
+		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
+		control = _mainForm->getControl("LowerButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = _mainForm->getControl("RaiseButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		/*
 		TerrainEditor TerrEdit;
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
@@ -690,6 +745,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 
 			_pager->reload(heightfields);
 		}
+		*/
 	}
 	else if (strcmp(control->getId(), "SmoothButton") == 0)
 	{
@@ -1319,6 +1375,73 @@ void Main::update(float elapsedTime)
 		_pager->parameters.generatedObjects = true;
 	}
 
+	if (_inputMode == INPUT_MODE::EDITING && RMB == true)
+	{
+		Control * control = _mainForm->getControl("LowerButton");
+		Button * button = (Button *)control;
+		if (button->getSkinColor(Control::State::NORMAL) == activeButton)
+		{
+			TerrainEditor TerrEdit;
+			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+			if (nearest != -1)
+			{
+				Vector3 ringPos = _selectionRing->getPosition();
+
+				std::vector<int> heightfields =
+					TerrEdit.lower(
+						BoundingSphere(ringPos, _selectionRing->getScale()),
+						_pager->parameters.scale.x,
+						_pager->parameters.scale.y,
+						_pager->loadedTerrains,
+						_pager->loadedHeightfields);
+
+				_pager->reload(heightfields);
+			}
+		}
+		control = _mainForm->getControl("FlattenButton");
+		button = (Button *)control;
+		if (button->getSkinColor(Control::State::NORMAL) == activeButton)
+		{
+			TerrainEditor TerrEdit;
+			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+			if (nearest != -1)
+			{
+				Vector3 ringPos = _selectionRing->getPosition();
+
+				std::vector<int> heightfields =
+					TerrEdit.flatten(
+						BoundingSphere(ringPos, _selectionRing->getScale()),
+						_pager->parameters.scale.x,
+						_pager->parameters.scale.y,
+						_pager->loadedTerrains,
+						_pager->loadedHeightfields);
+
+				_pager->reload(heightfields);
+			}
+		}
+		control = _mainForm->getControl("RaiseButton");
+		button = (Button *)control;
+		if (button->getSkinColor(Control::State::NORMAL) == activeButton)
+		{
+			TerrainEditor TerrEdit;
+			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+			if (nearest != -1)
+			{
+				Vector3 ringPos = _selectionRing->getPosition();
+
+				std::vector<int> heightfields =
+					TerrEdit.raise(
+						BoundingSphere(ringPos, _selectionRing->getScale()),
+						_pager->parameters.scale.x,
+						_pager->parameters.scale.y,
+						_pager->loadedTerrains,
+						_pager->loadedHeightfields);
+
+				_pager->reload(heightfields);
+			}
+		}
+	}
+
 	moveCamera(elapsedTime);
 
 	_mainForm->update(elapsedTime);
@@ -1442,6 +1565,36 @@ void Main::keyEvent(Keyboard::KeyEvent evt, int key)
 				_moveRight = true;
 			}
 			break;
+		case Keyboard::KEY_TAB:
+			if (_inputMode == NAVIGATION)
+			{
+				Control * control=_mainForm->getControl("NavigateButton");
+				RadioButton * button = (RadioButton*)control;
+				button->setSelected(false);
+				control = _mainForm->getControl("EditorButton");
+				button = (RadioButton*)control;
+				button->setSelected(true);
+
+				_inputMode = EDITING;
+				_mainForm->getControl("NavigateToolBar")->setVisible(false);
+				_mainForm->getControl("GeneratorToolBar")->setVisible(false);
+				_mainForm->getControl("TerrainEditorbar")->setVisible(true);
+			}
+			else if (_inputMode == EDITING)
+			{
+				Control * control = _mainForm->getControl("NavigateButton");
+				RadioButton * button = (RadioButton*)control;
+				button->setSelected(true);
+				control = _mainForm->getControl("EditorButton");
+				button = (RadioButton*)control;
+				button->setSelected(false);
+
+				_inputMode = NAVIGATION;
+				_mainForm->getControl("TerrainEditorbar")->setVisible(false);
+				_mainForm->getControl("GeneratorToolBar")->setVisible(false);
+				_mainForm->getControl("NavigateToolBar")->setVisible(true);
+			}
+			break;
 		}
 
 	}
@@ -1485,7 +1638,17 @@ bool Main::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 {
 	if (evt == Mouse::MOUSE_PRESS_RIGHT_BUTTON)
 	{
-		if (_inputMode == INPUT_MODE::TERRAIN)
+		RMB = true;
+		return true;
+	}
+	if (evt == Mouse::MOUSE_RELEASE_RIGHT_BUTTON)
+	{
+		RMB = false;
+		return true;
+	}
+	if (evt == Mouse::MOUSE_PRESS_LEFT_BUTTON)
+	{
+		if (_inputMode == INPUT_MODE::EDITING)
 		{
 			Ray pickRay;
 			_scene->getActiveCamera()->pickRay(gameplay::Rectangle(0, 0, getWidth(), getHeight()), x, y, &pickRay);
@@ -1504,16 +1667,12 @@ bool Main::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 				}
 			}
 		}
-		return true;
-	}
-	if (evt == Mouse::MOUSE_PRESS_LEFT_BUTTON)
-	{
-		RMB = true;
+		LMB = true;
 		return true;
 	}
 	if (evt == Mouse::MOUSE_RELEASE_LEFT_BUTTON)
 	{
-		RMB = false;
+		LMB = false;
 		return true;
 	}
 	if (evt == Mouse::MOUSE_MOVE)
