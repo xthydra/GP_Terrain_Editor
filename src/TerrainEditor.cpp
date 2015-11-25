@@ -154,75 +154,9 @@ void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField
 
 std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)
 {
-//#define OLD
-#ifdef OLD
 	std::vector<int> fields;
 
 	size_t heightFieldSize = heightFields[0]->getRowCount();
-
-	//TODO: i obviously messed this up, it's flattening 1 heightfield at a time and it isnt making a cumulative height of every heightfields
-
-	for (size_t i = 0; i < terrains.size(); i++)
-	{
-		Vector3 terrainPos = terrains[i]->getNode()->getTranslationWorld();
-		//terrain bounding box world space
-		int boxSize = terrains[i]->getBoundingBox().max.x;
-		BoundingBox worldBox(
-			(terrainPos.z - boxSize),
-			terrains[i]->getBoundingBox().min.y,
-			(terrainPos.z - boxSize),
-			(terrainPos.x + boxSize),
-			terrains[i]->getBoundingBox().max.y,
-			(terrainPos.z + boxSize)
-			);
-
-		if (worldBox.intersects(selectionRing))
-		{
-			fields.push_back(i);
-			float * heights = heightFields[i]->getArray();
-
-			std::vector<int> vertexesModified;
-			std::vector<int> vertexesModifiedHeight;
-
-			for (size_t x = 0; x < heightFieldSize; x++)
-			{
-				for (size_t z = 0; z < heightFieldSize; z++)
-				{
-					//vertexe position in world space
-					Vector3 vertexePosition((x*scaleXZ) + (terrainPos.x - boxSize),
-						heights[x + (z * heightFieldSize)] * scaleY,
-						(z*scaleXZ) + (terrainPos.z - boxSize));
-
-
-					//check against distance and apply strength
-					float dist = vertexePosition.distance(selectionRing.center);
-
-					if (dist <= selectionRing.radius)
-					{
-						vertexesModified.push_back(x + (z * heightFieldSize));
-						vertexesModifiedHeight.push_back(heights[x + (z * heightFieldSize)]);
-					}
-				}
-			}
-			float cumulativeHeight=0;
-			for (size_t f = 0; f < vertexesModified.size(); f++)
-			{
-				cumulativeHeight += vertexesModifiedHeight[f];
-			}
-			cumulativeHeight /= vertexesModified.size();
-			for (size_t f = 0; f< vertexesModified.size(); f++)
-			{
-				heights[vertexesModified[f]] += (cumulativeHeight - heights[vertexesModified[f]]) * 0.03;
-			}
-		}
-	}
-	return fields;
-#else
-	std::vector<int> fields;
-
-	size_t heightFieldSize = heightFields[0]->getRowCount();
-
-	//TODO: i obviously messed this up, it's flattening 1 heightfield at a time and it isnt making a cumulative height of every heightfields
 
 	std::vector<std::vector<int>> vertexesModified;
 	std::vector<std::vector<int>> vertexesModifiedHeight;
@@ -233,7 +167,7 @@ std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleX
 	for (size_t i = 0; i < terrains.size(); i++)
 	{
 		Vector3 terrainPos = terrains[i]->getNode()->getTranslationWorld();
-		//terrain bounding box world space
+		//terrain bounding box in world space
 		int boxSize = terrains[i]->getBoundingBox().max.x;
 		BoundingBox worldBox(
 			(terrainPos.z - boxSize),
@@ -290,7 +224,7 @@ std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleX
 		if (vertexesModified[i].size() > 0)
 		{
 			float * heights = heightFields[i]->getArray();
-			for (size_t f = 0; f < vertexesModified.size(); f++)
+			for (size_t f = 0; f < vertexesModified[i].size(); f++)
 			{
 				heights[vertexesModified[i][f]] += (cumulativeHeight - heights[vertexesModified[i][f]]) * 0.03;
 			}
