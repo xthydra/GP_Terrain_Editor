@@ -18,46 +18,10 @@
 
 #include "main.h"
 
-/**
-* return the heightfield height based on gameplay implementation
-*
-* @return float
-**/
-float returnHeight(float x, float z, gameplay::HeightField * field, int heightFieldResolution, int scaleXZ)
+void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField*> > heightFields)
 {
-	// Calculate the correct x, z position relative to the heightfield data.
-	float cols = field->getColumnCount();
-	float rows = field->getRowCount();
+	size_t heightFieldSize = heightFields[0][0]->getColumnCount();
 
-	GP_ASSERT(cols > 0);
-	GP_ASSERT(rows > 0);
-
-	Matrix _inverseWorldMatrix = Matrix::identity();
-
-	// Apply local scale and invert
-	_inverseWorldMatrix.scale(scaleXZ);
-	_inverseWorldMatrix.invert();
-
-	// Since the specified coordinates are in world space, we need to use the 
-	// inverse of our world matrix to transform the world x,z coords back into
-	// local heightfield coordinates for indexing into the height array.
-	Vector3 v = _inverseWorldMatrix * Vector3(x, 0.0f, z);
-	x = v.x + (cols - 1) * 0.5f;
-	z = v.z + (rows - 1) * 0.5f;
-
-	// Get the unscaled height value from the HeightField
-	float height = field->getHeight(x, z);
-
-	// Apply world scale
-	//TODO : i don't think i'm suposed to multiply it by the terrain scale
-	height *= scaleXZ;
-
-	return height;
-
-}
-
-void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField*> > heightFields, size_t heightFieldSize, int scaleXZ)
-{
 	for (size_t i = 0; i < heightFields.size(); i++)
 	{
 		for (size_t j = 0; j < heightFields.size(); j++)
@@ -66,86 +30,48 @@ void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField
 			{
 				if (j != (heightFields.size() - 1))
 				{
-					int x, z, x2, z2, x3, z3, x4, z4;
-					//primary height 1
-					x =  ((heightFieldSize*(heightFieldSize)) / 2);
-					z = -(((heightFieldSize)* heightFieldSize) / 2);
-					z += ((heightFieldSize)* g);
+					float pHeight = (heightFields[i][j]->getHeight(heightFieldSize, g));//primary height 1
+					float pHeight2 = (heightFields[i][j + 1]->getHeight(0, g));//primary height 2
 
-					//primary height 2
-					x2 = -((heightFieldSize*(heightFieldSize)) / 2);
-					z2 = -(((heightFieldSize)* heightFieldSize) / 2);
-					z2 += ((heightFieldSize)* g);
+					float sHeight = (heightFields[i][j]->getHeight(heightFieldSize-1, g));//secondary height 1
+					float sHeight2 = (heightFields[i][j + 1]->getHeight(1, g));//secondary height 2
 
-					//secondary height 1
-					x3 = ((heightFieldSize*(heightFieldSize)) / 2);
-					z3 = -(((heightFieldSize)* heightFieldSize) / 2);
-					z3 += ((heightFieldSize)* g) + heightFieldSize;
+					//TODO : something is wrong with the way it's smoothing out
+					//as if it favor a greater number when smoothing and when you press align again it keep moving
+					//the terrains extremity shouldnt move at the second time align is called if the terrains didnt change at least not as much as it's doing right now
 
-					//primary height 2
-					x4 = -((heightFieldSize*(heightFieldSize)) / 2);
-					z4 = -(((heightFieldSize)* heightFieldSize) / 2);
-					z4 += ((heightFieldSize)* g) + heightFieldSize;
-
-					//get heights
-					float pHeight = (returnHeight(x, z, heightFields[i][j], heightFieldSize, scaleXZ) / heightFieldSize);//primary height 1
-					float pHeight2 = (returnHeight(x2, z2, heightFields[i][j + 1], heightFieldSize, scaleXZ) / heightFieldSize);//primary height 2
-
-					float sHeight = (returnHeight(x3, z3, heightFields[i][j], heightFieldSize, scaleXZ) / heightFieldSize);//secondary height 1
-					float sHeight2 = (returnHeight(x4, z4, heightFields[i][j + 1], heightFieldSize, scaleXZ) / heightFieldSize);//secondary height 2
-
-					//remove decimals
-					float tmpHeight = ((pHeight + pHeight2) + (sHeight + sHeight2)) / 4;
-					double tmpHeight2 = std::floor(tmpHeight * 100000000.) / 100000000.;
-
+					//float tmpHeight = ((pHeight + pHeight2) + (sHeight + sHeight2)) / 4;
+					//float tmpHeight = ((((pHeight + pHeight2) * 0.5) + ((sHeight + sHeight2) * 0.5)) * 0.5);
+					float tmpHeight = ((((pHeight + pHeight2) * 0.5) + sHeight + sHeight2) / 3);
+					//double tmpHeight2 = std::floor(tmpHeight * 100000000.) / 100000000.;
 
 					//aligning vertexes
 					float * fieldArray = heightFields[i][j]->getArray();
-					fieldArray[(heightFieldSize * g) + heightFieldSize - 1] = tmpHeight2;//X
+					int wtf = (heightFieldSize * g) + heightFieldSize - 1;
+					fieldArray[(heightFieldSize * g) + heightFieldSize - 1] = tmpHeight;//X
 
 					fieldArray = heightFields[i][j + 1]->getArray();
-					fieldArray[heightFieldSize * g] = tmpHeight2;//-X
+					fieldArray[heightFieldSize * g] = tmpHeight;//-X
 				}
 				if (i != (heightFields.size() - 1))
 				{
-					int x, z, x2, z2, x3, z3, x4, z4;
-					//primary height 1
-					x = -((heightFieldSize*(heightFieldSize)) / 2);
-					x += ((heightFieldSize)* g);
-					z = ((heightFieldSize*(heightFieldSize)) / 2);
+					float pHeight = heightFields[i][j]->getHeight(g, heightFieldSize);//primary height 1
+					float pHeight2 = heightFields[i + 1][j]->getHeight(g, 0);//primary height 2
 
-					//primary height 2
-					x2 = -((heightFieldSize*(heightFieldSize)) / 2);
-					x2 += ((heightFieldSize)* g);
-					z2 = -((heightFieldSize*(heightFieldSize)) / 2);
+					float sHeight = heightFields[i][j]->getHeight(g, heightFieldSize-1);//secondary height 1
+					float sHeight2 = heightFields[i + 1][j]->getHeight(g, 1);//secondary height 2
 
-					//secondary height 1
-					x3 = -((heightFieldSize*(heightFieldSize)) / 2);
-					x3 += ((heightFieldSize)* g) + heightFieldSize;
-					z3 = ((heightFieldSize*(heightFieldSize)) / 2);
-
-					//primary height 2
-					x4 = -((heightFieldSize*(heightFieldSize)) / 2);
-					x4 += ((heightFieldSize)* g) + heightFieldSize;
-					z4 = -((heightFieldSize*(heightFieldSize)) / 2);
-
-					//get heights
-					float pHeight = (returnHeight(x, z, heightFields[i][j], heightFieldSize, scaleXZ) / heightFieldSize);//primary height 1
-					float pHeight2 = (returnHeight(x2, z2, heightFields[i + 1][j], heightFieldSize, scaleXZ) / heightFieldSize);//primary height 2
-
-					float sHeight = (returnHeight(x3, z3, heightFields[i][j], heightFieldSize, scaleXZ) / heightFieldSize);//secondary height 1
-					float sHeight2 = (returnHeight(x4, z4, heightFields[i + 1][j], heightFieldSize, scaleXZ) / heightFieldSize);//secondary height 2
-
-					//remove decimals for precision
-					float tmpHeight = ((pHeight + pHeight2) + (sHeight + sHeight2)) / 4;
-					double tmpHeight2 = std::floor(tmpHeight * 100000000.) / 100000000.;
+					//float tmpHeight = ((pHeight + pHeight2) + (sHeight + sHeight2)) / 4;
+					//float tmpHeight = ((((pHeight + pHeight2) * 0.5) + ((sHeight + sHeight2) * 0.5)) * 0.5);
+					float tmpHeight = ((((pHeight + pHeight2) * 0.5) + sHeight + sHeight2) / 3);
+					//double tmpHeight2 = std::floor(tmpHeight * 100000000.) / 100000000.;
 
 					//aligning vertexes
 					float * fieldArray = heightFields[i][j]->getArray();
-					fieldArray[(heightFieldSize * (heightFieldSize - 1)) + g] = tmpHeight2; //Z
+					fieldArray[(heightFieldSize * (heightFieldSize - 1)) + g] = tmpHeight; //Z
 
 					fieldArray = heightFields[i + 1][j]->getArray();
-					fieldArray[g] = tmpHeight2;//-Z
+					fieldArray[g] = tmpHeight;//-Z
 				}
 			}
 		}
@@ -330,16 +256,21 @@ std::vector<int> TerrainEditor::raise(BoundingSphere selectionRing, int scaleXZ,
 
 std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)
 {
-	//TODO : obviously isnt meant to be used right now
-	/*
+	//TODO : isnt meant to be used right now
 	std::vector<int> fields;
 
 	size_t heightFieldSize = heightFields[0]->getRowCount();
 
+	std::vector<std::vector<int>> vertexesModified;
+	std::vector<std::vector<int>> vertexesModifiedHeight;
+
+	vertexesModified.resize(heightFields.size());
+	vertexesModifiedHeight.resize(heightFields.size());
+
 	for (size_t i = 0; i < terrains.size(); i++)
 	{
 		Vector3 terrainPos = terrains[i]->getNode()->getTranslationWorld();
-		//terrain bounding box world space
+		//terrain bounding box in world space
 		int boxSize = terrains[i]->getBoundingBox().max.x;
 		BoundingBox worldBox(
 			(terrainPos.z - boxSize),
@@ -354,6 +285,7 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 		{
 			fields.push_back(i);
 			float * heights = heightFields[i]->getArray();
+
 			for (size_t x = 0; x < heightFieldSize; x++)
 			{
 				for (size_t z = 0; z < heightFieldSize; z++)
@@ -363,19 +295,61 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 						heights[x + (z * heightFieldSize)] * scaleY,
 						(z*scaleXZ) + (terrainPos.z - boxSize));
 
-
 					//check against distance and apply strength
 					float dist = vertexePosition.distance(selectionRing.center);
 
 					if (dist <= selectionRing.radius)
 					{
-						heights[x + (z * heightFieldSize)] += (selectionRing.radius - dist) * 0.01;
+						//x+1
+						Vector3 vertexePosition2(((x + 1)*scaleXZ) + (terrainPos.x - boxSize),
+							heights[(x + 1) + (z * heightFieldSize)] * scaleY,
+							(z*scaleXZ) + (terrainPos.z - boxSize));
+						if (vertexePosition2.x < (terrainPos.x - (boxSize * 2)))
+						{
+
+						}
+
+						//z+1
+						Vector3 vertexePosition3((x*scaleXZ) + (terrainPos.x - boxSize),
+							heights[x + ((z + 1) * heightFieldSize)] * scaleY,
+							((z + 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						//x-1
+						Vector3 vertexePosition4(((x - 1)*scaleXZ) + (terrainPos.x - boxSize),
+							heights[(x - 1) + (z * heightFieldSize)] * scaleY,
+							(z*scaleXZ) + (terrainPos.z - boxSize));
+
+						//z-1
+						Vector3 vertexePosition5((x*scaleXZ) + (terrainPos.x - boxSize),
+							heights[x + ((z - 1) * heightFieldSize)] * scaleY,
+							((z - 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						//z+1,x+1
+						Vector3 vertexePosition6(((x + 1)*scaleXZ) + (terrainPos.x - boxSize),
+							heights[(x + 1) + ((z + 1) * heightFieldSize)] * scaleY,
+							((z + 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						//z-1,x-1
+						Vector3 vertexePosition7(((x - 1)*scaleXZ) + (terrainPos.x - boxSize),
+							heights[(x - 1) + ((z - 1) * heightFieldSize)] * scaleY,
+							((z - 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						//z-1,x+1
+						Vector3 vertexePosition8(((x + 1)*scaleXZ) + (terrainPos.x - boxSize),
+							heights[(x + 1) + ((z - 1) * heightFieldSize)] * scaleY,
+							((z - 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						//z+1,x-1
+						Vector3 vertexePosition9(((x - 1)*scaleXZ) + (terrainPos.x - boxSize),
+							heights[(x - 1) + ((z + 1) * heightFieldSize)] * scaleY,
+							((z + 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						vertexesModified[i].push_back(x + (z * heightFieldSize));
+						vertexesModifiedHeight[i].push_back(heights[x + (z * heightFieldSize)]);
 					}
 				}
 			}
 		}
 	}
 	return fields;
-	*/
-	return std::vector<int>();
 }

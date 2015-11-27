@@ -528,7 +528,6 @@ std::vector<std::vector<std::vector<std::vector<unsigned char> > > >
 std::vector<std::vector<gameplay::HeightField*> > 
 	TerrainGenerator::buildTerrainTiles(size_t heightmapResolution,
 										size_t tilesResolution,
-										int scaleXZ,
 										int minHeight,
 										int maxHeight,
 										int type,
@@ -592,7 +591,7 @@ std::vector<std::vector<gameplay::HeightField*> >
 	delete noise;
 
 	TerrainEditor terrEdit;
-	terrEdit.aligningTerrainsVertexes(heightfields, heightmapResolution, scaleXZ);
+	terrEdit.aligningTerrainsVertexes(heightfields);
 
 	return heightfields;
 }

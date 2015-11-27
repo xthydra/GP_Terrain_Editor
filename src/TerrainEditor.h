@@ -27,14 +27,10 @@ struct TerrainEditor{
 	* Aligning each vertexes at given terrains extremity next to each others height to make it look smoother
 	*
 	* @param heightfields vectors
-	* @param heightfield size
-	* @param terrain XZ scale(must be squared)
 	*
 	* @return void
 	**/
-	void aligningTerrainsVertexes(std::vector<std::vector<HeightField*> >, 
-								  size_t,
-								  int);
+	void aligningTerrainsVertexes(std::vector<std::vector<HeightField*> >);
 
 	/**
 	* Raise a part of the terrains vertices defined by a radius and a position

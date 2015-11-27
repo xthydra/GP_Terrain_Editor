@@ -134,7 +134,13 @@ void Main::initialize()
 	Slider *slider = (Slider *)_mainForm->getControl("MoveSlider");
 	slider->addListener(this, Control::Listener::VALUE_CHANGED);
 
-	slider = (Slider *)_mainForm->getControl("RenderSlider");
+	slider = (Slider *)_mainForm->getControl("LODSlider");
+	slider->addListener(this, Control::Listener::VALUE_CHANGED);
+
+	slider = (Slider *)_mainForm->getControl("TerrainsRenderSlider");
+	slider->addListener(this, Control::Listener::VALUE_CHANGED);
+
+	slider = (Slider *)_mainForm->getControl("ObjectsRenderSlider");
 	slider->addListener(this, Control::Listener::VALUE_CHANGED);
 
 	slider = (Slider *)_mainForm->getControl("LoadSlider");
@@ -281,7 +287,6 @@ void Main::initialize()
 	std::vector<std::vector<gameplay::HeightField*>> heightfields;
 	heightfields = terrainGenerator.buildTerrainTiles(parameters.heightFieldResolution,
 		parameters.tilesResolution,
-		parameters.scale.x,
 		parameters.minHeight,
 		parameters.maxHeight,
 		0,
@@ -577,6 +582,11 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		Slider * slider = (Slider *)control;
 		MOVE_SPEED = slider->getValue();
 	}
+	else if (strcmp(control->getId(), "LODSlider") == 0)
+	{
+		Slider * slider = (Slider *)control;
+		_pager->parameters.lodQuality = slider->getValue();
+	}
 	else if (strcmp(control->getId(), "LoadSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
@@ -594,11 +604,15 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 			_pager->parameters.distanceTerrainLoad = (slider->getValue() * _pager->parameters.boundingBox);
 		}
 	}
-	else if (strcmp(control->getId(), "RenderSlider") == 0)
+	else if (strcmp(control->getId(), "ObjectsRenderSlider") == 0)
+	{
+		Slider * slider = (Slider *)control;
+		_pager->parameters.distanceMaxModelRender = ((slider->getValue() * _pager->parameters.boundingBox) * 0.2);
+	}
+	else if (strcmp(control->getId(), "TerrainsRenderSlider") == 0)
 	{
 		Slider * slider = (Slider *)control;
 		_pager->parameters.distanceTerrainMaxRender = (slider->getValue() * _pager->parameters.boundingBox);
-		_pager->parameters.distanceMaxModelRender = ((slider->getValue() * _pager->parameters.boundingBox) * 0.3);
 	}
 	else if (strcmp(control->getId(), "UnloadSlider") == 0)
 	{
@@ -633,9 +647,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	else if (strcmp(control->getId(), "AlignButton") == 0)
 	{
 		TerrainEditor TerrEdit;
-		TerrEdit.aligningTerrainsVertexes(_pager->heightFieldList,
-			_pager->parameters.heightFieldResolution,
-			_pager->parameters.scale.x);
+		TerrEdit.aligningTerrainsVertexes(_pager->heightFieldList);
 		_pager->reloadTerrains();
 	}
 	else if (strcmp(control->getId(), "RaiseButton") == 0)
@@ -655,24 +667,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		{
 			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
 		}
-		/*
-		TerrainEditor TerrEdit;
-		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-		if (nearest != -1)
-		{
-			Vector3 ringPos = _selectionRing->getPosition();
-
-			std::vector<int> heightfields =
-				TerrEdit.raise(
-				BoundingSphere(ringPos, _selectionRing->getScale()),
-				_pager->parameters.scale.x,
-				_pager->parameters.scale.y,
-				_pager->loadedTerrains,
-				_pager->loadedHeightfields);
-
-			_pager->reload(heightfields);
-		}
-		*/
 	}
 	else if (strcmp(control->getId(), "LowerButton") == 0)
 	{
@@ -691,25 +685,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		{
 			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
 		}
-		//button->setSkinColor(button->getSkinColor(Control::State::ACTIVE), gameplay::Control::State::NORMAL);
-		/*
-		TerrainEditor TerrEdit;
-		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-		if (nearest != -1)
-		{
-			Vector3 ringPos = _selectionRing->getPosition();
-
-			std::vector<int> heightfields =
-				TerrEdit.lower(
-					BoundingSphere(ringPos, _selectionRing->getScale()),
-					_pager->parameters.scale.x,
-					_pager->parameters.scale.y,
-					_pager->loadedTerrains,
-					_pager->loadedHeightfields);
-
-			_pager->reload(heightfields);
-		}
-		*/
 	}
 	else if (strcmp(control->getId(), "FlattenButton") == 0)
 	{
@@ -728,7 +703,9 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		{
 			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
 		}
-		/*
+	}
+	else if (strcmp(control->getId(), "SmoothButton") == 0)
+	{
 		TerrainEditor TerrEdit;
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
@@ -736,7 +713,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 			Vector3 ringPos = _selectionRing->getPosition();
 
 			std::vector<int> heightfields =
-				TerrEdit.flatten(
+				TerrEdit.smooth(
 					BoundingSphere(ringPos, _selectionRing->getScale()),
 					_pager->parameters.scale.x,
 					_pager->parameters.scale.y,
@@ -745,11 +722,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 
 			_pager->reload(heightfields);
 		}
-		*/
-	}
-	else if (strcmp(control->getId(), "SmoothButton") == 0)
-	{
-		//TODO: make a function like flatten
 	}
 	//=============================
 	else if (strcmp(control->getId(), "CancelGenerateTerrainsButton") == 0)
@@ -1177,7 +1149,6 @@ void Main::generateNewTerrain()
 
 	_pager->heightFieldList = terrainGenerator.buildTerrainTiles(_pager->parameters.heightFieldResolution,
 		_pager->parameters.tilesResolution,
-		_pager->parameters.scale.x,
 		_pager->parameters.minHeight,
 		_pager->parameters.maxHeight,
 		noise,
@@ -1196,7 +1167,7 @@ void Main::generateNewTerrain()
 
 	//aligning vertexes for aesthetic
 	TerrainEditor terrEdit;
-	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList, _pager->parameters.heightFieldResolution, _pager->parameters.scale.x);
+	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList);
 
 	//configuring blend maps generation
 	control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");

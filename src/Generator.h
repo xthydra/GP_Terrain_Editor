@@ -72,7 +72,6 @@ public:
 	*
 	* @param Heightfield resolution
 	* @param Tiles resolution
-	* @param Scale XZ
 	* @param minimum height of the terrains
 	* @param maximum height of the terrains
 	* @param Noise generator type
@@ -85,7 +84,6 @@ public:
 	**/
 	std::vector<std::vector<gameplay::HeightField*> > buildTerrainTiles(size_t,
 																	   size_t,
-																	   int,
 																	   int,
 																	   int,
 																	   int,
