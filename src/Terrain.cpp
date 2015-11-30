@@ -49,7 +49,7 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 			patchSize,
 			LODQuality,
 			skirtSize,
-			0,
+			NULL,
 			terrainMaterial);
 	}
 	

@@ -88,90 +88,97 @@ void Pager::loadTerrain(int z, int x)
 
 	if (heightFieldList.size() > 0)
 	{
-			if (parameters.generatedBlendmaps == false)
+		std::string blendName1, blendName2, normalName;
+		if (parameters.generatedBlendmaps == false)
+		{
+			if (blendMaps.size() > 0)
 			{
-				if (blendMaps.size() > 0)
-				{
-					FilesSaver saver;
-					saver.saveBlendmap(blendMaps[z][x][0],
-						blendMaps[z][x][1],
-						parameters.blendMapDIR,
-						z,
-						x,
-						parameters.heightFieldResolution);
-				}
+				FilesSaver saver;
+				saver.saveBlendmap(blendMaps[z][x][0],
+					blendMaps[z][x][1],
+					parameters.blendMapDIR,
+					z,
+					x,
+					parameters.heightFieldResolution);
 			}
-			if (parameters.generatedNormalmaps == false)
-			{
-				if (normalMaps.size() > 0)
-				{
-					FilesSaver saver;
-					saver.saveNormalmap(normalMaps[z][x],
-						parameters.normalMapDIR,
-						z,
-						x,
-						parameters.heightFieldResolution);
-				}
-			}
-			//find the blendmap and normal map filename
-			std::string blendName1, blendName2, normalName;
-			blendName1 += parameters.blendMapDIR;
-
-			blendName1 += "blend-";
-			blendName1 += std::to_string(z);
-			blendName1 += "-";
-			blendName1 += std::to_string(x);
-			blendName1 += "_";
-
-			blendName2 += blendName1;
-
-			blendName1 += std::to_string(1);
-			blendName1 += ".png";
-
-			blendName2 += std::to_string(2);
-			blendName2 += ".png";
-
+		}
+		if (parameters.generatedNormalmaps == false)
+		{
 			if (normalMaps.size() > 0)
 			{
-				normalName += parameters.normalMapDIR;
-
-				normalName += "normalMap-";
-				normalName += std::to_string(z);
-				normalName += "-";
-				normalName += std::to_string(x);
-				normalName += ".png";
+				FilesSaver saver;
+				saver.saveNormalmap(normalMaps[z][x],
+					parameters.normalMapDIR,
+					z,
+					x,
+					parameters.heightFieldResolution);
 			}
+			normalName += parameters.normalMapDIR;
 
-			//I copy the heightfield before sending to create a terrain
-			int resolution = parameters.heightFieldResolution;
+			normalName += "normalMap-";
+			normalName += std::to_string(z);
+			normalName += "-";
+			normalName += std::to_string(x);
+			normalName += ".png";
+		}
+		//find the blendmap and normal map filename
+		blendName1 += parameters.blendMapDIR;
 
-			gameplay::HeightField* field = HeightField::create(resolution, resolution);
+		blendName1 += "blend-";
+		blendName1 += std::to_string(z);
+		blendName1 += "-";
+		blendName1 += std::to_string(x);
+		blendName1 += "_";
 
-			for (size_t i = 0; i < resolution; i++)
+		blendName2 += blendName1;
+
+		blendName1 += std::to_string(1);
+		blendName1 += ".png";
+
+		blendName2 += std::to_string(2);
+		blendName2 += ".png";
+
+		if (parameters.generatedNormalmaps == true)
+		{
+			normalName += parameters.normalMapDIR;
+
+			normalName += "normalMap-";
+			normalName += std::to_string(z);
+			normalName += "-";
+			normalName += std::to_string(x);
+			normalName += ".png";
+		}
+
+		//I copy the heightfield before sending to create a terrain
+		int resolution = parameters.heightFieldResolution;
+
+		gameplay::HeightField* field = HeightField::create(resolution, resolution);
+
+		for (size_t i = 0; i < resolution; i++)
+		{
+			for (size_t j = 0; j < resolution; j++)
 			{
-				for (size_t j = 0; j < resolution; j++)
-				{
-					size_t vertexe = (j*resolution) + i;
-					float * vertex = field->getArray();
-					vertex[vertexe] = heightFieldList[z][x]->getHeight(i, j);
-				}
+				size_t vertexe = (j*resolution) + i;
+				float * vertex = field->getArray();
+				vertex[vertexe] = heightFieldList[z][x]->getHeight(i, j);
 			}
+		}
 	
-			//create the terrain
-			Terr = new CTerrain(field,
-				parameters.lodQuality,
-				parameters.textureScale,
-				parameters.skirtSize,
-				parameters.patchSize,
-				parameters.scale,
-				gameplay::Vector3(zoneList[z][x]->getPosition().x,
+		//create the terrain
+		Terr = new CTerrain(field,
+			parameters.lodQuality,
+			parameters.textureScale,
+			parameters.skirtSize,
+			parameters.patchSize,
+			parameters.scale,
+			gameplay::Vector3(zoneList[z][x]->getPosition().x,
 				0,
 				zoneList[z][x]->getPosition().z),
-				normalName,
-				blendName1.c_str(),
-				blendName2.c_str(),
-				parameters.terrainMaterialPath.c_str(),
-				this->_Scene);
+			normalName,
+			blendName1.c_str(),
+			blendName2.c_str(),
+			parameters.terrainMaterialPath.c_str(),
+			this->_Scene);
 	}
 
 	//terrain pager values to check against

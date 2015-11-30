@@ -162,7 +162,6 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\GamePlay\samples\character\res\common\sample.scene" />
     <None Include="game.config" />
     <None Include="LICENSE.md" />
     <None Include="README.md" />
@@ -172,7 +171,6 @@
     <None Include="res\generateTerrains.form" />
     <None Include="res\load.form" />
     <None Include="res\main.form" />
-    <None Include="res\materials\terrain.material" />
     <None Include="res\materials\terrainDirectionallight.material" />
     <None Include="res\materials\terrainPointlight.material" />
     <None Include="res\materials\tree.material" />

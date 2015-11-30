@@ -111,9 +111,6 @@
     <None Include="res\shaders\lighting.vert">
       <Filter>res\shaders</Filter>
     </None>
-    <None Include="res\materials\terrain.material">
-      <Filter>res</Filter>
-    </None>
     <None Include="res\shaders\terrain.vert">
       <Filter>res\shaders</Filter>
     </None>
@@ -168,9 +165,6 @@
       <Filter>res</Filter>
     </None>
     <None Include="res\materials\terrainPointlight.material">
-      <Filter>res</Filter>
-    </None>
-    <None Include="..\GamePlay\samples\character\res\common\sample.scene">
       <Filter>res</Filter>
     </None>
   </ItemGroup>

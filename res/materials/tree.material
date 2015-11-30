@@ -1,4 +1,4 @@
-material texturedDirectLight
+material trunk
 {
     technique
     {
@@ -6,18 +6,19 @@ material texturedDirectLight
         {
             vertexShader = res/shaders/textured.vert
             fragmentShader = res/shaders/textured.frag
-			defines = DIRECTIONAL_LIGHT_COUNT 1;
+			defines = DIRECTIONAL_LIGHT_COUNT 1
 
-            u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
-			u_worldViewMatrix = WORLD_VIEW_MATRIX
+			u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
 			u_inverseTransposeWorldViewMatrix = INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX
-			u_ambientColor = SCENE_AMBIENT_COLOR
+            u_worldViewMatrix = WORLD_VIEW_MATRIX
+            u_ambientColor = SCENE_AMBIENT_COLOR
             
             sampler u_diffuseTexture
             {
+				path = res/bark.png
                 mipmap = true
-                wrapS = CLAMP
-                wrapT = CLAMP
+                wrapS = REPEAT
+                wrapT = REPEAT
                 minFilter = LINEAR_MIPMAP_LINEAR
                 magFilter = LINEAR
             }
@@ -31,7 +32,7 @@ material texturedDirectLight
     }
 }
 
-material texturedTransparent
+material leaves
 {
     technique
     {
@@ -41,13 +42,14 @@ material texturedTransparent
             fragmentShader = res/shaders/textured.frag
             defines = DIRECTIONAL_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1
 
-            u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
-			u_worldViewMatrix = WORLD_VIEW_MATRIX
+			u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
 			u_inverseTransposeWorldViewMatrix = INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX
-			u_ambientColor = SCENE_AMBIENT_COLOR
+            u_worldViewMatrix = WORLD_VIEW_MATRIX
+            u_ambientColor = SCENE_AMBIENT_COLOR
             
             sampler u_diffuseTexture
             {
+				path = res/leave.png
                 mipmap = true
                 wrapS = CLAMP
                 wrapT = CLAMP
@@ -63,42 +65,6 @@ material texturedTransparent
                 blendSrc = SRC_ALPHA
                 blendDst = ONE_MINUS_SRC_ALPHA
             }
-        }
-    }
-}
-
-material leaves : texturedTransparent
-{
-    technique
-    {
-        pass
-        {
-            defines = DIRECTIONAL_LIGHT_COUNT 1
-            u_matrixPalette = MATRIX_PALETTE
-            u_modulateAlpha = 1.0
-
-            sampler u_diffuseTexture
-            {
-                path = res/leave.png
-            }
-        }
-    }
-}
-
-material trunk : texturedDirectLight
-{
-    technique
-    {
-        pass
-        {
-            defines = DIRECTIONAL_LIGHT_COUNT 1
-            u_matrixPalette = MATRIX_PALETTE
-            u_modulateAlpha = 1.0
-
-            sampler u_diffuseTexture
-            {
-                path = res/bark.png
-            }	
         }
     }
 }

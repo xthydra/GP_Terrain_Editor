@@ -4,9 +4,11 @@ scene
 	node leaves
 	{
 		material = res/materials/tree.material#leaves
+		scale = 500,500,500
 	}
 	node trunk
 	{
 		material = res/materials/tree.material#trunk
+		scale = 500,500,500
 	}
 }

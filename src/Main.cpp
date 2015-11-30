@@ -276,7 +276,11 @@ void Main::initialize()
 	parameters.maxHeight = 128;
 	parameters.skirtSize = 16;
 	parameters.patchSize = 32;
-	parameters.terrainMaterialPath = "res/materials/terrain.material";
+#ifdef POINTLIGHT_TEST
+	parameters.terrainMaterialPath = "res/materials/terrainPointlight.material";
+#else
+	parameters.terrainMaterialPath = "res/materials/terrainDirectionallight.material";
+#endif
 
 	parameters.scale = Vector3(parameters.heightFieldResolution, ((parameters.heightFieldResolution*parameters.tilesResolution)*0.10), parameters.heightFieldResolution);
 
@@ -365,11 +369,12 @@ void Main::initialize()
 	tree->setScale(Vector3(50, 50, 50));
 	leaves->setScale(Vector3(50, 50, 50));
 	Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
-	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
 	Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
-	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
 
 #ifdef POINTLIGHT_TEST
+	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
+	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
+
 	//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
 	tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
 	tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
@@ -379,10 +384,11 @@ void Main::initialize()
 	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
 	tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
 #else
-	tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
+	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
+	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
+
 	tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
 	tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
 	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
 	tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
 #endif
@@ -400,9 +406,9 @@ void Main::initialize()
 #else
 	// Bind the light's color and direction to the material.
 	tempt->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-	tempt->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
+	tempt->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorView);
 	tempt2->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-	tempt2->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
+	tempt2->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorView);
 #endif
 	// Load the texture from file.
 	Texture::Sampler* sampler = tempt->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/bark.png", true);
@@ -986,7 +992,7 @@ void Main::generateObjectsPosition()
 				{
 					for (size_t g = 0; g < objsPos[i][j].size(); g++)
 					{
-						Node * tree2 = nodes->clone();
+						Node * tree2 = node->clone();
 
 						tree2->setTranslation(Vector3(
 							objsPos[i][j][g]->x,
@@ -1001,6 +1007,7 @@ void Main::generateObjectsPosition()
 			}
 			_pager->objects = objs;
 			_pager->objectsPosition = objsPos;
+			//TODO: got to change that filename push
 			_pager->objectsFilename.push_back("tree.gpb");
 
 			FilesSaver saver;
@@ -1015,7 +1022,7 @@ void Main::generateObjectsPosition()
 			t3.objectBool();
 			saverThreads.push_back(t3);
 
-			Node * childs = nodes->getFirstChild();
+			Node * childs = node->getFirstChild();
 
 			while(childs)
 			{
@@ -1023,8 +1030,9 @@ void Main::generateObjectsPosition()
 				{
 					childs->getDrawable()->draw();
 				}
+				childs=node->getNextSibling();
 			}
-			_pager->parameters.distanceMaxModelRender = nodes->getBoundingSphere().radius * 5;
+			_pager->parameters.distanceMaxModelRender = node->getBoundingSphere().radius * 5;
 		}
 	}
 }
