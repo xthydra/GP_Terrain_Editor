@@ -38,16 +38,16 @@ void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField
 
 					//TODO : something is wrong with the way it's smoothing out
 					//as if it favor a greater number when smoothing and when you press align again it keep moving
-					//the terrains extremity shouldnt move at the second time align is called if the terrains didnt change at least not as much as it's doing right now
+					//the terrains extremities shouldnt move at the second time align is called if the terrains didnt change at least not as much as it's doing right now
 
 					//float tmpHeight = ((pHeight + pHeight2) + (sHeight + sHeight2)) / 4;
 					//float tmpHeight = ((((pHeight + pHeight2) * 0.5) + ((sHeight + sHeight2) * 0.5)) * 0.5);
-					float tmpHeight = ((((pHeight + pHeight2) * 0.5) + sHeight + sHeight2) / 3);
+					//float tmpHeight = ((((pHeight + pHeight2) * 0.5) + sHeight + sHeight2) / 3);
+					float tmpHeight = ((sHeight + sHeight2)* 0.5);
 					//double tmpHeight2 = std::floor(tmpHeight * 100000000.) / 100000000.;
 
 					//aligning vertexes
 					float * fieldArray = heightFields[i][j]->getArray();
-					int wtf = (heightFieldSize * g) + heightFieldSize - 1;
 					fieldArray[(heightFieldSize * g) + heightFieldSize - 1] = tmpHeight;//X
 
 					fieldArray = heightFields[i][j + 1]->getArray();
@@ -63,7 +63,8 @@ void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField
 
 					//float tmpHeight = ((pHeight + pHeight2) + (sHeight + sHeight2)) / 4;
 					//float tmpHeight = ((((pHeight + pHeight2) * 0.5) + ((sHeight + sHeight2) * 0.5)) * 0.5);
-					float tmpHeight = ((((pHeight + pHeight2) * 0.5) + sHeight + sHeight2) / 3);
+					//float tmpHeight = ((((pHeight + pHeight2) * 0.5) + sHeight + sHeight2) / 3);
+					float tmpHeight = ((sHeight + sHeight2)* 0.5);
 					//double tmpHeight2 = std::floor(tmpHeight * 100000000.) / 100000000.;
 
 					//aligning vertexes
@@ -286,6 +287,7 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 			fields.push_back(i);
 			float * heights = heightFields[i]->getArray();
 
+			bool beyondX=false, belowX=false, beyondZ=false, belowZ=false;
 			for (size_t x = 0; x < heightFieldSize; x++)
 			{
 				for (size_t z = 0; z < heightFieldSize; z++)
@@ -304,9 +306,9 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 						Vector3 vertexePosition2(((x + 1)*scaleXZ) + (terrainPos.x - boxSize),
 							heights[(x + 1) + (z * heightFieldSize)] * scaleY,
 							(z*scaleXZ) + (terrainPos.z - boxSize));
-						if (vertexePosition2.x < (terrainPos.x - (boxSize * 2)))
+						if (vertexePosition2.x > (terrainPos.x + boxSize))
 						{
-
+							beyondX = true;
 						}
 
 						//z+1
@@ -314,40 +316,107 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 							heights[x + ((z + 1) * heightFieldSize)] * scaleY,
 							((z + 1)*scaleXZ) + (terrainPos.z - boxSize));
 
+						if (vertexePosition3.z > (terrainPos.z + boxSize))
+						{
+							beyondZ = true;
+						}
+
 						//x-1
 						Vector3 vertexePosition4(((x - 1)*scaleXZ) + (terrainPos.x - boxSize),
 							heights[(x - 1) + (z * heightFieldSize)] * scaleY,
 							(z*scaleXZ) + (terrainPos.z - boxSize));
+
+						if (vertexePosition4.x < (terrainPos.x - boxSize))
+						{
+							belowX = true;
+						}
 
 						//z-1
 						Vector3 vertexePosition5((x*scaleXZ) + (terrainPos.x - boxSize),
 							heights[x + ((z - 1) * heightFieldSize)] * scaleY,
 							((z - 1)*scaleXZ) + (terrainPos.z - boxSize));
 
+						if (vertexePosition2.z < (terrainPos.z - boxSize))
+						{
+							belowZ = true;
+						}
+
 						//z+1,x+1
 						Vector3 vertexePosition6(((x + 1)*scaleXZ) + (terrainPos.x - boxSize),
 							heights[(x + 1) + ((z + 1) * heightFieldSize)] * scaleY,
 							((z + 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						if (vertexePosition3.z > (terrainPos.z + boxSize))
+						{
+							beyondZ = true;
+						}
+						else if (vertexePosition2.x > (terrainPos.x + boxSize))
+						{
+							beyondX = true;
+						}
 
 						//z-1,x-1
 						Vector3 vertexePosition7(((x - 1)*scaleXZ) + (terrainPos.x - boxSize),
 							heights[(x - 1) + ((z - 1) * heightFieldSize)] * scaleY,
 							((z - 1)*scaleXZ) + (terrainPos.z - boxSize));
 
+						if (vertexePosition3.z < (terrainPos.z - boxSize))
+						{
+							belowZ = true;
+						}
+						else if (vertexePosition2.x < (terrainPos.x - boxSize))
+						{
+							belowX = true;
+						}
+
 						//z-1,x+1
 						Vector3 vertexePosition8(((x + 1)*scaleXZ) + (terrainPos.x - boxSize),
 							heights[(x + 1) + ((z - 1) * heightFieldSize)] * scaleY,
 							((z - 1)*scaleXZ) + (terrainPos.z - boxSize));
+
+						if (vertexePosition3.z < (terrainPos.z - boxSize))
+						{
+							belowZ = true;
+						}
+						else if (vertexePosition2.x > (terrainPos.x + boxSize))
+						{
+							beyondX = true;
+						}
 
 						//z+1,x-1
 						Vector3 vertexePosition9(((x - 1)*scaleXZ) + (terrainPos.x - boxSize),
 							heights[(x - 1) + ((z + 1) * heightFieldSize)] * scaleY,
 							((z + 1)*scaleXZ) + (terrainPos.z - boxSize));
 
+						if (vertexePosition3.z > (terrainPos.z + boxSize))
+						{
+							beyondZ = true;
+						}
+						else if (vertexePosition2.x < (terrainPos.x - boxSize))
+						{
+							belowX = true;
+						}
+
 						vertexesModified[i].push_back(x + (z * heightFieldSize));
 						vertexesModifiedHeight[i].push_back(heights[x + (z * heightFieldSize)]);
 					}
 				}
+			}
+			if (belowX)
+			{
+				printf("below X pos");
+			}
+			else if (beyondX)
+			{
+				printf("beyond X pos");
+			}
+			else if (belowZ)
+			{
+				printf("below X pos");
+			}
+			else if (beyondZ)
+			{
+				printf("beyond Z pos");
 			}
 		}
 	}

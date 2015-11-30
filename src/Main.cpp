@@ -115,7 +115,7 @@ void Main::initialize()
 #endif*/
 	//creating and setting up the UI
 	
-	_mainForm = Form::create("res/main.form");
+	_mainForm = Form::create("res/forms/main.form");
 
 	Control *control = _mainForm->getControl("EditorButton");
 	control->addListener(this, Control::Listener::CLICK);
@@ -194,7 +194,7 @@ void Main::initialize()
 	slider = (Slider *)_mainForm->getControl("SizeSlider");
 	slider->addListener(this, Control::Listener::VALUE_CHANGED);
 	//===============
-	_generateTerrainsForm = Form::create("res/generateTerrains.form");
+	_generateTerrainsForm = Form::create("res/forms/generateTerrains.form");
 	_generateTerrainsForm->setVisible(false);
 
 	control = _generateTerrainsForm->getControl("CancelGenerateTerrainsButton");
@@ -203,7 +203,7 @@ void Main::initialize()
 	control = _generateTerrainsForm->getControl("ConfirmGenerateTerrainsButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============	
-	_generateBlendmapsForm = Form::create("res/generateBlendmaps.form");
+	_generateBlendmapsForm = Form::create("res/forms/generateBlendmaps.form");
 	_generateBlendmapsForm->setVisible(false);
 
 	control = _generateBlendmapsForm->getControl("CancelGenerateBlendmapsButton");
@@ -212,7 +212,7 @@ void Main::initialize()
 	control = _generateBlendmapsForm->getControl("ConfirmGenerateBlendmapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
-	_loadForm = Form::create("res/load.form");
+	_loadForm = Form::create("res/forms/load.form");
 	_loadForm->setVisible(false);
 
 	control = _loadForm->getControl("CancelLoadButton");
@@ -221,7 +221,7 @@ void Main::initialize()
 	control = _loadForm->getControl("ConfirmLoadButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
-	_generateObjectsForm = Form::create("res/generateObjects.form");
+	_generateObjectsForm = Form::create("res/forms/generateObjects.form");
 	_generateObjectsForm->setVisible(false);
 
 	control = _generateObjectsForm->getControl("CancelGenerateObjectsButton");
@@ -230,7 +230,7 @@ void Main::initialize()
 	control = _generateObjectsForm->getControl("ConfirmGenerateObjectsButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============GENERATE_N_SAVE
-	_saveForm = Form::create("res/save.form");
+	_saveForm = Form::create("res/forms/save.form");
 	_saveForm->setVisible(false);
 
 	control = _saveForm->getControl("RAWHeightmapsButton");
@@ -277,8 +277,7 @@ void Main::initialize()
 	parameters.skirtSize = 16;
 	parameters.patchSize = 32;
 	parameters.terrainMaterialPath = "res/materials/terrain.material";
-	//if you want to define scale dont expect the terrain editor tools to work because alot of functions are using heightfield resolution instead
-	//of the scale parameters sent to the paging class
+
 	parameters.scale = Vector3(parameters.heightFieldResolution, ((parameters.heightFieldResolution*parameters.tilesResolution)*0.10), parameters.heightFieldResolution);
 
 	parameters.boundingBox = (parameters.heightFieldResolution * parameters.heightFieldResolution) - parameters.heightFieldResolution;
@@ -468,6 +467,7 @@ void Main::initialize()
 	leaves->getDrawable()->draw();
 	_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 #endif
+
 }
 
 void Main::finalize()
@@ -936,7 +936,10 @@ void Main::generateObjectsPosition()
 			Node * node = Node::create(fileName.c_str());
 			while (nodes)
 			{
-				node->addChild(nodes);
+				if (nodes->getDrawable())
+				{
+					node->addChild(nodes);
+				}
 				nodes = tempScene->getNext();
 			}
 
@@ -970,7 +973,7 @@ void Main::generateObjectsPosition()
 				1, 
 				_pager->parameters.heightFieldResolution, 
 				_pager->heightFieldList, 
-				nodes);
+				node);
 
 			std::vector<std::vector<std::vector<Node*> > > objs;
 			std::vector<Model*> models;

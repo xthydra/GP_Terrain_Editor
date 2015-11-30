@@ -1,12 +1,10 @@
 scene
 {
-    path = res/tree.gpb
-
+	path = res/tree.gpb
 	node leaves
 	{
 		material = res/materials/tree.material#leaves
 	}
-
 	node trunk
 	{
 		material = res/materials/tree.material#trunk

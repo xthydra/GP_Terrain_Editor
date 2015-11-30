@@ -162,6 +162,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\GamePlay\samples\character\res\common\sample.scene" />
     <None Include="game.config" />
     <None Include="LICENSE.md" />
     <None Include="README.md" />

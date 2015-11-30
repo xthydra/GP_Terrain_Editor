@@ -1,0 +1,225 @@
+form GenerateForm
+{
+    theme = res/common/default.theme
+    width = 801
+    height = 600
+    alignment = ALIGN_VCENTER_HCENTER
+    layout = LAYOUT_FLOW
+    style = noBorder
+    
+	container
+	{    
+		layout = LAYOUT_FLOW
+        width = 801
+        height = 200
+		slider HeightFieldSizeSlider
+		{
+			text = Height field size
+			min = 0.0
+			max = 512.0
+			value = 64.0
+			step = 32.0
+			height = 45
+			width = 400
+		}
+		slider PatchSizeSlider
+		{
+			text = Patch size
+			min = 0.0
+			max = 256.0
+			value = 32.0
+			step = 1.0
+			height = 45
+			width = 400
+		}
+		slider DetailLevelsSlider
+		{
+			text = Detail levels size
+			min = 0.0
+			max = 10.0
+			value = 0.0
+			step = 1.0
+			height = 45
+			width = 400
+		}
+		slider ScaleXZSlider
+		{
+			text = Scale XZ
+			min = 0.0
+			max = 256.0
+			value = 64.0
+			step = 8.0
+			height = 45
+			width = 400
+		}
+		slider ScaleYSlider
+		{
+			text = Scale Y
+			min = 0.0
+			max = 64.0
+			value = 10.0
+			step = 4.0
+			height = 45
+			width = 400
+		}
+		slider MinHeightSlider
+		{
+			text = Min height
+			min = 0.0
+			max = 128.0
+			value = 32.0
+			step = 8.0
+			height = 45
+			width = 400
+		}
+		slider MaxHeightSlider
+		{
+			text = Max height
+			min = 0.0
+			max = 1024.0
+			value = 128.0
+			step = 32.0
+			height = 45
+			width = 400
+		}
+	}
+    label SeedLabel
+    {
+        text = Seed
+        height = 45
+        width = 400
+    }
+    textbox SeedTextBox
+    {
+        text = 0
+        height = 45
+        width = 400
+    }
+	label TilesResolutionLabel
+    {
+        text = Tiles Resolution
+        height = 45
+        width = 400
+    }
+    textbox TilesResolutionBox
+    {
+        text = 4
+        height = 45
+        width = 400
+    }
+	label TerrainMaterialLabel
+    {
+        text = Terrrain Material
+        height = 45
+        width = 400
+    }
+    textbox TerrainMaterialBox
+    {
+        text = res/materials/terrain.material
+        height = 45
+        width = 400
+    }
+	container AmplitudeContainer
+	{
+        layout = LAYOUT_FLOW
+        width = 400
+        height = 45
+        radioButton AmplitudePositiveRadio
+        {
+            group = AmplitudeTypeGroup
+            text = + Amplitude
+            selected = true
+            height = 45
+            width = 180
+        }
+        radioButton AmplitudeNegativeRadio
+        {
+            group = AmplitudeTypeGroup
+            text = - Amplitude
+            height = 45
+            width = 200
+        }
+    }      
+    slider AmplitudeSlider
+    {
+        text = Amplitude
+        min = 1.0
+        max = 10.0
+        value = 1.0
+        step = 0.2
+        height = 45
+        width = 400
+    }
+	container GainContainer
+	{
+        layout = LAYOUT_FLOW
+        width = 400
+        height = 45
+        radioButton GainPositiveRadio
+        {
+            group = GainTypeGroup
+            text = + Gain
+            selected = true
+            height = 45
+            width = 180
+        }
+        radioButton GainNegativeRadio
+        {
+            group = GainTypeGroup
+            text = - Gain
+            height = 45
+            width = 200
+        }
+    }
+    slider GainSlider
+    {
+        text = Gain
+        min = 1.0
+        max = 10.0
+        value = 1.0
+        step = 0.2
+        height = 45
+        width = 400
+    }
+    container NoiseContainer
+	{
+        layout = LAYOUT_FLOW
+        width = 400
+        height = 45
+        radioButton SimplexNoiseRadio
+        {
+            group = NoiseTypeGroup
+            text = Simplex 
+            selected = true
+            height = 45
+            width = 180
+        }
+        radioButton DiamondNoiseRadio
+        {
+            group = NoiseTypeGroup
+            text = Diamond Square
+            height = 45
+            width = 200
+        }
+    }
+    container ButtonContainer 
+	{
+        layout = LAYOUT_FLOW
+        width = 400
+        height = 45
+        
+        button CancelGenerateTerrainsButton 
+		{
+            text = Cancel
+            height = 45
+            width = 199
+        }
+        button ConfirmGenerateTerrainsButton 
+		{
+            text = Generate
+            height = 45
+            width = 199
+        }
+    } 
+
+}

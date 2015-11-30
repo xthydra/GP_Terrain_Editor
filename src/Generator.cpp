@@ -87,13 +87,11 @@ std::vector<std::vector<std::vector<Vector3*> > >
 											  std::vector<std::vector<gameplay::HeightField *> >heightFields,
 											  Node * object)
 {
-	//it's the bounding box
-	float worldminx = -(scaleXZ * (heightFieldSize - 1) * 0.5);
-	float worldminz = -(scaleXZ * (heightFieldSize - 1) * 0.5);
-	float worldmaxx = (scaleXZ * (heightFieldSize - 1) * 0.5);
-	float worldmaxz = (scaleXZ * (heightFieldSize - 1) * 0.5);
+	//it's half of the bounding box in local space
+	float boxHalfSize = (scaleXZ * (heightFieldSize - 1) * 0.5);
 
-	Node * tempObj = object->clone();
+	//Node * tempObj = object->clone();
+	float radius = object->getBoundingSphere().radius;
 	std::vector<std::vector<std::vector<Vector3*> > > objectPos;
 	std::vector<std::vector<std::vector<BoundingSphere> > > bounds;
 	bounds.resize(heightFields.size());
@@ -114,24 +112,23 @@ std::vector<std::vector<std::vector<Vector3*> > >
 					int r = rand() % 100;
 					if (random > r)
 					{
-						float worldx, worldz, worldy;
+						float worldy;
 
 						k = x + (z * heightFieldSize);
 
-						worldx = ((float)x / (float)heightFieldSize) * (worldmaxx - worldminx) + worldminx;
-						worldz = ((float)z / (float)heightFieldSize) * (worldmaxz - worldminz) + worldminz;
+						//vertexe XZ position in world space
+						float posX = (x * scaleXZ) - boxHalfSize;
+						float posZ = (z * scaleXZ) - boxHalfSize;
 
+						//vertexe Y position in world space
 						worldy = heightFields[i][j]->getHeight(x, z);
 
-						worldy *= scaleY;
+						worldy *= (float)scaleY;
 
-						worldy *= worldScale.y;
-
-						float posYOffset = object->getBoundingSphere().radius / 2;
+						worldy *= (float)worldScale.y;
 
 						//TODO : the positioning doesn't seem to work as intented
-						Vector3 truePos(worldx + ((worldmaxx * 2) * j), worldy, worldz + ((worldmaxx * 2) * i));
-						tempObj->setTranslation(truePos);
+						Vector3 truePos((float)(posX + ((boxHalfSize * 2) * j)), (float)worldy, (float)(posZ + ((boxHalfSize * 2) * i)));
 
 						bool push = false;
 
@@ -139,28 +136,29 @@ std::vector<std::vector<std::vector<Vector3*> > >
 						{
 							for (size_t g = 0; g < objectPos[i][j].size(); g++)
 							{
-								if (tempObj->getBoundingSphere().intersects(bounds[i][j][g]) == false)
+								float vx = truePos.x - objectPos[i][j][g]->x;
+								float vy = truePos.y - objectPos[i][j][g]->y;
+								float vz = truePos.z - objectPos[i][j][g]->z;
+
+								if (!sqrt((vx * vx) + (vy * vy) + (vz * vz)) < (radius*3))
 								{
 									push = true;
 								}
 							}
 						}
-						if (objectPos[i][j].size() == 0)
+						else
 						{
-							bounds[i][j].push_back(tempObj->getBoundingSphere());
-							objectPos[i][j].push_back(new Vector3(tempObj->getTranslationWorld()));
+							objectPos[i][j].push_back(new Vector3(truePos));
 						}
-						if (push)
+						if (push == true)
 						{
-							bounds[i][j].push_back(tempObj->getBoundingSphere());
-							objectPos[i][j].push_back(new Vector3(tempObj->getTranslationWorld()));
+							objectPos[i][j].push_back(new Vector3(truePos));
 						}
 					}
 				}
 			}
 		}
 	}
-	SAFE_RELEASE(tempObj);
 	return objectPos;
 }
 

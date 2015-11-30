@@ -170,6 +170,9 @@
     <None Include="res\materials\terrainPointlight.material">
       <Filter>res</Filter>
     </None>
+    <None Include="..\GamePlay\samples\character\res\common\sample.scene">
+      <Filter>res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
