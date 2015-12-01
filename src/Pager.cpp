@@ -89,8 +89,48 @@ void Pager::loadTerrain(int z, int x)
 	if (heightFieldList.size() > 0)
 	{
 		std::string blendName1, blendName2, normalName;
+		//it make sure the blend maps image have been saved to the disk
 		if (parameters.generatedBlendmaps == false)
 		{
+			blendName1 += parameters.blendMapDIR;
+
+			blendName1 += "blend-";
+			blendName1 += std::to_string(z);
+			blendName1 += "-";
+			blendName1 += std::to_string(x);
+			blendName1 += "_";
+
+			blendName2 += blendName1;
+
+			blendName1 += std::to_string(1);
+			blendName1 += ".png";
+
+			blendName2 += std::to_string(2);
+			blendName2 += ".png";
+
+			std::ifstream in(blendName1, std::ios::binary | std::ios::ate);
+			std::ifstream in2(blendName2, std::ios::binary | std::ios::ate);
+			int fileSize = in.tellg();
+			int fileSize2 = in2.tellg();
+
+			if (fileSize == -1 || fileSize2 == -1)
+			{
+				if (blendMaps.size() > 0)
+				{
+					FilesSaver saver;
+					saver.saveBlendmap(blendMaps[z][x][0],
+						blendMaps[z][x][1],
+						parameters.blendMapDIR,
+						z,
+						x,
+						parameters.heightFieldResolution);
+				}
+				else
+				{
+					blendName1.clear();
+					blendName2.clear();
+				}
+			}
 			if (blendMaps.size() > 0)
 			{
 				FilesSaver saver;
@@ -102,17 +142,27 @@ void Pager::loadTerrain(int z, int x)
 					parameters.heightFieldResolution);
 			}
 		}
+		else 
+		{
+			blendName1 += parameters.blendMapDIR;
+
+			blendName1 += "blend-";
+			blendName1 += std::to_string(z);
+			blendName1 += "-";
+			blendName1 += std::to_string(x);
+			blendName1 += "_";
+
+			blendName2 += blendName1;
+
+			blendName1 += std::to_string(1);
+			blendName1 += ".png";
+
+			blendName2 += std::to_string(2);
+			blendName2 += ".png";
+		}
+		//it make sure the normal maps image have been saved to the disk
 		if (parameters.generatedNormalmaps == false)
 		{
-			if (normalMaps.size() > 0)
-			{
-				FilesSaver saver;
-				saver.saveNormalmap(normalMaps[z][x],
-					parameters.normalMapDIR,
-					z,
-					x,
-					parameters.heightFieldResolution);
-			}
 			normalName += parameters.normalMapDIR;
 
 			normalName += "normalMap-";
@@ -120,25 +170,28 @@ void Pager::loadTerrain(int z, int x)
 			normalName += "-";
 			normalName += std::to_string(x);
 			normalName += ".png";
+
+			std::ifstream in(normalName, std::ios::binary | std::ios::ate);
+			int fileSize = in.tellg();
+
+			if (fileSize == -1)
+			{
+				if (normalMaps.size() > 0)
+				{
+					FilesSaver saver;
+					saver.saveNormalmap(normalMaps[z][x],
+						parameters.normalMapDIR,
+						z,
+						x,
+						parameters.heightFieldResolution);
+				}
+				else 
+				{
+					normalName.clear();
+				}
+			}
 		}
-		//find the blendmap and normal map filename
-		blendName1 += parameters.blendMapDIR;
-
-		blendName1 += "blend-";
-		blendName1 += std::to_string(z);
-		blendName1 += "-";
-		blendName1 += std::to_string(x);
-		blendName1 += "_";
-
-		blendName2 += blendName1;
-
-		blendName1 += std::to_string(1);
-		blendName1 += ".png";
-
-		blendName2 += std::to_string(2);
-		blendName2 += ".png";
-
-		if (parameters.generatedNormalmaps == true)
+		else 
 		{
 			normalName += parameters.normalMapDIR;
 
@@ -148,21 +201,12 @@ void Pager::loadTerrain(int z, int x)
 			normalName += std::to_string(x);
 			normalName += ".png";
 		}
-
-		//I copy the heightfield before sending to create a terrain
+		//copying the heightfield before sending it because if i ask gameplay to delete a terrain it would delete the heightfield too
 		int resolution = parameters.heightFieldResolution;
-
 		gameplay::HeightField* field = HeightField::create(resolution, resolution);
-
-		for (size_t i = 0; i < resolution; i++)
-		{
-			for (size_t j = 0; j < resolution; j++)
-			{
-				size_t vertexe = (j*resolution) + i;
-				float * vertex = field->getArray();
-				vertex[vertexe] = heightFieldList[z][x]->getHeight(i, j);
-			}
-		}
+		float * vertex = field->getArray();
+		float * array = heightFieldList[z][x]->getArray();
+		memcpy(vertex, array, sizeof(float)*(resolution*resolution));
 	
 		//create the terrain
 		Terr = new CTerrain(field,
