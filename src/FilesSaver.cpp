@@ -35,8 +35,6 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 		{
 			std::vector<__int16> raw;
 
-			size_t x, z, k;
-
 			for (size_t g = 0; g < objsPos[i][j].size();)
 			{
 				raw.push_back(objsPos[i][j][g]->x);
@@ -252,10 +250,8 @@ void FilesSaver::saveBlendmap(std::vector<unsigned char> blendmap, std::vector<u
 	// Generate the png.
 	lodepng::encode(fieldName.c_str(), blendmap2.data(), blendmapRes, blendmapRes);
 }
-
-
 /*
-void FilesSaver::saveObjectsPos2(std::vector<Vector3> objsPos, char * objectName, int z, int x)
+void FilesSaver::saveObjectsPos(std::vector<Vector3> objsPos, char * objectName, int z, int x)
 {
 #ifdef WIN32
 	char tmpdir[] = "res/tmp/fileXXXXXX";

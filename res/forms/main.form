@@ -45,17 +45,7 @@ form MainForm
             text = Editor
             height = 45
             width = 130
-        }
-        /** Not implemented yet
-        radioButton PaintButton
-        {
-            group = ModeGroup
-            text = Paint
-            height = 45
-            width = 120
-        }
-        */
-        
+        }        
     }
 	container NavigateToolBar
     {
@@ -182,6 +172,15 @@ form MainForm
             height = 45
             width = 120
         }
+		/** Not implemented yet
+        radioButton PaintButton
+        {
+            group = ModeGroup
+            text = Paint
+            height = 45
+            width = 120
+        }
+        */
     }
 
 	container GeneratorToolBar
@@ -198,12 +197,6 @@ form MainForm
             height = 45
             width = 120
         }
-		button GeneratenSaveButton
-        {
-            text = Generate n Save
-            height = 45
-            width = 120	
-        }
         button GenerateBlendMapsButton
         {
             text = Blendmaps
@@ -216,72 +209,75 @@ form MainForm
             height = 45
             width = 120
         }
-		button GenerateRawHeightfieldsButton
-        {
-            text = Raw Heightfields
-            height = 45
-            width = 120
-        }
 		button GenerateObjectsPosButton
         {
-            text = Objects Positions
-            height = 45
-            width = 120
-        }
+			text = Objects Positions
+			height = 45
+			width = 120
+		}
+		button SaveButton
+		{
+			text = Save
+			height = 45
+			width = 120	
+		}
 		button LoadButton
-        {
-            text = Load
-            height = 45
-            width = 120
-        }
-    }
-    container PaintToolbar
-    {
-        visible = false
-        width = 120
-        height = 450
-        layout = LAYOUT_VERTICAL
-        
-        slider SizeSlider2
-        {
-            text = Size
-            selected = true
-            min = 500.0
-            max = 50000.0
-            value = 500.0
-            step = 1.0
-            height = 45
-            width = 120
-        }
-        
-        radioButton GrassButton
-        {
-            group = TextureGroup
-            text = Grass
-            selected = true
-            height = 45
-            width = 120
-        }
-        
-        radioButton RocksButton
-        {
-            group = TextureGroup
-            text = Rocks
-            height = 45
-            width = 120
-        }
-        
-        button DrawButton
-        {
-            text = Draw
-            height = 45
-            width = 120
-        }
-        button EraseButton
-        {
-            text = Erase
-            height = 45
-            width = 120
-        }
-    }
+		{
+			text = Load
+			height = 45
+			width = 120
+		}
+	}
+	container PaintToolbar
+	{
+		visible = false
+		width = 120
+		height = 450
+		layout = LAYOUT_VERTICAL
+
+		slider SizeSlider2
+		{
+			text = Size
+			selected = true
+			min = 500.0
+			max = 50000.0
+			value = 500.0
+			step = 1.0
+			height = 45
+			width = 120
+		}
+		radioButton Texture1
+		{
+			group = TextureGroup
+			text = Texture1
+			height = 45
+			width = 120
+		}
+		radioButton Texture2
+		{
+			group = TextureGroup
+			text = Texture2
+			height = 45
+			width = 120
+		}
+		radioButton Texture3
+		{
+			group = TextureGroup
+			text = Texture2
+			height = 45
+			width = 120
+		}
+		button DrawButton
+		{
+			text = Draw
+			height = 45
+			width = 120
+		}
+		button EraseButton
+		{
+			text = Erase
+			height = 45
+			width = 120
+		}
+	}
 }

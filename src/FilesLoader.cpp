@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 std::vector<std::vector<std::vector<Vector3*> > > FilesLoader::loadObjectsPos(const char* folder)
 {
 	std::vector<std::vector<char*> > fileNames;
-	int arraySize, x = 0, z = 0;
+	int x = 0, z = 0;
 
 	bool arraySizeFound = false;
 

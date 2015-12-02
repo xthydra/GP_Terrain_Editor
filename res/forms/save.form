@@ -1,4 +1,4 @@
-form GeneratenSaveForm
+form SaveForm
 {
     theme = res/common/default.theme
     width = 400
@@ -22,12 +22,6 @@ form GeneratenSaveForm
 		button BlendmapsButton
 		{
 			text = Blendmaps
-			height = 45
-			width = 200
-		}
-		button NormalmapsButton
-		{
-			text = Normalmaps
 			height = 45
 			width = 200
 		}

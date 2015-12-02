@@ -156,19 +156,16 @@ void Main::initialize()
 	control = _mainForm->getControl("GenerateTerrainsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	control = _mainForm->getControl("GeneratenSaveButton");
-	control->addListener(this, Control::Listener::CLICK);
-
 	control = _mainForm->getControl("GenerateBlendMapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
 	control = _mainForm->getControl("GenerateNormalMapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	control = _mainForm->getControl("GenerateRawHeightfieldsButton");
+	control = _mainForm->getControl("GenerateObjectsPosButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	control = _mainForm->getControl("GenerateObjectsPosButton");
+	control = _mainForm->getControl("SaveButton");
 	control->addListener(this, Control::Listener::CLICK);
 
 	control = _mainForm->getControl("LoadButton");
@@ -229,7 +226,7 @@ void Main::initialize()
 
 	control = _generateObjectsForm->getControl("ConfirmGenerateObjectsButton");
 	control->addListener(this, Control::Listener::CLICK);
-	//===============GENERATE_N_SAVE
+	//===============SAVE
 	_saveForm = Form::create("res/forms/save.form");
 	_saveForm->setVisible(false);
 
@@ -239,21 +236,12 @@ void Main::initialize()
 	control = _saveForm->getControl("BlendmapsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	control = _saveForm->getControl("NormalmapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
 	control = _saveForm->getControl("ObjectsButton");
 	control->addListener(this, Control::Listener::CLICK);
 
 	control = _saveForm->getControl("CancelSaveButton");
 	control->addListener(this, Control::Listener::CLICK);
 	//===============
-
-	/*
-	Button * button = (Button *)control;
-	Vector4 normalColor = button->getSkinColor(Control::State::NORMAL);
-	Vector4 activeColor = button->getSkinColor(Control::State::ACTIVE);*/
-
 
 	control = _mainForm->getControl("RaiseButton");
 	Button * button = (Button *)control;
@@ -531,11 +519,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		_mainForm->setVisible(false);
 		_generateTerrainsForm->setVisible(true);
 	}
-	else if (strcmp(control->getId(), "GeneratenSaveButton") == 0)
-	{		
-		_mainForm->setVisible(false);
-		_saveForm->setVisible(true);
-	}
 	else if (strcmp(control->getId(), "GenerateBlendMapsButton") == 0)
 	{
 		if (_pager)
@@ -558,21 +541,15 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 			}
 		}
 	}
-	else if (strcmp(control->getId(), "GenerateRawHeightfieldsButton") == 0)
-	{
-		if (_pager)
-		{
-			if (_pager->heightFieldList.size() > 0)
-			{
-				FilesSaver saver;
-				saver.saveRAWHeightmaps(_pager->heightFieldList);
-			}
-		}
-	}
 	else if (strcmp(control->getId(), "GenerateObjectsPosButton") == 0)
 	{
 		_mainForm->setVisible(false);
 		_generateObjectsForm->setVisible(true);
+	}
+	else if (strcmp(control->getId(), "SaveButton") == 0)
+	{
+		_mainForm->setVisible(false);
+		_saveForm->setVisible(true);
 	}
 	else if (strcmp(control->getId(), "LoadButton") == 0)
 	{
@@ -766,6 +743,46 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		load();
 	}
 	//===========================
+	else if (strcmp(control->getId(), "RAWHeightmapsButton") == 0)
+	{
+		FilesSaver saver;
+		
+		threads.push_back(std::thread(
+			&FilesSaver::saveRAWHeightmaps,
+			saver,
+			_pager->heightFieldList));
+	}
+	else if (strcmp(control->getId(), "BlendmapsButton") == 0)
+	{
+		FilesSaver saver;
+		Threads t;
+		t.blendBool();
+		saverThreads.push_back(t);
+
+		threads.push_back(std::thread(
+			&FilesSaver::saveBlendmaps,
+			saver,
+			_pager->blendMaps,
+			_pager->parameters.blendMapDIR,
+			_pager->parameters.heightFieldResolution));
+
+		//TODO: i really dont know if i need to clear the folder containing the blendmaps before overwriting
+		//cuz at somepoint i will probably allow the user to change textures files which will probably end up corrupting the way files are loaded
+	}
+	else if (strcmp(control->getId(), "ObjectsButton") == 0)
+	{
+		FilesSaver saver;
+
+		threads.push_back(std::thread(
+			&FilesSaver::saveObjectsPos,
+			saver,
+			_pager->objectsPosition,
+			_pager->objectsFilename[0]));
+
+		Threads t;
+		t.objectBool();
+		saverThreads.push_back(t);
+	}
 	else if (strcmp(control->getId(), "CancelSaveButton") == 0)
 	{
 		_mainForm->setVisible(true);
@@ -949,24 +966,42 @@ void Main::generateObjectsPosition()
 				nodes = tempScene->getNext();
 			}
 
-			//TODO : set directional or pointlight depending if the material support it
-			/*
-			Node* lightNode = _scene->findNode("light");
-#ifdef POINTLIGHT_TEST
-			tempt->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-			tempt->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-			tempt->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-			tempt2->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-			tempt2->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-			tempt2->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-#else
-			// Bind the light's color and direction to the material.
-			tempt->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-			tempt->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
-			tempt2->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-			tempt2->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorWorld);
-#endif
-			*/
+
+			Node * childs = node->getFirstChild();
+
+			while (childs)
+			{
+				//TODO: i might need 3 lights, 1 direct,1 spot and 1 point
+
+				bool directLight = false, pointLight = false;
+				for (size_t i = 0; i < ((Model*)childs->getDrawable())->getMaterial()->getTechniqueCount(); i++)
+				{
+					for (size_t j = 0; j < ((Model*)childs->getDrawable())->getMaterial()->getTechniqueByIndex(i)->getPassCount(); j++)
+					{
+						if (((Model*)childs->getDrawable())->getMaterial()->getTechniqueByIndex(i)->getPassByIndex(j)->getEffect()->getUniform("u_directionalLightDirection"))
+						{
+							directLight = true;
+						}
+						if (((Model*)childs->getDrawable())->getMaterial()->getTechniqueByIndex(i)->getPassByIndex(j)->getEffect()->getUniform("u_pointLightPosition"))
+						{
+							pointLight = true;
+						}
+					}
+				}
+				Node* lightNode = _scene->findNode("light");
+				if (directLight == true)
+				{
+					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
+					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorView);
+				}
+				if (pointLight == true)
+				{
+					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
+					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
+					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
+				}
+				childs = childs->getNextSibling();
+			}
 
 			Vector3 worldScale;//(1,1,1);
 			_pager->pagingCheck();
@@ -1007,8 +1042,8 @@ void Main::generateObjectsPosition()
 			}
 			_pager->objects = objs;
 			_pager->objectsPosition = objsPos;
-			//TODO: got to change that filename push
-			_pager->objectsFilename.push_back("tree.gpb");
+			char * file = (char*)fileName.c_str();
+			_pager->objectsFilename.push_back(file);
 
 			FilesSaver saver;
 
@@ -1016,13 +1051,13 @@ void Main::generateObjectsPosition()
 				&FilesSaver::saveObjectsPos,
 				saver,
 				_pager->objectsPosition,
-				_pager->objectsFilename[0]));
+				file));
 
 			Threads t3;
 			t3.objectBool();
 			saverThreads.push_back(t3);
 
-			Node * childs = node->getFirstChild();
+			childs = node->getFirstChild();
 
 			while(childs)
 			{
@@ -1030,7 +1065,7 @@ void Main::generateObjectsPosition()
 				{
 					childs->getDrawable()->draw();
 				}
-				childs=node->getNextSibling();
+				childs=childs->getNextSibling();
 			}
 			_pager->parameters.distanceMaxModelRender = node->getBoundingSphere().radius * 5;
 		}
@@ -1125,6 +1160,7 @@ void Main::generateNewTerrain()
 		_pager->parameters.terrainMaterialPath = textBox->getText();
 	}
 
+	//getting Noiser settings
 	control = _generateTerrainsForm->getControl("SimplexNoiseRadio");
 	radioButton = (RadioButton *)control;
 	int noise;
@@ -1134,7 +1170,6 @@ void Main::generateNewTerrain()
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected()) { noise = 1; }
 
-	//getting Noiser settings
 	control = _generateTerrainsForm->getControl("AmplitudeSlider");
 	slider = (Slider *)control;
 	int amplitude = (slider->getValue());

@@ -115,7 +115,7 @@ form GenerateForm
     }
     textbox TerrainMaterialBox
     {
-        text = res/materials/terrain.material
+        text = res/materials/terrainDirectionallight.material
         height = 45
         width = 400
     }

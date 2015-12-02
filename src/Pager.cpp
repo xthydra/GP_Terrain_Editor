@@ -22,6 +22,7 @@
 // heightfields[z][x][y]//pager with vertical paging
 // heightfields[z][x][y][w]//pager supporting negative world position
 
+
 Pager::Pager(PagerParameters param, gameplay::Scene* scen)
 {
 	this->_Scene = scen;
@@ -204,9 +205,7 @@ void Pager::loadTerrain(int z, int x)
 		//copying the heightfield before sending it because if i ask gameplay to delete a terrain it would delete the heightfield too
 		int resolution = parameters.heightFieldResolution;
 		gameplay::HeightField* field = HeightField::create(resolution, resolution);
-		float * vertex = field->getArray();
-		float * array = heightFieldList[z][x]->getArray();
-		memcpy(vertex, array, sizeof(float)*(resolution*resolution));
+		memcpy(field->getArray(), heightFieldList[z][x]->getArray(), sizeof(float)*(resolution*resolution));
 	
 		//create the terrain
 		Terr = new CTerrain(field,

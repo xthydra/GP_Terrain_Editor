@@ -36,7 +36,7 @@ struct FilesSaver
 	void saveNormalmaps(std::vector<std::vector<std::vector<unsigned char> > >, char *, int);
 
 	/*
-	Output heightmaps as PNG images(it's suposed to be encoding in binary tho lol)
+	Output heightfields in binary files
 	@param heightfields in 2 vectors (z,x)
 	*/
 	void saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> >);
@@ -45,7 +45,7 @@ struct FilesSaver
 	Output blend maps as PNG images
 	@param normalmap in 3 vectors (z,x, pixels as unsigned char)
 	@param folder to output encoded PNG files
-	@param normal map Resolution
+	@param blend map Resolution
 	*/
 	void saveBlendmaps(std::vector<std::vector<std::vector<std::vector<unsigned char> > > >,char*,int);
 
@@ -75,9 +75,8 @@ struct FilesSaver
 	@param folder to output the encoded PNG file
 	@param Z position in the vector of heightfields list
 	@param X position in the vector of heightfields list
-	@param normal map Resolution
 	*/
-	void saveObjectsPos2(std::vector<Vector3*>, char*,int,int);
+	//void saveObjectsPos(std::vector<Vector3*>, char*,int,int);
 
 	/*used to save the files name for the pager in case it would need to re-create a terrain*/
 	std::vector<std::vector<std::vector<char*> > > blendFilesname;

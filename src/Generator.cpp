@@ -140,7 +140,7 @@ std::vector<std::vector<std::vector<Vector3*> > >
 								float vy = truePos.y - objectPos[i][j][g]->y;
 								float vz = truePos.z - objectPos[i][j][g]->z;
 
-								if (!sqrt((vx * vx) + (vy * vy) + (vz * vz)) < (radius*3))
+								if ((bool)(sqrt((vx * vx) + (vy * vy) + (vz * vz)) <= (radius*3)) == false)
 								{
 									push = true;
 								}

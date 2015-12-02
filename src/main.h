@@ -28,7 +28,7 @@
 #define CREATE_NORMALMAPS
 #define CREATE_BLENDMAPS
 #define CREATE_TREES
-#define POINTLIGHT_TEST
+//#define POINTLIGHT_TEST
 #endif
 
 
