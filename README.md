@@ -38,7 +38,9 @@
 
 #What i will try to change
 
-1) there's a TODO somewhere(may include stomach ache and nausea)
+1) https://github.com/xthydra/GP_Terrain_Editor/blob/master/TODO.txt
+
+2) https://github.com/xthydra/GP_Terrain_Editor/issues
 
 #What will i not change
 
