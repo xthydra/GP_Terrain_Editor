@@ -1,0 +1,14 @@
+scene
+{
+	path = res/tree.gpb
+	node leaves
+	{
+		material = res/materials/treeDirectionallight.material#leaves
+		scale = 500,500,500
+	}
+	node trunk
+	{
+		material = res/materials/treeDirectionallight.material#trunk
+		scale = 500,500,500
+	}
+}

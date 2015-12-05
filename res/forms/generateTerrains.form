@@ -1,17 +1,17 @@
 form GenerateForm
 {
-    theme = res/common/default.theme
-    width = 801
-    height = 600
-    alignment = ALIGN_VCENTER_HCENTER
-    layout = LAYOUT_FLOW
-    style = noBorder
-    
+	theme = res/common/default.theme
+	width = 801
+	height = 600
+	alignment = ALIGN_VCENTER_HCENTER
+	layout = LAYOUT_FLOW
+	style = noBorder
+	
 	container
 	{    
 		layout = LAYOUT_FLOW
-        width = 801
-        height = 200
+		width = 801
+		height = 200
 		slider HeightFieldSizeSlider
 		{
 			text = Height field size
@@ -83,143 +83,142 @@ form GenerateForm
 			width = 400
 		}
 	}
-    label SeedLabel
-    {
-        text = Seed
-        height = 45
-        width = 400
-    }
-    textbox SeedTextBox
-    {
-        text = 0
-        height = 45
-        width = 400
-    }
+	label SeedLabel
+	{
+		text = Seed
+		height = 45
+		width = 400
+	}
+	textbox SeedTextBox
+	{
+		text = 0
+		height = 45
+		width = 400
+	}
 	label TilesResolutionLabel
-    {
-        text = Tiles Resolution
-        height = 45
-        width = 400
-    }
-    textbox TilesResolutionBox
-    {
-        text = 4
-        height = 45
-        width = 400
-    }
+	{
+		text = Tiles Resolution
+		height = 45
+		width = 400
+	}
+	textbox TilesResolutionBox
+	{
+		text = 4
+		height = 45
+		width = 400
+	}
 	label TerrainMaterialLabel
-    {
-        text = Terrrain Material
-        height = 45
-        width = 400
-    }
-    textbox TerrainMaterialBox
-    {
-        text = res/materials/terrainDirectionallight.material
-        height = 45
-        width = 400
-    }
+	{
+		text = Terrrain Material
+		height = 45
+		width = 400
+	}
+	textbox TerrainMaterialBox
+	{
+		text = res/materials/terrainDirectionallight.material
+		height = 45
+		width = 400
+	}
 	container AmplitudeContainer
 	{
-        layout = LAYOUT_FLOW
-        width = 400
-        height = 45
-        radioButton AmplitudePositiveRadio
-        {
-            group = AmplitudeTypeGroup
-            text = + Amplitude
-            selected = true
-            height = 45
-            width = 180
-        }
-        radioButton AmplitudeNegativeRadio
-        {
-            group = AmplitudeTypeGroup
-            text = - Amplitude
-            height = 45
-            width = 200
-        }
-    }      
-    slider AmplitudeSlider
-    {
-        text = Amplitude
-        min = 1.0
-        max = 10.0
-        value = 1.0
-        step = 0.2
-        height = 45
-        width = 400
-    }
+		layout = LAYOUT_FLOW
+		width = 400
+		height = 45
+		radioButton AmplitudePositiveRadio
+		{
+			group = AmplitudeTypeGroup
+			text = + Amplitude
+			selected = true
+			height = 45
+			width = 180
+		}
+		radioButton AmplitudeNegativeRadio
+		{
+			group = AmplitudeTypeGroup
+			text = - Amplitude
+			height = 45
+			width = 200
+		}
+	}      
+	slider AmplitudeSlider
+	{
+		text = Amplitude
+		min = 1.0
+		max = 10.0
+		value = 1.0
+		step = 0.2
+		height = 45
+		width = 400
+	}
 	container GainContainer
 	{
-        layout = LAYOUT_FLOW
-        width = 400
-        height = 45
-        radioButton GainPositiveRadio
-        {
-            group = GainTypeGroup
-            text = + Gain
-            selected = true
-            height = 45
-            width = 180
-        }
-        radioButton GainNegativeRadio
-        {
-            group = GainTypeGroup
-            text = - Gain
-            height = 45
-            width = 200
-        }
-    }
-    slider GainSlider
-    {
-        text = Gain
-        min = 1.0
-        max = 10.0
-        value = 1.0
-        step = 0.2
-        height = 45
-        width = 400
-    }
-    container NoiseContainer
-	{
-        layout = LAYOUT_FLOW
-        width = 400
-        height = 45
-        radioButton SimplexNoiseRadio
-        {
-            group = NoiseTypeGroup
-            text = Simplex 
-            selected = true
-            height = 45
-            width = 180
-        }
-        radioButton DiamondNoiseRadio
-        {
-            group = NoiseTypeGroup
-            text = Diamond Square
-            height = 45
-            width = 200
-        }
-    }
-    container ButtonContainer 
-	{
-        layout = LAYOUT_FLOW
-        width = 400
-        height = 45
-        
-        button CancelGenerateTerrainsButton 
+		layout = LAYOUT_FLOW
+		width = 400
+		height = 45
+		radioButton GainPositiveRadio
 		{
-            text = Cancel
-            height = 45
-            width = 199
-        }
-        button ConfirmGenerateTerrainsButton 
+			group = GainTypeGroup
+			text = + Gain
+			selected = true
+			height = 45
+			width = 180
+		}
+		radioButton GainNegativeRadio
 		{
-            text = Generate
-            height = 45
-            width = 199
-        }
-    } 
-
+			group = GainTypeGroup
+			text = - Gain
+			height = 45
+			width = 200
+		}
+	}
+	slider GainSlider
+	{
+		text = Gain
+		min = 1.0
+		max = 10.0
+		value = 1.0
+		step = 0.2
+		height = 45
+		width = 400
+	}
+	container NoiseContainer
+	{
+		layout = LAYOUT_FLOW
+		width = 400
+		height = 45
+		radioButton SimplexNoiseRadio
+		{
+			group = NoiseTypeGroup
+			text = Simplex 
+			selected = true
+			height = 45
+			width = 180
+		}
+		radioButton DiamondNoiseRadio
+		{
+			group = NoiseTypeGroup
+			text = Diamond Square
+			height = 45
+			width = 200
+		}
+	}
+	container ButtonContainer 
+	{
+		layout = LAYOUT_FLOW
+		width = 400
+		height = 45
+		
+		button CancelGenerateTerrainsButton 
+		{
+			text = Cancel
+			height = 45
+			width = 199
+		}
+		button ConfirmGenerateTerrainsButton 
+		{
+			text = Generate
+			height = 45
+			width = 199
+		}
+	} 
 }

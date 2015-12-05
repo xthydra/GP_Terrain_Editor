@@ -1,17 +1,17 @@
 form SaveForm
 {
-    theme = res/common/default.theme
-    width = 400
-    height = 600
-    alignment = ALIGN_VCENTER_HCENTER
-    layout = LAYOUT_VERTICAL
-    style = noBorder
-             
-    container LoadContainer
+	theme = res/common/default.theme
+	width = 400
+	height = 600
+	alignment = ALIGN_VCENTER_HCENTER
+	layout = LAYOUT_VERTICAL
+	style = noBorder
+			 
+	container LoadContainer
 	{
-        layout = LAYOUT_FLOW
-        width = 450
-        height = 135
+		layout = LAYOUT_FLOW
+		width = 450
+		height = 135
 
 		button RAWHeightmapsButton
 		{
@@ -32,18 +32,17 @@ form SaveForm
 			width = 200
 		}
 	}
-    container ButtonContainer
+	container ButtonContainer
 	{
-        layout = LAYOUT_FLOW
-        width = 450
-        height = 45
-        
-        button CancelSaveButton
+		layout = LAYOUT_FLOW
+		width = 450
+		height = 45
+		
+		button CancelSaveButton
 		{
-            text = Cancel
-            height = 45
-            width = 400
-        }
-    } 
-
+			text = Cancel
+			height = 45
+			width = 400
+		}
+	} 
 }

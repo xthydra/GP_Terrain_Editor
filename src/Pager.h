@@ -213,15 +213,32 @@ public:
 	std::vector<std::vector<std::vector<char*> > > blendMapList;
 
 	/**
-	* Files List to encode.
+	* position X defined by world space position
+	* position Z defined by world space position
+	* blendmap 0 or 1
+	* the image data stacked into a vector
 	**/
 	std::vector<std::vector<std::vector<std::vector<unsigned char> > > > blendMaps;
-	std::vector<std::vector<std::vector<unsigned char> > >				 normalMaps;
 
 	/**
-	* List of objects located on the terrains.
+	* position X defined by world space position
+	* position Z defined by world space position
+	* the image data stacked into a vector
+	**/
+	std::vector<std::vector<std::vector<unsigned char> > > normalMaps;
+
+	/**
+	* position X defined by world space position
+	* position Z defined by world space position
+	* vector stack of gameplay::Vector3 defining the number of objects on one terrain
 	**/
 	std::vector<std::vector<std::vector<Vector3*> > > objectsPosition;
+
+	/**
+	* position X defined by world space position
+	* position Z defined by world space position
+	* vector stack of gameplay::Node used in rendering and used as a reference to delete
+	**/
 	std::vector<std::vector<std::vector<Node*> > > objects;
 	std::vector<char*> objectsFilename;
 

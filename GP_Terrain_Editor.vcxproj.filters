@@ -137,12 +137,6 @@
     </None>
     <None Include="README.md" />
     <None Include="LICENSE.md" />
-    <None Include="res\common\Tree.scene">
-      <Filter>res</Filter>
-    </None>
-    <None Include="res\materials\tree.material">
-      <Filter>res</Filter>
-    </None>
     <None Include="res\materials\terrainDirectionallight.material">
       <Filter>res</Filter>
     </None>
@@ -167,8 +161,17 @@
     <None Include="res\forms\save.form">
       <Filter>res\UI forms</Filter>
     </None>
-    <None Include="res\forms\size.form">
-      <Filter>res\UI forms</Filter>
+    <None Include="res\common\Tree_directionallight.scene">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\common\Tree_pointlight.scene">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\materials\treeDirectionallight.material">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\materials\treePointlight.material">
+      <Filter>res</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

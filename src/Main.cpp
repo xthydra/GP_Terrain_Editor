@@ -112,7 +112,7 @@ void Main::initialize()
 	//setting up a light
 	_binding = new TerrainToolAutoBindingResolver();
 	_binding->setLight(_light);
-#endif*/
+#endif
 	//creating and setting up the UI
 	
 	_mainForm = Form::create("res/forms/main.form");
@@ -351,115 +351,15 @@ void Main::initialize()
 	_selectionRing = new SelectionRing(_scene);
 
 #ifdef CREATE_TREES
-	Scene * Stree = Scene::load("res/tree.gpb");
-	Node* leaves = Stree->findNode("leaves");
-	Node* tree = Stree->findNode("trunk");
-	tree->setScale(Vector3(50, 50, 50));
-	leaves->setScale(Vector3(50, 50, 50));
-	Model* tempt = dynamic_cast<Model*>(tree->getDrawable());
-	Model* tempt2 = dynamic_cast<Model*>(leaves->getDrawable());
-
 #ifdef POINTLIGHT_TEST
-	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1");
-	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
-
-	//tempt->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	tempt->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-	tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-	tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	//tempt2->getMaterial()->setParameterAutoBinding("u_normalMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewMatrix", "WORLD_VIEW_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+	control = _generateObjectsForm->getControl("ObjectTextBox");
+	TextBox * textBox = (TextBox *)control;
+	textBox->setText("res/common/Tree_pointlight.scene");
+	generateObjectsPosition();
 #else
-	tempt->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1");
-	tempt2->setMaterial("res/shaders/textured.vert", "res/shaders/textured.frag", "DIRECTIONAL_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1");
-
-	tempt->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-	tempt->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_worldViewProjectionMatrix", "WORLD_VIEW_PROJECTION_MATRIX");
-	tempt2->getMaterial()->setParameterAutoBinding("u_inverseTransposeWorldViewMatrix", "INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX");
+	generateObjectsPosition();
 #endif
-	// Set the ambient color of the material.
-	tempt->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
-	tempt2->getMaterial()->getParameter("u_ambientColor")->setValue(Vector3(0.5f, 0.5f, 0.5f));
-
-#ifdef POINTLIGHT_TEST
-	tempt->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-	tempt->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-	tempt->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-	tempt2->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-	tempt2->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-	tempt2->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-#else
-	// Bind the light's color and direction to the material.
-	tempt->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-	tempt->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorView);
-	tempt2->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-	tempt2->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorView);
 #endif
-	// Load the texture from file.
-	Texture::Sampler* sampler = tempt->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/bark.png", true);
-	Texture::Sampler* sampler2 = tempt2->getMaterial()->getParameter("u_diffuseTexture")->setValue("res/leave.png", true);
-
-	tempt->getMaterial()->getStateBlock()->setCullFace(true);
-	tempt->getMaterial()->getStateBlock()->setDepthTest(true);
-
-	tempt2->getMaterial()->getStateBlock()->setCullFace(true);
-	tempt2->getMaterial()->getStateBlock()->setDepthTest(true);
-
-	Vector3 worldScale;
-	_pager->pagingCheck();
-	_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
-
-	std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, parameters.scale.y, _pager->parameters.scale.x, 1, parameters.heightFieldResolution, _pager->heightFieldList, tree);
-	std::vector<std::vector<std::vector<Node*> > > objs;
-	std::vector<Model*> models;
-
-	objs.resize(_pager->heightFieldList.size());
-	for (size_t i = 0; i < _pager->heightFieldList.size(); i++)
-	{
-		objs[i].resize(_pager->heightFieldList.size());
-		for (size_t j = 0; j < _pager->heightFieldList[i].size(); j++)
-		{
-			for (size_t g = 0; g < objsPos[i][j].size(); g++)
-			{
-				Node * tmp1 = tree->clone();
-				Node * tmp2 = leaves->clone();
-
-				Node * tree2 = Node::create("tree");
-
-				tree2->addChild(tmp2);
-				tree2->addChild(tmp1);
-
-				tree2->setTranslation(Vector3(
-					objsPos[i][j][g]->x,
-					objsPos[i][j][g]->y,
-					objsPos[i][j][g]->z));
-
-				_scene->addNode(tree2);
-
-				objs[i][j].push_back(tree2);
-			}
-		}
-	}
-	_pager->objects = objs;
-	_pager->objectsPosition = objsPos;
-	_pager->objectsFilename.push_back("tree.gpb");
-
-	threads.push_back(std::thread(
-		&FilesSaver::saveObjectsPos,
-		saver,
-		_pager->objectsPosition,
-		_pager->objectsFilename[0]));
-
-	Threads t3;
-	t3.objectBool();
-	saverThreads.push_back(t3);
-#endif
-	tree->getDrawable()->draw();
-	leaves->getDrawable()->draw();
-	_pager->parameters.distanceMaxModelRender = tree->getBoundingSphere().radius * 5;
 #endif
 
 }
@@ -627,6 +527,36 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 			_selectionRing->setScale(_selectionScale, _pager->loadedTerrains[nearest]);
 		}
 	}
+	/*
+	TerrainEditor TerrEdit;
+	std::vector<std::vector<unsigned char>> blend1, blend2;
+	std::vector<Vector3> fieldsPos;
+
+	for (size_t i = 0; i < _pager->loadedTerrains.size(); i++)
+	{
+		int posX = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().x;
+		int posZ = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().z;
+
+		int sPosX = posX / _pager->parameters.scale.x;
+		int sPosZ = posZ / _pager->parameters.scale.x;
+
+		posX = (posX / _pager->parameters.scale.x) / (_pager->parameters.heightFieldResolution - 1);
+		posZ = (posZ / _pager->parameters.scale.x) / (_pager->parameters.heightFieldResolution - 1);
+
+		blend1[i] = _pager->blendMaps[posX][posZ][0];
+		blend2[i] = _pager->blendMaps[posX][posZ][1];
+		fieldsPos.push_back(Vector3(sPosX, 0, sPosZ));
+	}
+
+	TerrEdit.paint(blend1,
+		blend2,
+		fieldsPos,
+		0,
+		Vector2(_selectionRing->getPosition().x, _selectionRing->getPosition().y),
+		_pager->parameters.heightFieldResolution,
+		_selectionRing->getScale()
+		);*/
+
 	else if (strcmp(control->getId(), "AlignButton") == 0)
 	{
 		TerrainEditor TerrEdit;
@@ -966,43 +896,6 @@ void Main::generateObjectsPosition()
 				nodes = tempScene->getNext();
 			}
 
-
-			Node * childs = node->getFirstChild();
-
-			while (childs)
-			{
-				//TODO: i might need 3 lights, 1 direct,1 spot and 1 point
-
-				bool directLight = false, pointLight = false;
-				for (size_t i = 0; i < ((Model*)childs->getDrawable())->getMaterial()->getTechniqueCount(); i++)
-				{
-					for (size_t j = 0; j < ((Model*)childs->getDrawable())->getMaterial()->getTechniqueByIndex(i)->getPassCount(); j++)
-					{
-						if (((Model*)childs->getDrawable())->getMaterial()->getTechniqueByIndex(i)->getPassByIndex(j)->getEffect()->getUniform("u_directionalLightDirection"))
-						{
-							directLight = true;
-						}
-						if (((Model*)childs->getDrawable())->getMaterial()->getTechniqueByIndex(i)->getPassByIndex(j)->getEffect()->getUniform("u_pointLightPosition"))
-						{
-							pointLight = true;
-						}
-					}
-				}
-				Node* lightNode = _scene->findNode("light");
-				if (directLight == true)
-				{
-					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_directionalLightColor[0]")->setValue(lightNode->getLight()->getColor());
-					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_directionalLightDirection[0]")->bindValue(lightNode, &Node::getForwardVectorView);
-				}
-				if (pointLight == true)
-				{
-					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_pointLightColor[0]")->setValue(lightNode->getLight()->getColor());
-					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_pointLightRangeInverse[0]")->setValue(lightNode->getLight()->getRangeInverse());
-					((Model*)childs->getDrawable())->getMaterial()->getParameter("u_pointLightPosition[0]")->bindValue(lightNode, &Node::getTranslationView);
-				}
-				childs = childs->getNextSibling();
-			}
-
 			Vector3 worldScale;//(1,1,1);
 			_pager->pagingCheck();
 			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
@@ -1057,7 +950,7 @@ void Main::generateObjectsPosition()
 			t3.objectBool();
 			saverThreads.push_back(t3);
 
-			childs = node->getFirstChild();
+			Node * childs = node->getFirstChild();
 
 			while(childs)
 			{
@@ -1552,6 +1445,8 @@ void Main::keyEvent(Keyboard::KeyEvent evt, int key)
 		switch (key)
 		{
 		case Keyboard::KEY_ESCAPE:
+			clear(CLEAR_COLOR_DEPTH, Vector4(0,0,0,0), 0, 0);
+			game.clearSchedule();
 			exit();
 			break;
 		case Keyboard::KEY_W:

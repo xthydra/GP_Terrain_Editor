@@ -1,0 +1,75 @@
+material trunk
+{
+	technique
+	{
+		pass
+		{
+			vertexShader = res/shaders/textured.vert
+			fragmentShader = res/shaders/textured.frag
+			defines = POINT_LIGHT_COUNT 1
+
+			u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
+			u_inverseTransposeWorldViewMatrix = INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX
+			u_worldViewMatrix = WORLD_VIEW_MATRIX
+			u_ambientColor = SCENE_AMBIENT_COLOR
+
+			u_pointLightColor[0] = LIGHT_COLOR_0
+			u_pointLightPosition[0] = LIGHT_POSITION_0
+			u_pointLightRangeInverse[0] = LIGHT_INVERSE_RANGE_0
+			
+			sampler u_diffuseTexture
+			{
+				path = res/bark.png
+				mipmap = true
+				wrapS = REPEAT
+				wrapT = REPEAT
+				minFilter = LINEAR_MIPMAP_LINEAR
+				magFilter = LINEAR
+			}
+
+			renderState
+			{
+				cullFace = true
+				depthTest = true
+			}
+		}
+	}
+}
+
+material leaves
+{
+	technique
+	{
+		pass
+		{
+			vertexShader = res/shaders/textured.vert
+			fragmentShader = res/shaders/textured.frag
+			defines = POINT_LIGHT_COUNT 1; TEXTURE_DISCARD_ALPHA 1
+
+			u_worldViewProjectionMatrix = WORLD_VIEW_PROJECTION_MATRIX
+			u_inverseTransposeWorldViewMatrix = INVERSE_TRANSPOSE_WORLD_VIEW_MATRIX
+			u_worldViewMatrix = WORLD_VIEW_MATRIX
+			u_ambientColor = SCENE_AMBIENT_COLOR
+
+			u_pointLightColor[0] = LIGHT_COLOR_0
+			u_pointLightPosition[0] = LIGHT_POSITION_0
+			u_pointLightRangeInverse[0] = LIGHT_INVERSE_RANGE_0
+			
+			sampler u_diffuseTexture
+			{
+				path = res/leave.png
+				mipmap = true
+				wrapS = CLAMP
+				wrapT = CLAMP
+				minFilter = LINEAR_MIPMAP_LINEAR
+				magFilter = LINEAR
+			}
+
+			renderState
+			{
+				cullFace = true
+				depthTest = true
+			}
+		}
+	}
+}

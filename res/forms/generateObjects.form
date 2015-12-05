@@ -1,63 +1,65 @@
-form GenerateObjectsForm
+form generateObjectsForm
 {
-    theme = res/common/default.theme
-    width = 425
-    height = 350
-    alignment = ALIGN_VCENTER_HCENTER
-    layout = LAYOUT_FLOW
+	theme = res/common/default.theme
+	width = 500
+	height = 500
+	alignment = ALIGN_VCENTER_HCENTER
+	layout = LAYOUT_FLOW
+	style = noBorder
 
-    label MaterialLabel
-    {
-        text = Material(Optional)
-        height = 45
-        width = 400
-    }
-    textbox MaterialTextBox
-    {
-        text = .material
-        height = 45
-        width = 400
-    }
-	label ObjectLabel
-    {
-        text = Object_.gpd_.scene_file
-        height = 45
-        width = 400
-    }
-    textbox ObjectTextBox
-    {
-        text = res/common/Tree.scene
-        height = 45
-        width = 400
-    }
-	label ChanceLabel
-    {
-        text = pourcentage_of_spawn_rate_1-100
-        height = 45
-        width = 400
-    }
-    textbox ChanceTextBox
-    {
-        text = 1
-        height = 45
-        width = 400
-    }
-    container ButtonContainer
+	label MaterialLabel
 	{
-        layout = LAYOUT_FLOW
-        width = 450
-        height = 45
-        button CancelGenerateObjectsButton
+		text = Material(Optional)
+		height = 45
+		width = 400
+	}
+	textbox MaterialTextBox
+	{
+		text = .material
+		height = 45
+		width = 400
+	}
+	label ObjectLabel
+	{
+		text = Object_.gpd_.scene_file
+		height = 45
+		width = 400
+	}
+	textbox ObjectTextBox
+	{
+		text = res/common/Tree_directionallight.scene
+		height = 45
+		width = 400
+	}
+	label ChanceLabel
+	{
+		text = pourcentage_of_spawn_rate_1-100
+		height = 45
+		width = 400
+	}
+	textbox ChanceTextBox
+	{
+		text = 1
+		height = 45
+		width = 400
+	}
+	container ObjButtonContainer
+	{
+		layout = LAYOUT_FLOW
+		width = 450
+		height = 45
+
+		button CancelGenerateObjectsButton
 		{
-            text = Cancel
-            height = 45
-            width = 200
-        }
-        button ConfirmGenerateObjectsButton
+			text = Cancel
+			height = 45
+			width = 200
+		}
+		button ConfirmGenerateObjectsButton
 		{
-            text = Generate
-            height = 45
-            width = 200
-        }
-    }
+			text = Generate
+			height = 45
+			width = 200
+		}
+	}
 }

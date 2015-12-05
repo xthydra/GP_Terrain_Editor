@@ -422,3 +422,52 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 	}
 	return fields;
 }
+
+std::vector<std::vector<std::vector<unsigned char>>> TerrainEditor::paint(std::vector<std::vector<unsigned char>> blendmap1,
+																		  std::vector<std::vector<unsigned char>> blendmap2,
+																		  std::vector<Vector3> fieldsPos,
+																		  int selectedTex,
+																		  Vector2 pos,
+																		  int blendmapRes,
+																		  int radius)
+{
+	for (size_t i = 0; i < blendmap1.size(); i++)
+	{
+		for (size_t x = 0; x < blendmapRes; x++)
+		{
+			for (size_t z = 0; z < blendmapRes; z++)
+			{
+				Vector2 pixel = Vector2(((fieldsPos[i].x - (blendmapRes*0.5)) + x), ((fieldsPos[i].z - (blendmapRes*0.5)) + z));
+
+				float vx = pos.x - x;
+				float vz = pos.y - z;
+
+				if ((bool)(sqrt((vx * vx) + (vz * vz)) <= radius) == true)
+				{
+					int k = 4 * x + (z * blendmapRes * 4);
+
+					if (selectedTex == 0)
+					{
+						//blendmap1[i][k] -= 
+						//blendmap1[--]
+						//blendmap2[--]
+					}
+					if (selectedTex == 1)
+					{
+						//blendmap1[++]
+						//blendmap2[--]
+					}
+					if (selectedTex == 2)
+					{
+						//blendmap1[--]
+						//blendmap2[++]
+					}
+				}
+			}
+		}
+	}
+	std::vector<std::vector<std::vector<unsigned char>>> blendmaps;
+	blendmaps.push_back(blendmap1);
+	blendmaps.push_back(blendmap2);
+	return blendmaps;
+}
