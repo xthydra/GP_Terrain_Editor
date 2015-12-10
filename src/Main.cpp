@@ -44,15 +44,6 @@ char * createTMPFolder()
 	return cstr;
 }
 
-bool toggleVisibility(gameplay::Control * control)
-{
-	if (control->isVisible())
-	{
-		return false;
-	}
-	else { return true; }
-}
-
 // Declare our game instance
 Main game;
 
@@ -95,7 +86,6 @@ void Main::initialize()
 	_scene->setActiveCamera(_camera.getCamera());
 
 	// Create a light source.
-
 #ifdef POINTLIGHT_TEST
 	_light = Light::createPoint(Vector3::one(), 800.0f);
 	Node* lightNode = _scene->addNode("light");
@@ -173,6 +163,9 @@ void Main::initialize()
 	//=============
 
 	//=============TERRAIN_EDITOR
+	slider = (Slider *)_mainForm->getControl("SizeSlider");
+	slider->addListener(this, Control::Listener::VALUE_CHANGED);
+
 	control = _mainForm->getControl("AlignButton");
 	control->addListener(this, Control::Listener::CLICK);
 
@@ -188,8 +181,9 @@ void Main::initialize()
 	control = _mainForm->getControl("SmoothButton");
 	control->addListener(this, Control::Listener::CLICK);
 
-	slider = (Slider *)_mainForm->getControl("SizeSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
+	control = _mainForm->getControl("PaintButton");
+	control->addListener(this, Control::Listener::CLICK);
+
 	//===============
 	_generateTerrainsForm = Form::create("res/forms/generateTerrains.form");
 	_generateTerrainsForm->setVisible(false);
@@ -310,6 +304,19 @@ void Main::initialize()
 														   _pager->heightFieldList);
 	_pager->parameters.blendMapDIR = createTMPFolder();
 
+
+	_pager->texturesLocation.resize(_pager->parameters.tilesResolution);
+	for (size_t i = 0; i < _pager->parameters.tilesResolution; i++)
+	{
+		_pager->texturesLocation[i].resize(_pager->parameters.tilesResolution);
+		for (size_t j = 0; j < _pager->parameters.tilesResolution; j++)
+		{
+			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/grass.dds"));
+			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/dirt.dds"));
+			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/rock.dds"));
+		}
+	}
+
 	FilesSaver saver;
 	Threads t;
 	t.blendBool();
@@ -382,7 +389,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	if (strcmp(control->getId(), "NavigateButton") == 0)
 	{
 		_inputMode = NAVIGATION;
-		//_mainForm->getControl("PaintToolbar")->setVisible(false);
 		_mainForm->getControl("TerrainEditorbar")->setVisible(false);
 		_mainForm->getControl("GeneratorToolBar")->setVisible(false);
 		_mainForm->getControl("NavigateToolBar")->setVisible(true);
@@ -391,7 +397,6 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		_inputMode = EDITING;
 		_mainForm->getControl("NavigateToolBar")->setVisible(false);
-		//_mainForm->getControl("PaintToolbar")->setVisible(false);
 		_mainForm->getControl("GeneratorToolBar")->setVisible(false);
 		_mainForm->getControl("TerrainEditorbar")->setVisible(true);
 	}
@@ -399,17 +404,8 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		_inputMode = GENERATOR;
 		_mainForm->getControl("NavigateToolBar")->setVisible(false);
-		//_mainForm->getControl("PaintToolbar")->setVisible(toggleVisibility(_mainForm->getControl("PaintToolBar")));
 		_mainForm->getControl("TerrainEditorbar")->setVisible(false);
 		_mainForm->getControl("GeneratorToolBar")->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "PaintButton") == 0)
-	{
-		_inputMode = PAINT;
-		_mainForm->getControl("NavigateToolBar")->setVisible(false);
-		_mainForm->getControl("TerrainEditorbar")->setVisible(false);
-		_mainForm->getControl("GeneratorToolBar")->setVisible(false);
-		//_mainForm->getControl("PaintToolbar")->setVisible(true);
 	}
 	//=============================
 
@@ -521,42 +517,12 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		Slider * slider = (Slider *)control;
 		_selectionScale = slider->getValue() * ((_pager->parameters.heightFieldResolution / 8) * (_pager->parameters.scale.x / 8));
-		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-		if (nearest != -1)
+
+		if (_pager->loadedTerrains.size() > 0)
 		{
-			_selectionRing->setScale(_selectionScale, _pager->loadedTerrains[nearest]);
+			_selectionRing->setScale(_selectionScale, _pager->loadedTerrains[0]);
 		}
 	}
-	/*
-	TerrainEditor TerrEdit;
-	std::vector<std::vector<unsigned char>> blend1, blend2;
-	std::vector<Vector3> fieldsPos;
-
-	for (size_t i = 0; i < _pager->loadedTerrains.size(); i++)
-	{
-		int posX = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().x;
-		int posZ = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().z;
-
-		int sPosX = posX / _pager->parameters.scale.x;
-		int sPosZ = posZ / _pager->parameters.scale.x;
-
-		posX = (posX / _pager->parameters.scale.x) / (_pager->parameters.heightFieldResolution - 1);
-		posZ = (posZ / _pager->parameters.scale.x) / (_pager->parameters.heightFieldResolution - 1);
-
-		blend1[i] = _pager->blendMaps[posX][posZ][0];
-		blend2[i] = _pager->blendMaps[posX][posZ][1];
-		fieldsPos.push_back(Vector3(sPosX, 0, sPosZ));
-	}
-
-	TerrEdit.paint(blend1,
-		blend2,
-		fieldsPos,
-		0,
-		Vector2(_selectionRing->getPosition().x, _selectionRing->getPosition().y),
-		_pager->parameters.heightFieldResolution,
-		_selectionRing->getScale()
-		);*/
-
 	else if (strcmp(control->getId(), "AlignButton") == 0)
 	{
 		TerrainEditor TerrEdit;
@@ -565,6 +531,10 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "RaiseButton") == 0)
 	{
+		control = _mainForm->getControl("PaintToolbar");
+		Container * container = (Container *)control;
+		container->setVisible(false);
+
 		control = _mainForm->getControl("RaiseButton");
 		Button * button = (Button *)control;
 		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
@@ -583,6 +553,10 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "LowerButton") == 0)
 	{
+		control = _mainForm->getControl("PaintToolbar");
+		Container * container = (Container *)control;
+		container->setVisible(false);
+
 		control = _mainForm->getControl("LowerButton");
 		Button * button = (Button *)control;
 		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
@@ -601,6 +575,10 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "FlattenButton") == 0)
 	{
+		control = _mainForm->getControl("PaintToolbar");
+		Container * container = (Container *)control;
+		container->setVisible(false);
+
 		control = _mainForm->getControl("FlattenButton");
 		Button * button = (Button *)control;
 		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
@@ -619,6 +597,10 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "SmoothButton") == 0)
 	{
+		control = _mainForm->getControl("PaintToolbar");
+		Container * container = (Container *)control;
+		container->setVisible(false);
+
 		TerrainEditor TerrEdit;
 		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 		if (nearest != -1)
@@ -634,6 +616,25 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 					_pager->loadedHeightfields);
 
 			_pager->reload(heightfields);
+		}
+	}
+	else if (strcmp(control->getId(), "PaintButton") == 0)
+	{
+		control = _mainForm->getControl("PaintToolbar");
+		Container * container = (Container *)control;
+		if (container->isVisible() == true)
+		{
+			container->setVisible(false);
+			control = _mainForm->getControl("HeightfieldEditor");
+			container = (Container *)control;
+			container->setVisible(true);
+		}
+		else 
+		{
+			container->setVisible(true);
+			control = _mainForm->getControl("HeightfieldEditor");
+			container = (Container *)control;
+			container->setVisible(false);
 		}
 	}
 	//=============================
@@ -1262,7 +1263,6 @@ void Main::update(float elapsedTime)
 	}
 	if (blendmap == true && total == saverThreads.size())
 	{
-		_pager->blendMaps.clear();
 		saverThreads.erase(saverThreads.begin() + iBlendmap);
 		threads[iBlendmap].join();
 		threads.erase(threads.begin() + iBlendmap);
@@ -1339,7 +1339,7 @@ void Main::update(float elapsedTime)
 			{
 				Vector3 ringPos = _selectionRing->getPosition();
 
-				std::vector<int> heightfields =
+				std::vector<int> modified =
 					TerrEdit.raise(
 						BoundingSphere(ringPos, _selectionRing->getScale()),
 						_pager->parameters.scale.x,
@@ -1347,7 +1347,124 @@ void Main::update(float elapsedTime)
 						_pager->loadedTerrains,
 						_pager->loadedHeightfields);
 
-				_pager->reload(heightfields);
+				_pager->reload(modified);
+			}
+		}
+		control = _mainForm->getControl("PaintToolbar");
+		Container * container = (Container*)control;
+		if (container->isVisible() == true)
+		{
+			bool paint = false,draw=false,erase=false;
+			control = _mainForm->getControl("DrawButton");
+			RadioButton * button = (RadioButton *)control;
+			if (button->isSelected() == true)
+			{
+				paint = true;
+				draw = true;
+			}
+			control = _mainForm->getControl("EraseButton");
+			button = (RadioButton *)control;
+			if (button->isSelected() == true)
+			{
+				paint = true;
+				erase = true;
+			}
+			if (paint == true)
+			{
+				TerrainEditor TerrEdit;
+				std::vector<std::vector<unsigned char>> blend1, blend2;
+				std::vector<Vector3> fieldsPos;
+
+				for (size_t i = 0; i < _pager->loadedTerrains.size(); i++)
+				{
+					int posX = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().x;
+					int posZ = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().z;
+
+					int offsetX = 0, offsetZ = 0;
+					if (posX > 0) { offsetX = 1; }
+					if (posZ > 0) { offsetZ = 1; }
+					int sPosX = ((posX / _pager->parameters.scale.x) + offsetX);
+					int sPosZ = ((posZ / _pager->parameters.scale.x) + offsetZ);
+
+					posX = (posX / _pager->parameters.scale.x) / (_pager->parameters.heightFieldResolution - 1);
+					posZ = (posZ / _pager->parameters.scale.x) / (_pager->parameters.heightFieldResolution - 1);
+
+					//blend1.push_back(_pager->blendMaps[posX][posZ][0]);
+					//blend2.push_back(_pager->blendMaps[posX][posZ][1]);
+					blend1.push_back(_pager->blendMaps[posZ][posX][0]);
+					blend2.push_back(_pager->blendMaps[posZ][posX][1]);
+					fieldsPos.push_back(Vector3(sPosX, 0, sPosZ));
+				}
+
+				int selectedTexture = 0;
+
+				control = _mainForm->getControl("Texture0");
+				RadioButton * button = (RadioButton *)control;
+				if (button->isSelected())
+				{
+					selectedTexture = 0;
+				}
+				control = _mainForm->getControl("Texture1");
+				button = (RadioButton *)control;
+				if (button->isSelected())
+				{
+					selectedTexture = 1;
+				}
+				control = _mainForm->getControl("Texture2");
+				button = (RadioButton *)control;
+				if (button->isSelected())
+				{
+					selectedTexture = 2;
+				}
+
+				bool drawOrErase;
+				if (draw == true) { drawOrErase = true; }
+				if (erase == true) { drawOrErase = false; }
+				std::vector<std::vector<Vector3>> modified = TerrEdit.paint(blend1,
+					blend2,
+					fieldsPos,
+					selectedTexture,
+					Vector2(_selectionRing->getPosition().x / _pager->parameters.scale.x, _selectionRing->getPosition().z / _pager->parameters.scale.x),
+					_pager->parameters.heightFieldResolution,
+					_selectionRing->getScale() / _pager->parameters.scale.x,
+					drawOrErase);
+
+				for (size_t i = 0; i < modified[0].size(); i++)
+				{
+					int z = (modified[0][i].x / _pager->parameters.heightFieldResolution);
+					int x = (modified[0][i].z / _pager->parameters.heightFieldResolution);
+
+					_pager->blendMaps[x][z][0] = TerrEdit.blend1[i];
+					FilesSaver saver;
+					saver.saveBlendmap(
+						_pager->blendMaps[x][z][0],
+						1,
+						_pager->parameters.blendMapDIR,
+						x,
+						z,
+						_pager->parameters.heightFieldResolution
+						);
+				}
+				for (size_t i = 0; i < modified[1].size(); i++)
+				{
+					int z = (modified[1][i].x / _pager->parameters.heightFieldResolution);
+					int x = (modified[1][i].z / _pager->parameters.heightFieldResolution);
+
+					_pager->blendMaps[x][z][1] = TerrEdit.blend2[i];
+					FilesSaver saver;
+					saver.saveBlendmap(
+						_pager->blendMaps[x][z][1],
+						2,
+						_pager->parameters.blendMapDIR,
+						x,
+						z,
+						_pager->parameters.heightFieldResolution
+						);
+				}
+				
+				_pager->reloadTerrains();
+				//_pager->reload(modified[0]);
+				//_pager->reload(modified[1]);
 			}
 		}
 	}
@@ -1419,7 +1536,7 @@ void Main::render(float elapsedTime)
 bool Main::drawScene(Node* node)
 {
 	// If the node visited contains a model, draw it
-
+	/*
 	Model* model = dynamic_cast<Model*>(node->getDrawable());
 	if (model)
 	{
@@ -1434,7 +1551,7 @@ bool Main::drawScene(Node* node)
 				node->getDrawable()->draw();
 			}
 		}
-	}
+	}*/
 	return true;
 }
 

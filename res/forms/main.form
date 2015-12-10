@@ -52,7 +52,7 @@ form MainForm
 
 		slider MoveSlider
 		{
-			text = Move Speed
+			text = CamMoveSpeed
 			selected = false
 			min = 1.0
 			max = 30.0
@@ -63,7 +63,7 @@ form MainForm
 		}
 		slider LODSlider
 		{
-			text = Terrains LOD
+			text = TerrainsLOD
 			selected = false
 			min = 1.0
 			max = 8
@@ -74,7 +74,7 @@ form MainForm
 		}
 		slider TerrainsRenderSlider
 		{
-			text = Terrains Render
+			text = TerrainsRenderDist
 			selected = false
 			min = 1.0
 			max = 10.0
@@ -85,7 +85,7 @@ form MainForm
 		}
 		slider ObjectsRenderSlider
 		{
-			text = Objects Render
+			text = ObjectsRenderDist
 			selected = false
 			min = 1.0
 			max = 10.0
@@ -96,7 +96,7 @@ form MainForm
 		}
 		slider LoadSlider
 		{
-			text = Load
+			text = TerrainsLoadDist
 			selected = false
 			min = 1.0
 			max = 10.0
@@ -107,7 +107,7 @@ form MainForm
 		}
 		slider UnloadSlider
 		{
-			text = Unload
+			text = TerrainsUnLoadDist
 			selected = false
 			min = 1.0
 			max = 10.0
@@ -120,14 +120,119 @@ form MainForm
 	container TerrainEditorbar
 	{
 		visible = false
-		width = 120
+		width = 242
 		height = 450
 		position = 0, 50
-		layout = LAYOUT_VERTICAL
+		layout = LAYOUT_FLOW
 		
+		button PaintButton
+		{
+			text = Paint
+			height = 45
+			width = 120
+		}
+
+		container HeightfieldEditor
+		{
+			width = 122
+			height = 225
+			layout = LAYOUT_VERTICAL
+
+			button FlattenButton
+			{
+				text = Flatten
+				height = 45
+				width = 120
+			}
+			button RaiseButton
+			{
+				text = Raise
+				height = 45
+				width = 120
+			}
+			button LowerButton
+			{
+				text = Lower
+				height = 45
+				width = 120
+			}
+			button SmoothButton
+			{
+				text = Smooth
+				height = 45
+				width = 120
+			}
+			button AlignButton
+			{
+				text = Align
+				height = 45
+				width = 120
+			}
+		}
+		container PaintToolbar
+		{
+			visible = false
+			width = 241
+			height = 181
+			layout = LAYOUT_FLOW
+
+			radioButton Texture0
+			{
+				group = Texture
+				text = Texture0
+				height = 45
+				width = 120
+			}
+			textbox Texture0Pos
+			{
+				text = 0
+				height = 45
+				width = 120
+			}
+			radioButton Texture1
+			{
+				group = Texture
+				text = Texture1
+				height = 45
+				width = 120
+			}
+			textbox Texture1Pos
+			{
+				text = 0
+				height = 45
+				width = 120
+			}
+			radioButton Texture2
+			{
+				group = Texture
+				text = Texture2
+				height = 45
+				width = 120
+			}
+			textbox Texture2Pos
+			{
+				text = 0
+				height = 45
+				width = 120
+			}
+			radioButton DrawButton
+			{
+				group = PaintBrush
+				text = Draw
+				height = 45
+				width = 120
+			}
+			radioButton EraseButton
+			{
+				group = PaintBrush
+				text = Erase
+				height = 45
+				width = 120
+			}
+		}
 		slider SizeSlider
 		{
-			text = Size
+			text = Brush Size
 			selected = true
 			min = 1.0
 			max = 20.0
@@ -136,46 +241,6 @@ form MainForm
 			height = 45
 			width = 120
 		}
-	
-		button FlattenButton
-		{
-			text = Flatten
-			height = 45
-			width = 120
-		}
-		button RaiseButton
-		{
-			text = Raise
-			height = 45
-			width = 120
-		}
-		button LowerButton
-		{
-			text = Lower
-			height = 45
-			width = 120
-		}
-		button SmoothButton
-		{
-			text = Smooth
-			height = 45
-			width = 120
-		}
-		button AlignButton
-		{
-			text = Align
-			height = 45
-			width = 120
-		}
-		/** Not implemented yet
-		radioButton PaintButton
-		{
-			group = ModeGroup
-			text = Paint
-			height = 45
-			width = 120
-		}
-		*/
 	}
 
 	container GeneratorToolBar
@@ -219,58 +284,6 @@ form MainForm
 		button LoadButton
 		{
 			text = Load
-			height = 45
-			width = 120
-		}
-	}
-	container PaintToolbar
-	{
-		visible = false
-		width = 120
-		height = 450
-		layout = LAYOUT_VERTICAL
-
-		slider SizeSlider2
-		{
-			text = Size
-			selected = true
-			min = 500.0
-			max = 50000.0
-			value = 500.0
-			step = 1.0
-			height = 45
-			width = 120
-		}
-		radioButton Texture1
-		{
-			group = TextureGroup
-			text = Texture1
-			height = 45
-			width = 120
-		}
-		radioButton Texture2
-		{
-			group = TextureGroup
-			text = Texture2
-			height = 45
-			width = 120
-		}
-		radioButton Texture3
-		{
-			group = TextureGroup
-			text = Texture2
-			height = 45
-			width = 120
-		}
-		button DrawButton
-		{
-			text = Draw
-			height = 45
-			width = 120
-		}
-		button EraseButton
-		{
-			text = Erase
 			height = 45
 			width = 120
 		}

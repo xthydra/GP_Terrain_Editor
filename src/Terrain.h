@@ -31,6 +31,7 @@ public:
 	* @param (int)patch size
 	* @param (Vector3)scale
 	* @param (Vector3)position
+	* @param vector stack of 3 strings defining the texture locations used by the blendmaps
 	* @param (std::string) normalmap
 	* @param (const char *)blendmap1
 	* @param (const char *)blendmap2
@@ -46,6 +47,7 @@ public:
 		int patchSize,
 		gameplay::Vector3,
 		gameplay::Vector3,
+		std::vector<std::string>,
 		std::string,
 		const char*,
 		const char*,

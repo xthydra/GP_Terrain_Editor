@@ -41,16 +41,19 @@ TerrainToolAutoBindingResolver::~TerrainToolAutoBindingResolver()
 
 bool TerrainToolAutoBindingResolver::resolveAutoBinding(const char* autoBinding, Node* node, MaterialParameter* parameter)
 {
+	//directional and spotlight
 	if (strcmp(autoBinding, "LIGHT_DIRECTION_0") == 0)
 	{
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightDirection0);
 		return true;
 	}
+	//directional,spotlight and pointlight
 	else if (strcmp(autoBinding, "LIGHT_COLOR_0") == 0)
 	{
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightColor0);
 		return true;
 	}
+	//point light,spot light
 	else if (strcmp(autoBinding, "LIGHT_POSITION_0") == 0)
 	{
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightPosition0);
@@ -61,16 +64,19 @@ bool TerrainToolAutoBindingResolver::resolveAutoBinding(const char* autoBinding,
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightRange0);
 		return true;
 	}
+	//point light,spot light
 	else if (strcmp(autoBinding, "LIGHT_INVERSE_RANGE_0") == 0)
 	{
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightInverseRange0);
 		return true;
 	}
+	//spot light
 	else if (strcmp(autoBinding, "LIGHT_INNER_ANGLE_COS_0") == 0)
 	{
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightInnerAngleCos0);
 		return true;
 	}
+	//spot light
 	else if (strcmp(autoBinding, "LIGHT_OUTTER_ANGLE_COS_0") == 0)
 	{
 		parameter->bindValue(this, &TerrainToolAutoBindingResolver::getLightOutterAngleCos0);

@@ -216,14 +216,14 @@ public:
 	* position X defined by world space position
 	* position Z defined by world space position
 	* blendmap 0 or 1
-	* the image data stacked into a vector
+	* the blendmaps image data stacked into a vector
 	**/
 	std::vector<std::vector<std::vector<std::vector<unsigned char> > > > blendMaps;
 
 	/**
 	* position X defined by world space position
 	* position Z defined by world space position
-	* the image data stacked into a vector
+	* the normalmaps image data stacked into a vector
 	**/
 	std::vector<std::vector<std::vector<unsigned char> > > normalMaps;
 
@@ -233,6 +233,13 @@ public:
 	* vector stack of gameplay::Vector3 defining the number of objects on one terrain
 	**/
 	std::vector<std::vector<std::vector<Vector3*> > > objectsPosition;
+
+	/**
+	* position X defined by world space position
+	* position Z defined by world space position
+	* A vector stack of 3 string defining the texture location used by the blendmaps used by the terrain
+	**/
+	std::vector<std::vector<std::vector<std::string>>> texturesLocation;
 
 	/**
 	* position X defined by world space position

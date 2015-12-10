@@ -100,7 +100,6 @@ struct TerrainEditor{
 		std::vector<gameplay::Terrain*>,
 		std::vector<HeightField*>);
 
-	
 	/**
 	* Paint a given texture defined by a radius
 	*
@@ -111,14 +110,20 @@ struct TerrainEditor{
 	* @param (Vector2) selection ring XZ Position(divided by terrains XZ scale)
 	* @param (int) blend map resolution
 	* @param (int)radius of the selection ring(divided by terrains XZ scale)
+	* @param (bool)true for drawing, false for erasing
 	*
-	* @return returning int pointing out to modified terrains from the vector stack
+	* @return returning 3D Vectors defining the blendmaps position that was modified
 	**/
-	std::vector<std::vector<std::vector<unsigned char>>> paint(std::vector<std::vector<unsigned char>>,
+	std::vector<std::vector<Vector3>> paint(std::vector<std::vector<unsigned char>>,
 		std::vector<std::vector<unsigned char>>,
 		std::vector<Vector3>,
 		int,
 		Vector2,
 		int,
-		int);
+		int,
+		bool);
+
+	//used by the painting function to return the modified blendmaps
+	std::vector<std::vector<unsigned char>> blend1, blend2;
+
 };

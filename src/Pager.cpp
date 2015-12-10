@@ -217,6 +217,7 @@ void Pager::loadTerrain(int z, int x)
 			gameplay::Vector3(zoneList[z][x]->getPosition().x,
 				0,
 				zoneList[z][x]->getPosition().z),
+			texturesLocation[z][x],
 			normalName,
 			blendName1.c_str(),
 			blendName2.c_str(),

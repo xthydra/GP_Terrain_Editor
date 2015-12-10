@@ -1,6 +1,12 @@
 =====================UPCOMING_FEATURES
 ------------------------PRIOR
-??
+Texture Painting tool
+
+change the texture text box inside the painting tool when the selection ring is changing position to make sure that
+add new blendmaps settings to the blendmap UI
+update the example function to make sure it would keep track of the blendmaps name
+keep track of every blendmaps of every terrains by setting up vectors inside pager.h
+finish the painting function inside TerrainEditor.cpp
 ------------------------------
 
 -------------------------MAJOR
@@ -15,24 +21,26 @@ add object material name inside the filenames. for e.g : field-0-0.bin.terrain.m
 when in editing mode mouse wheel should be able to increase or decrease selection ring size
 
 saving normalmaps,blendmaps, terrains, objects positions , materials and scenes per tile in a compressed file using fastLZ or someshit https://github.com/ariya/FastLZ/blob/master/fastlz.c
+
+add support for nav mesh generation https://github.com/recastnavigation/recastnavigation
+
 Angular terrain editing tools
+
 Generate terrains,normalmaps,blendmaps and object positions on a GPU(if possible)
+
 stick bunch of heightfields together in low detail as an overview feature to save GPU power + button
+
 implement vertical paging
+
 optimize long distance traveling by virtually moving terrains and objects around as a virtual camera
 optimize the virtual camera by preventing buffer overflow on the position value
-Texture Painting tool
 	
 if i had maximum height from when creating terrains then i wouldn't need to generate all blendmaps all at once before starting the lazy thread that's encoding blendmaps into PNGs...that would be an optimization
-
------------------------------
-
 =============================
 
-==========================BUG
-it might also have created a bug while using the selection ring because sometime it doesn't seem to work as intended( doesn't increase in size or doesn't seem to be where it's rendered when an editing function is called)
+==========================BUGS
 
-the aligning function is missing 4 vertexes alignment between 4 terrains extremity
-the diamond simplex noiser look too much smooth on Y scale
+the aligning function is missing 4 vertexes alignment between 4 terrains extremities
+the diamondSquare noiser look too much smooth on Y scale
 theres no checks against segmentation fault for terrains with certain patchsize versus heightfield size
 =============================

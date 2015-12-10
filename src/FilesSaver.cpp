@@ -199,7 +199,6 @@ void FilesSaver::saveBlendmaps(std::vector<std::vector<std::vector<std::vector<u
 			lodepng::encode(fieldName.c_str(), blendmaps[i][j][1], blendmapRes, blendmapRes);
 		}
 	}
-	int shit = 1 + 1;
 }
 
 //===========================================================================
@@ -249,6 +248,23 @@ void FilesSaver::saveBlendmap(std::vector<unsigned char> blendmap, std::vector<u
 
 	// Generate the png.
 	lodepng::encode(fieldName.c_str(), blendmap2.data(), blendmapRes, blendmapRes);
+}
+
+void FilesSaver::saveBlendmap(std::vector<unsigned char> blendmap, int blendNumber, char* folder, int z, int x, int blendmapRes)
+{
+	std::string fieldName;
+
+	fieldName += folder;
+	fieldName += "blend-";
+	fieldName += std::to_string(z);
+	fieldName += "-";
+	fieldName += std::to_string(x);
+	fieldName += "_";
+	fieldName += std::to_string(blendNumber);
+	fieldName += ".png";
+
+	// Generate the png.
+	lodepng::encode(fieldName.c_str(), blendmap.data(), blendmapRes, blendmapRes);
 }
 /*
 void FilesSaver::saveObjectsPos(std::vector<Vector3> objsPos, char * objectName, int z, int x)

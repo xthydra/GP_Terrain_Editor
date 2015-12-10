@@ -25,6 +25,7 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 				   int patchSize,
 				   gameplay::Vector3 scale,
 				   gameplay::Vector3 pos,
+				   std::vector<std::string> textures,
 				   std::string normalmap,
 				   const char* blend1,
 				   const char* blend2,
@@ -52,10 +53,10 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 			NULL,
 			terrainMaterial);
 	}
-	
-	terrain->setLayer(0, "res/common/terrain/grass.dds", gameplay::Vector2(ScaleTexture, ScaleTexture));
-	terrain->setLayer(1, "res/common/terrain/dirt.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend1, 3);
-	terrain->setLayer(2, "res/common/terrain/rock.dds", gameplay::Vector2(ScaleTexture, ScaleTexture), blend2, 3);
+
+	terrain->setLayer(0, textures[0].c_str(), gameplay::Vector2(ScaleTexture, ScaleTexture));
+	terrain->setLayer(1, textures[1].c_str(), gameplay::Vector2(ScaleTexture, ScaleTexture), blend1, 3);
+	terrain->setLayer(2, textures[2].c_str(), gameplay::Vector2(ScaleTexture, ScaleTexture), blend2, 3);
 
 	terrainNode = gameplay::Node::create("terrain");
 	terrainNode->setTranslation(pos);

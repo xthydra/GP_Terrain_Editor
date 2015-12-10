@@ -61,13 +61,25 @@ struct FilesSaver
 
 	/*
 	Output one blend map as a PNG image
-	@param blend in 1 vector (pixels as unsigned char)
+	@param blendmap1 in 1 vector (pixels as unsigned char)
+	@param blendmap2 in 1 vector (pixels as unsigned char)
 	@param folder to output the encoded PNG file
 	@param Z position in the vector of heightfields list
 	@param X position in the vector of heightfields list
 	@param blend map Resolution
 	*/
 	void saveBlendmap(std::vector<unsigned char>,std::vector<unsigned char>,char*,int,int,int);
+
+	/*
+	Output one blend map as a PNG image
+	@param blendmap in 1 vector (pixels as unsigned char)
+	@param blendmap number(1 or 2)
+	@param folder to output the encoded PNG file
+	@param Z position in the vector of heightfields list
+	@param X position in the vector of heightfields list
+	@param blend map Resolution
+	*/
+	void saveBlendmap(std::vector<unsigned char>, int, char*, int, int, int);
 
 	/*
 	Output one terrain objects position as a binary file(it's not active tho lol)

@@ -423,51 +423,160 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 	return fields;
 }
 
-std::vector<std::vector<std::vector<unsigned char>>> TerrainEditor::paint(std::vector<std::vector<unsigned char>> blendmap1,
+std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<unsigned char>> blendmap1,
 																		  std::vector<std::vector<unsigned char>> blendmap2,
 																		  std::vector<Vector3> fieldsPos,
 																		  int selectedTex,
 																		  Vector2 pos,
 																		  int blendmapRes,
-																		  int radius)
+																		  int radius,
+																		  bool draw)
 {
+	std::vector<std::vector<Vector3>> modified;
+	modified.resize(2);
 	for (size_t i = 0; i < blendmap1.size(); i++)
 	{
+		bool bBlend1 = false, bBlend2 = false;
 		for (size_t x = 0; x < blendmapRes; x++)
 		{
 			for (size_t z = 0; z < blendmapRes; z++)
 			{
 				Vector2 pixel = Vector2(((fieldsPos[i].x - (blendmapRes*0.5)) + x), ((fieldsPos[i].z - (blendmapRes*0.5)) + z));
 
-				float vx = pos.x - x;
-				float vz = pos.y - z;
+				float dist = pos.distance(pixel);
 
-				if ((bool)(sqrt((vx * vx) + (vz * vz)) <= radius) == true)
+				if(dist < radius)
 				{
 					int k = 4 * x + (z * blendmapRes * 4);
 
+					float strNeg = (dist / radius);
+
+					double strPlus = ((radius - dist) / radius);
+					float brushStr = 1;//minimum 1// maximum ~1.5
+					strPlus += brushStr;
+
 					if (selectedTex == 0)
 					{
-						//blendmap1[i][k] -= 
-						//blendmap1[--]
-						//blendmap2[--]
+						if (draw)
+						{
+							bBlend1 = true;
+							bBlend2 = true;
+
+							//blendmap1[--]
+							//blendmap2[--]
+
+							blendmap1[i][k] *= strNeg;
+							blendmap1[i][k+1] *= strNeg;
+							blendmap1[i][k+2] *= strNeg;
+							blendmap1[i][k + 3] = (((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) * strNeg) / 3);
+
+							blendmap2[i][k] *= strNeg;
+							blendmap2[i][k + 1] *= strNeg;
+							blendmap2[i][k + 2] *= strNeg;
+							blendmap2[i][k + 3] = (((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) * strNeg) / 3);
+						}
+						// you cannot remove the texture one because it's not a blendmap
+						//tho you can replace it by using blendmaps but it doesn't follow the logical expression behind "removing a texture"
+						//i would have to choose between 2 blendmaps to "replace" instead of "remove", very counter intuitive
 					}
 					if (selectedTex == 1)
 					{
-						//blendmap1[++]
-						//blendmap2[--]
+						if (draw)
+						{
+							bBlend1 = true;
+							bBlend2 = true;
+
+							//blendmap1[++]
+							//blendmap2[--]
+							int height = blendmap1[i][k] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap1[i][k] = height;
+
+							height = blendmap1[i][k + 1] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap1[i][k + 1] = height;
+
+							height = blendmap1[i][k + 2] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap1[i][k + 2] = height;
+
+							height = blendmap1[i][k + 3] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap1[i][k + 3] = height;
+
+							blendmap2[i][k] *= strNeg;
+							blendmap2[i][k + 1] *= strNeg;
+							blendmap2[i][k + 2] *= strNeg;
+							blendmap2[i][k + 3] = (((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) * strNeg) / 3);
+						}
+						else
+						{
+							bBlend1 = true;
+
+							//blendmap1[--]
+
+							blendmap1[i][k] *= strNeg;
+							blendmap1[i][k + 1] *= strNeg;
+							blendmap1[i][k + 2] *= strNeg;
+							blendmap1[i][k + 3] = (((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) * strNeg) / 3);
+						}
 					}
 					if (selectedTex == 2)
 					{
-						//blendmap1[--]
-						//blendmap2[++]
+						if (draw)
+						{
+							bBlend1 = true;
+							bBlend2 = true;
+
+							//blendmap1[--]
+							//blendmap2[++]
+
+							blendmap1[i][k] *= strNeg;
+							blendmap1[i][k + 1] *= strNeg;
+							blendmap1[i][k + 2] *= strNeg;
+							blendmap1[i][k + 3] = (((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) * strNeg) / 3);
+
+							int height = blendmap2[i][k] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap2[i][k] = height;
+
+							height = blendmap2[i][k + 1] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap2[i][k + 1] = height;
+
+							height = blendmap2[i][k + 2] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap2[i][k + 2] = height;
+
+							height = blendmap2[i][k + 3] * strPlus;
+							if (height > 255) { height = 255; }
+							blendmap2[i][k + 3] = height;
+						}
+						else
+						{
+							bBlend2 = true;
+
+							//blendmap2[--]
+
+							blendmap2[i][k] *= (dist / radius);
+							blendmap2[i][k + 1] *= (dist / radius);
+							blendmap2[i][k + 2] *= (dist / radius);
+							blendmap2[i][k + 3] = (((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) * (dist / radius)) / 3);
+						}
 					}
 				}
 			}
 		}
+		if (bBlend1 == true)
+		{
+			modified[0].push_back(fieldsPos[i]);
+			blend1.push_back(blendmap1[i]);
+		}
+		if (bBlend2 == true)
+		{
+			modified[1].push_back(fieldsPos[i]);
+			blend2.push_back(blendmap2[i]);
+		}
 	}
-	std::vector<std::vector<std::vector<unsigned char>>> blendmaps;
-	blendmaps.push_back(blendmap1);
-	blendmaps.push_back(blendmap2);
-	return blendmaps;
+	return modified;
 }
