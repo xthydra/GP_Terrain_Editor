@@ -16,7 +16,7 @@
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "Main.h"
 
 void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > > objsPos, char * objectName)
 {

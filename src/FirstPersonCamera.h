@@ -16,8 +16,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "gameplay.h"
-
 using namespace gameplay;
 
 /**
@@ -108,7 +106,16 @@ public:
 	*/
 	void rotate(float yaw, float pitch);
 
+	/**
+	* set the Movement speed of the camera.
+	**/
+	void setMoveSpeed(float);
+
 private:
+	/**
+	* Movement speed of the camera.
+	**/
+	float _moveSpeed;
 
 	/**
 	* Node descriping the orientation of the camera.

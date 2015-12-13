@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "Main.h"
 
 /**
 * return the heightfield height based on gameplay implementation

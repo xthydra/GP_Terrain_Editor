@@ -1,12 +1,13 @@
 =====================UPCOMING_FEATURES
 ------------------------PRIOR
-Texture Painting tool
+change the texture text box inside the painting UI tool when the selection ring is changing position to make sure that the z
 
-change the texture text box inside the painting tool when the selection ring is changing position to make sure that
 add new blendmaps settings to the blendmap UI
 update the example function to make sure it would keep track of the blendmaps name
-keep track of every blendmaps of every terrains by setting up vectors inside pager.h
-finish the painting function inside TerrainEditor.cpp
+
+make a class for creating UI forms and for checking against the UI(Editing tools are taking too much space inside the main source files and UI initilization list is horribly long)
+
+put the generatingTerrain,normal maps and such inside interface class
 ------------------------------
 
 -------------------------MAJOR

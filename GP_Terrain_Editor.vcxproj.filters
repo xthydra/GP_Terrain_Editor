@@ -40,6 +40,9 @@
     <ClCompile Include="src\AutoBindingResolver.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\UInterface.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DiamondSquareNoise.h">
@@ -82,6 +85,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\AutoBindingResolver.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UInterface.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

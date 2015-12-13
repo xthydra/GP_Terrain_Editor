@@ -16,7 +16,7 @@
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "Main.h"
 
 char * createTMPFolder()
 {
@@ -49,17 +49,12 @@ Main game;
 
 Main::Main()
 	: _scene(NULL),
-	_mainForm(NULL),
-	_generateTerrainsForm(NULL),
-	_loadForm(NULL),
 	_moveForward(false),
 	_moveBackward(false),
 	_moveLeft(false),
 	_moveRight(false),
 	_prevX(0),
 	_prevY(0),
-	MOVE_SPEED(10.0f),
-	_selectionScale(100.0f),
 	_inputMode(NAVIGATION),
 	_doAction(false)
 {
@@ -80,10 +75,12 @@ void Main::initialize()
 	_scene->setAmbientColor(0.5,0.5,0.5);
 
 	// Setup a fly cam.
-	_camera.initialize(1.0f, 60000.0f, 45);
-	_camera.rotate(0.0f, -MATH_DEG_TO_RAD(10));
-	_scene->addNode(_camera.getRootNode());
-	_scene->setActiveCamera(_camera.getCamera());
+	_camera = new FirstPersonCamera();
+	_camera->initialize(1.0f, 60000.0f, 45);
+	_camera->rotate(0.0f, -MATH_DEG_TO_RAD(10));
+	_camera->setMoveSpeed(10);
+	_scene->addNode(_camera->getRootNode());
+	_scene->setActiveCamera(_camera->getCamera());
 
 	// Create a light source.
 #ifdef POINTLIGHT_TEST
@@ -103,144 +100,6 @@ void Main::initialize()
 	_binding = new TerrainToolAutoBindingResolver();
 	_binding->setLight(_light);
 #endif
-	//creating and setting up the UI
-	
-	_mainForm = Form::create("res/forms/main.form");
-
-	Control *control = _mainForm->getControl("EditorButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("NavigateButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("GeneratorButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	/* Not implemented yet
-	control = _mainForm->getControl("PaintButton");
-	control->addListener(this, Control::Listener::CLICK);
-	*/
-	//=============NAVIGATOR
-	Slider *slider = (Slider *)_mainForm->getControl("MoveSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	slider = (Slider *)_mainForm->getControl("LODSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	slider = (Slider *)_mainForm->getControl("TerrainsRenderSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	slider = (Slider *)_mainForm->getControl("ObjectsRenderSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	slider = (Slider *)_mainForm->getControl("LoadSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	slider = (Slider *)_mainForm->getControl("UnloadSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	_mainForm->getControl("NavigateToolBar")->setVisible(true);
-	//=============
-
-	//=============GENERATOR
-	control = _mainForm->getControl("GenerateTerrainsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("GenerateBlendMapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("GenerateNormalMapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("GenerateObjectsPosButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("SaveButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("LoadButton");
-	control->addListener(this, Control::Listener::CLICK);
-	//=============
-
-	//=============TERRAIN_EDITOR
-	slider = (Slider *)_mainForm->getControl("SizeSlider");
-	slider->addListener(this, Control::Listener::VALUE_CHANGED);
-
-	control = _mainForm->getControl("AlignButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("RaiseButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("LowerButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("FlattenButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("SmoothButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _mainForm->getControl("PaintButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	//===============
-	_generateTerrainsForm = Form::create("res/forms/generateTerrains.form");
-	_generateTerrainsForm->setVisible(false);
-
-	control = _generateTerrainsForm->getControl("CancelGenerateTerrainsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _generateTerrainsForm->getControl("ConfirmGenerateTerrainsButton");
-	control->addListener(this, Control::Listener::CLICK);
-	//===============	
-	_generateBlendmapsForm = Form::create("res/forms/generateBlendmaps.form");
-	_generateBlendmapsForm->setVisible(false);
-
-	control = _generateBlendmapsForm->getControl("CancelGenerateBlendmapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _generateBlendmapsForm->getControl("ConfirmGenerateBlendmapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-	//===============
-	_loadForm = Form::create("res/forms/load.form");
-	_loadForm->setVisible(false);
-
-	control = _loadForm->getControl("CancelLoadButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _loadForm->getControl("ConfirmLoadButton");
-	control->addListener(this, Control::Listener::CLICK);
-	//===============
-	_generateObjectsForm = Form::create("res/forms/generateObjects.form");
-	_generateObjectsForm->setVisible(false);
-
-	control = _generateObjectsForm->getControl("CancelGenerateObjectsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _generateObjectsForm->getControl("ConfirmGenerateObjectsButton");
-	control->addListener(this, Control::Listener::CLICK);
-	//===============SAVE
-	_saveForm = Form::create("res/forms/save.form");
-	_saveForm->setVisible(false);
-
-	control = _saveForm->getControl("RAWHeightmapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _saveForm->getControl("BlendmapsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _saveForm->getControl("ObjectsButton");
-	control->addListener(this, Control::Listener::CLICK);
-
-	control = _saveForm->getControl("CancelSaveButton");
-	control->addListener(this, Control::Listener::CLICK);
-	//===============
-
-	control = _mainForm->getControl("RaiseButton");
-	Button * button = (Button *)control;
-	normalButton = button->getSkinColor(gameplay::Control::State::NORMAL);
-	activeButton = button->getSkinColor(gameplay::Control::State::ACTIVE);
 	
 #ifdef EXAMPLE
 	//Generate heightfields for the terrain pager
@@ -291,6 +150,9 @@ void Main::initialize()
 	_pager->heightFieldList = heightfields;
 
 	_pager->computePositions();
+
+	//creating and setting up the UI
+	interface = new UI(_scene, this, _camera, _pager);
 
 #ifdef CREATE_BLENDMAPS
 	_pager->blendMaps =
@@ -352,14 +214,16 @@ void Main::initialize()
 		_pager->parameters.heightFieldResolution));
 
 #endif
-	_camera.setPosition(Vector3(0, ((parameters.heightFieldResolution*parameters.tilesResolution) * 25), 0));
-	_camera.rotate(0, -90);
+	_camera->setPosition(Vector3(0, ((parameters.heightFieldResolution*parameters.tilesResolution) * 25), 0));
+	_camera->rotate(0, -90);
 
 	_selectionRing = new SelectionRing(_scene);
 
+	interface->selectionRing = _selectionRing;
+
 #ifdef CREATE_TREES
 #ifdef POINTLIGHT_TEST
-	control = _generateObjectsForm->getControl("ObjectTextBox");
+	Control * control =	interface->generateObjectsForm->getControl("ObjectTextBox");
 	TextBox * textBox = (TextBox *)control;
 	textBox->setText("res/common/Tree_pointlight.scene");
 	generateObjectsPosition();
@@ -367,16 +231,15 @@ void Main::initialize()
 	generateObjectsPosition();
 #endif
 #endif
+#elif
+	//creating and setting up the UI
+	interface = new UI(_scene, this, _camera, _pager);
 #endif
 
 }
 
 void Main::finalize()
 {
-	SAFE_RELEASE(_mainForm);
-	SAFE_RELEASE(_generateTerrainsForm);
-	SAFE_RELEASE(_generateBlendmapsForm);
-	SAFE_RELEASE(_loadForm);
 	SAFE_RELEASE(_light);
 	SAFE_RELEASE(_selectionRing);
 	SAFE_RELEASE(_scene);
@@ -385,299 +248,27 @@ void Main::finalize()
 
 void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 {
-	//=====================MAIN_FORM
-	if (strcmp(control->getId(), "NavigateButton") == 0)
-	{
-		_inputMode = NAVIGATION;
-		_mainForm->getControl("TerrainEditorbar")->setVisible(false);
-		_mainForm->getControl("GeneratorToolBar")->setVisible(false);
-		_mainForm->getControl("NavigateToolBar")->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "EditorButton") == 0)
-	{
-		_inputMode = EDITING;
-		_mainForm->getControl("NavigateToolBar")->setVisible(false);
-		_mainForm->getControl("GeneratorToolBar")->setVisible(false);
-		_mainForm->getControl("TerrainEditorbar")->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "GeneratorButton") == 0)
-	{
-		_inputMode = GENERATOR;
-		_mainForm->getControl("NavigateToolBar")->setVisible(false);
-		_mainForm->getControl("TerrainEditorbar")->setVisible(false);
-		_mainForm->getControl("GeneratorToolBar")->setVisible(true);
-	}
-	//=============================
+	//most of the user interface events will happen in that function
+	interface->controlEvents(control, evt);
+	_inputMode = (INPUT_MODE)interface->inputMode;
 
-	//=====================GENERATOR
-	else if (strcmp(control->getId(), "GenerateTerrainsButton") == 0)
+	//the other part of the UI events will be called here
+	if (strcmp(control->getId(), "ConfirmGenerateTerrainsButton") == 0)
 	{
-		_mainForm->setVisible(false);
-		_generateTerrainsForm->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "GenerateBlendMapsButton") == 0)
-	{
-		if (_pager)
-		{
-			if (_pager->heightFieldList.size() > 0)
-			{
-				_mainForm->setVisible(false);
-				_generateBlendmapsForm->setVisible(true);
-			}
-		}
-	}
-	else if (strcmp(control->getId(), "GenerateNormalMapsButton") == 0)
-	{
-		if (_pager)
-		{
-			if (_pager->heightFieldList.size() > 0)
-			{
-				TerrainGenerator terrainGenerator;
-				terrainGenerator.createNormalmaps(_pager->parameters.scale.y, _pager->parameters.scale.x, _pager->parameters.heightFieldResolution, _pager->heightFieldList);
-			}
-		}
-	}
-	else if (strcmp(control->getId(), "GenerateObjectsPosButton") == 0)
-	{
-		_mainForm->setVisible(false);
-		_generateObjectsForm->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "SaveButton") == 0)
-	{
-		_mainForm->setVisible(false);
-		_saveForm->setVisible(true);
-	}
-	else if (strcmp(control->getId(), "LoadButton") == 0)
-	{
-		_loadForm->setVisible(true);
-		_mainForm->setVisible(false);
-	}
-
-	//=============================
-
-	//====================NAVIGATOR
-	else if (strcmp(control->getId(), "MoveSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		MOVE_SPEED = slider->getValue();
-	}
-	else if (strcmp(control->getId(), "LODSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		_pager->parameters.lodQuality = slider->getValue();
-	}
-	else if (strcmp(control->getId(), "LoadSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		if (_pager->parameters.distanceTerrainUnload > (slider->getValue() * _pager->parameters.boundingBox))
-		{
-			_pager->parameters.distanceTerrainLoad = (slider->getValue() * _pager->parameters.boundingBox);
-		}
-		else if (_pager->parameters.distanceTerrainUnload < (slider->getValue() * _pager->parameters.boundingBox))
-		{
-			Control * control2 = _mainForm->getControl("UnloadSlider");
-			Slider * slider2 = (Slider *)control2;
-			slider2->setValue(slider->getValue() + 1);
-			//setloadSlider value below unloadSlider
-			_pager->parameters.distanceTerrainUnload = (slider2->getValue() * _pager->parameters.boundingBox);
-			_pager->parameters.distanceTerrainLoad = (slider->getValue() * _pager->parameters.boundingBox);
-		}
-	}
-	else if (strcmp(control->getId(), "ObjectsRenderSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		_pager->parameters.distanceMaxModelRender = ((slider->getValue() * _pager->parameters.boundingBox) * 0.2);
-	}
-	else if (strcmp(control->getId(), "TerrainsRenderSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		_pager->parameters.distanceTerrainMaxRender = (slider->getValue() * _pager->parameters.boundingBox);
-	}
-	else if (strcmp(control->getId(), "UnloadSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		if (_pager->parameters.distanceTerrainLoad < (slider->getValue() * _pager->parameters.boundingBox))
-		{
-			_pager->parameters.distanceTerrainUnload = (slider->getValue() * _pager->parameters.boundingBox);
-		}
-		else if (_pager->parameters.distanceTerrainLoad >(slider->getValue() * _pager->parameters.boundingBox))
-		{
-			Control * control2 = _mainForm->getControl("LoadSlider");
-			Slider * slider2 = (Slider *)control2;
-			slider2->setValue(slider->getValue() - 1);
-			//setloadSlider value below unloadSlider
-			_pager->parameters.distanceTerrainLoad = (slider2->getValue() * _pager->parameters.boundingBox);
-			_pager->parameters.distanceTerrainUnload = (slider->getValue() * _pager->parameters.boundingBox);
-		}
-	}
-	//=============================
-
-	//=======================EDITOR
-	else if (strcmp(control->getId(), "SizeSlider") == 0)
-	{
-		Slider * slider = (Slider *)control;
-		_selectionScale = slider->getValue() * ((_pager->parameters.heightFieldResolution / 8) * (_pager->parameters.scale.x / 8));
-
-		if (_pager->loadedTerrains.size() > 0)
-		{
-			_selectionRing->setScale(_selectionScale, _pager->loadedTerrains[0]);
-		}
-	}
-	else if (strcmp(control->getId(), "AlignButton") == 0)
-	{
-		TerrainEditor TerrEdit;
-		TerrEdit.aligningTerrainsVertexes(_pager->heightFieldList);
-		_pager->reloadTerrains();
-	}
-	else if (strcmp(control->getId(), "RaiseButton") == 0)
-	{
-		control = _mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
-		control = _mainForm->getControl("RaiseButton");
-		Button * button = (Button *)control;
-		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
-		control = _mainForm->getControl("LowerButton");
-		button = (Button *)control;
-		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
-		{
-			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
-		}
-		control = _mainForm->getControl("FlattenButton");
-		button = (Button *)control;
-		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
-		{
-			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
-		}
-	}
-	else if (strcmp(control->getId(), "LowerButton") == 0)
-	{
-		control = _mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
-		control = _mainForm->getControl("LowerButton");
-		Button * button = (Button *)control;
-		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
-		control = _mainForm->getControl("RaiseButton");
-		button = (Button *)control;
-		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
-		{
-			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
-		}
-		control = _mainForm->getControl("FlattenButton");
-		button = (Button *)control;
-		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
-		{
-			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
-		}
-	}
-	else if (strcmp(control->getId(), "FlattenButton") == 0)
-	{
-		control = _mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
-		control = _mainForm->getControl("FlattenButton");
-		Button * button = (Button *)control;
-		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
-		control = _mainForm->getControl("LowerButton");
-		button = (Button *)control;
-		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
-		{
-			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
-		}
-		control = _mainForm->getControl("RaiseButton");
-		button = (Button *)control;
-		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
-		{
-			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
-		}
-	}
-	else if (strcmp(control->getId(), "SmoothButton") == 0)
-	{
-		control = _mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
-		TerrainEditor TerrEdit;
-		int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-		if (nearest != -1)
-		{
-			Vector3 ringPos = _selectionRing->getPosition();
-
-			std::vector<int> heightfields =
-				TerrEdit.smooth(
-					BoundingSphere(ringPos, _selectionRing->getScale()),
-					_pager->parameters.scale.x,
-					_pager->parameters.scale.y,
-					_pager->loadedTerrains,
-					_pager->loadedHeightfields);
-
-			_pager->reload(heightfields);
-		}
-	}
-	else if (strcmp(control->getId(), "PaintButton") == 0)
-	{
-		control = _mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		if (container->isVisible() == true)
-		{
-			container->setVisible(false);
-			control = _mainForm->getControl("HeightfieldEditor");
-			container = (Container *)control;
-			container->setVisible(true);
-		}
-		else 
-		{
-			container->setVisible(true);
-			control = _mainForm->getControl("HeightfieldEditor");
-			container = (Container *)control;
-			container->setVisible(false);
-		}
-	}
-	//=============================
-	else if (strcmp(control->getId(), "CancelGenerateTerrainsButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_generateTerrainsForm->setVisible(false);
-	}
-	else if (strcmp(control->getId(), "ConfirmGenerateTerrainsButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_generateTerrainsForm->setVisible(false);
-		this->generateNewTerrain();
-	}
-	//===========================
-	else if (strcmp(control->getId(), "CancelGenerateBlendmapsButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_generateBlendmapsForm->setVisible(false);
+		generateNewTerrain();
 	}
 	else if (strcmp(control->getId(), "ConfirmGenerateBlendmapsButton") == 0)
 	{
-		_mainForm->setVisible(true);
-		_generateBlendmapsForm->setVisible(false);
 		generateNewBlendmaps();
 	}
-	//===========================
-	else if (strcmp(control->getId(), "CancelLoadButton") == 0)
+	else if (strcmp(control->getId(), "ConfirmLoadButton") == 0)
 	{
-		_mainForm->setVisible(true);
-		_loadForm->setVisible(false);
-	}
-	else if (strcmp(control->getId(), "ConfirmLoadButton") == 0)	
-	{
-		_mainForm->setVisible(true);
-		_loadForm->setVisible(false);
 		load();
 	}
-	//===========================
 	else if (strcmp(control->getId(), "RAWHeightmapsButton") == 0)
 	{
 		FilesSaver saver;
-		
+
 		threads.push_back(std::thread(
 			&FilesSaver::saveRAWHeightmaps,
 			saver,
@@ -714,21 +305,8 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		t.objectBool();
 		saverThreads.push_back(t);
 	}
-	else if (strcmp(control->getId(), "CancelSaveButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_saveForm->setVisible(false);
-	}
-	//===========================
-	else if (strcmp(control->getId(), "CancelGenerateObjectsButton") == 0)
-	{
-		_mainForm->setVisible(true);
-		_generateObjectsForm->setVisible(false);
-	}
 	else if (strcmp(control->getId(), "ConfirmGenerateObjectsButton") == 0)
 	{
-		_mainForm->setVisible(true);
-		_generateObjectsForm->setVisible(false);
 		generateObjectsPosition();
 	}
 }
@@ -739,11 +317,11 @@ void Main::load()
 	TextBox * textBox;
 	RadioButton * radioButton;
 
-	control = _loadForm->getControl("FolderTextBox");
+	control = interface->loadForm->getControl("FolderTextBox");
 	textBox = (TextBox *)control;
 	const char * folder = textBox->getText();
 
-	control = _loadForm->getControl("RawHeightfieldRadio");
+	control = interface->loadForm->getControl("RawHeightfieldRadio");
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
@@ -755,7 +333,7 @@ void Main::load()
 		_pager->parameters.tilesResolution = load.tilesResolution;
 	}
 
-	control = _loadForm->getControl("BlendmapRadio");
+	control = interface->loadForm->getControl("BlendmapRadio");
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
@@ -766,7 +344,7 @@ void Main::load()
 		_pager->reloadTerrains();
 	}
 
-	control = _loadForm->getControl("ObjectsPosRadio");
+	control = interface->loadForm->getControl("ObjectsPosRadio");
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
@@ -777,7 +355,7 @@ void Main::load()
 		//TODO : _pager->createObjects(objectName,_pager->parameters.objectsPosition);
 	}
 
-	control = _loadForm->getControl("NormalmapRadio");
+	control = interface->loadForm->getControl("NormalmapRadio");
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
@@ -796,19 +374,19 @@ void Main::generateNewBlendmaps()
 		Control * control;
 		Slider * slider;
 
-		control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");
+		control = interface->generateBlendmapsForm->getControl("Blendmap1-Intensity");
 		slider = (Slider *)control;
 		int Intensity1 = slider->getValue();
 
-		control = _generateBlendmapsForm->getControl("Blendmap2-Intensity");
+		control = interface->generateBlendmapsForm->getControl("Blendmap2-Intensity");
 		slider = (Slider *)control;
 		int Intensity2 = slider->getValue();
 
-		control = _generateBlendmapsForm->getControl("Blendmap1-Opacity");
+		control = interface->generateBlendmapsForm->getControl("Blendmap1-Opacity");
 		slider = (Slider *)control;
 		int Opacity1 = slider->getValue();
 
-		control = _generateBlendmapsForm->getControl("Blendmap2-Opacity");
+		control = interface->generateBlendmapsForm->getControl("Blendmap2-Opacity");
 		slider = (Slider *)control;
 		int Opacity2 = slider->getValue();
 
@@ -863,21 +441,21 @@ void Main::generateObjectsPosition()
 			TextBox * textBox;
 			std::string fileName, material;
 
-			control = _generateObjectsForm->getControl("MaterialTextBox");
+			control = interface->generateObjectsForm->getControl("MaterialTextBox");
 			textBox = (TextBox *)control;
 			if (textBox)
 			{
 				material = textBox->getText();
 			}
 
-			control = _generateObjectsForm->getControl("ObjectTextBox");
+			control = interface->generateObjectsForm->getControl("ObjectTextBox");
 			textBox = (TextBox *)control;
 			if (textBox)
 			{
 				fileName = textBox->getText();
 			}
 
-			control = _generateObjectsForm->getControl("ChanceTextBox");
+			control = interface->generateObjectsForm->getControl("ChanceTextBox");
 			textBox = (TextBox *)control;
 			if (textBox)
 			{
@@ -905,7 +483,7 @@ void Main::generateObjectsPosition()
 			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, 
 				_pager->parameters.scale.y, 
 				_pager->parameters.scale.x,
-				1, 
+				2, 
 				_pager->parameters.heightFieldResolution, 
 				_pager->heightFieldList, 
 				node);
@@ -1001,53 +579,52 @@ void Main::generateNewTerrain()
 		_pager = new Pager(parameters, _scene);
 	}
 
-
 	Control * control;
 	Slider * slider;
 	TextBox * textBox;
 	RadioButton * radioButton;
 	float xz = 0, y = 0;
 
-	control = _generateTerrainsForm->getControl("DetailLevelsSlider");
+	control = interface->generateTerrainsForm->getControl("DetailLevelsSlider");
 	slider = (Slider *)control;
 	_pager->parameters.lodQuality = slider->getValue();
 
 	if (_pager->parameters.lodQuality == 0){ _pager->parameters.lodQuality = 1; }
 
-	control = _generateTerrainsForm->getControl("HeightFieldSizeSlider");
+	control = interface->generateTerrainsForm->getControl("HeightFieldSizeSlider");
 	slider = (Slider *)control;
 	int heightfieldResolution = slider->getValue();
 	_pager->parameters.heightFieldResolution = heightfieldResolution;
 
-	control = _generateTerrainsForm->getControl("MaxHeightSlider");
+	control = interface->generateTerrainsForm->getControl("MaxHeightSlider");
 	slider = (Slider *)control;
 	_pager->parameters.maxHeight = (slider->getValue());
 
-	control = _generateTerrainsForm->getControl("MinHeightSlider");
+	control = interface->generateTerrainsForm->getControl("MinHeightSlider");
 	slider = (Slider *)control;
 	_pager->parameters.minHeight = (slider->getValue());
 
-	control = _generateTerrainsForm->getControl("PatchSizeSlider");
+	control = interface->generateTerrainsForm->getControl("PatchSizeSlider");
 	slider = (Slider *)control;
 	_pager->parameters.patchSize = (slider->getValue());
 
-	control = _generateTerrainsForm->getControl("ScaleYSlider");
+	control = interface->generateTerrainsForm->getControl("ScaleYSlider");
 	slider = (Slider *)control;
 	float scaleY = slider->getValue();
 
-	control = _generateTerrainsForm->getControl("ScaleXZSlider");
+	control = interface->generateTerrainsForm->getControl("ScaleXZSlider");
 	slider = (Slider *) control;
 	int scaleXZ = slider->getValue();
 
-	control = _generateTerrainsForm->getControl("SeedTextBox");
+	control = interface->generateTerrainsForm->getControl("SeedTextBox");
 	textBox = (TextBox *)control;
 	int seed = (strtol(textBox->getText(), NULL, 10));
 
-	control = _generateTerrainsForm->getControl("TilesResolutionBox");
+	control = interface->generateTerrainsForm->getControl("TilesResolutionBox");
 	textBox = (TextBox *)control;
 	_pager->parameters.tilesResolution = (strtol(textBox->getText(), NULL, 10));
 
-	control = _generateTerrainsForm->getControl("TerrainMaterialBox");
+	control = interface->generateTerrainsForm->getControl("TerrainMaterialBox");
 	textBox = (TextBox *)control;
 	if (textBox)
 	{
@@ -1055,29 +632,29 @@ void Main::generateNewTerrain()
 	}
 
 	//getting Noiser settings
-	control = _generateTerrainsForm->getControl("SimplexNoiseRadio");
+	control = interface->generateTerrainsForm->getControl("SimplexNoiseRadio");
 	radioButton = (RadioButton *)control;
 	int noise;
 	if (radioButton->isSelected()) { noise = 0; }
 
-	control = _generateTerrainsForm->getControl("DiamondNoiseRadio");
+	control = interface->generateTerrainsForm->getControl("DiamondNoiseRadio");
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected()) { noise = 1; }
 
-	control = _generateTerrainsForm->getControl("AmplitudeSlider");
+	control = interface->generateTerrainsForm->getControl("AmplitudeSlider");
 	slider = (Slider *)control;
 	int amplitude = (slider->getValue());
 
-	control = _generateTerrainsForm->getControl("GainSlider");
+	control = interface->generateTerrainsForm->getControl("GainSlider");
 	slider = (Slider *)control;
 	int gain = (slider->getValue());
 
-	control = _generateTerrainsForm->getControl("AmplitudeNegativeRadio");
+	control = interface->generateTerrainsForm->getControl("AmplitudeNegativeRadio");
 	radioButton = (RadioButton *)control;
 	bool bAmp = true;
 	if (radioButton->isSelected()) { bAmp = false; }
 
-	control = _generateTerrainsForm->getControl("GainNegativeRadio");
+	control = interface->generateTerrainsForm->getControl("GainNegativeRadio");
 	radioButton = (RadioButton *)control;
 	bool bGain = true;
 	if (radioButton->isSelected()) { bGain = false; }
@@ -1110,19 +687,19 @@ void Main::generateNewTerrain()
 	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList);
 
 	//configuring blend maps generation
-	control = _generateBlendmapsForm->getControl("Blendmap1-Intensity");
+	control = interface->generateBlendmapsForm->getControl("Blendmap1-Intensity");
 	slider = (Slider *)control;
 	int Intensity1 = slider->getValue();
 
-	control = _generateBlendmapsForm->getControl("Blendmap2-Intensity");
+	control = interface->generateBlendmapsForm->getControl("Blendmap2-Intensity");
 	slider = (Slider *)control;
 	int Intensity2 = slider->getValue();
 
-	control = _generateBlendmapsForm->getControl("Blendmap1-Opacity");
+	control = interface->generateBlendmapsForm->getControl("Blendmap1-Opacity");
 	slider = (Slider *)control;
 	int Opacity1 = slider->getValue();
 
-	control = _generateBlendmapsForm->getControl("Blendmap2-Opacity");
+	control = interface->generateBlendmapsForm->getControl("Blendmap2-Opacity");
 	slider = (Slider *)control;
 	int Opacity2 = slider->getValue();
 
@@ -1137,6 +714,18 @@ void Main::generateNewTerrain()
 		_pager->heightFieldList);
 	_pager->parameters.blendMapDIR = createTMPFolder();
 	_pager->parameters.generatedBlendmaps = false;
+
+	_pager->texturesLocation.resize(_pager->parameters.tilesResolution);
+	for (size_t i = 0; i < _pager->parameters.tilesResolution; i++)
+	{
+		_pager->texturesLocation[i].resize(_pager->parameters.tilesResolution);
+		for (size_t j = 0; j < _pager->parameters.tilesResolution; j++)
+		{
+			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/grass.dds"));
+			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/dirt.dds"));
+			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/rock.dds"));
+		}
+	}
 
 	//configuring a thread to save blendmaps
 	for (size_t i = 0; i < threads.size(); i++)
@@ -1184,54 +773,49 @@ void Main::generateNewTerrain()
 		_pager->parameters.heightFieldResolution));
 
 #endif
+	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * 1.3;
+	_pager->parameters.distanceTerrainUnload = _pager->parameters.boundingBox * 1.4;
+	_pager->parameters.distanceTerrainMaxRender = _pager->parameters.boundingBox * 1.4;
 
-	_pager->parameters.distanceTerrainLoad = (_pager->parameters.boundingBox * _pager->parameters.maxHeight ) * 0.9;
-	_pager->parameters.distanceTerrainUnload = (_pager->parameters.boundingBox * _pager->parameters.maxHeight) * 1;
-	_pager->parameters.distanceTerrainMaxRender = (_pager->parameters.boundingBox * _pager->parameters.maxHeight) * 1;
-
+	_camera->setPosition(Vector3(0, 0, 0));
 	_pager->pagingCheck();
-	_camera.setPosition(Vector3(0, _pager->zoneList[0][0]->getObjectInside()->terrain->getHeight(0, 0), 0));
-
-	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * .9;
-	_pager->parameters.distanceTerrainUnload = _pager->parameters.boundingBox * 1;
-	_pager->parameters.distanceTerrainMaxRender = _pager->parameters.boundingBox * 1;
+	_camera->setPosition(Vector3(0, _pager->zoneList[0][0]->getObjectInside()->terrain->getHeight(0, 0), 0));
 }
 
 void Main::moveCamera(float elapsedTime)
 {
 	if (_moveForward)
 	{
-		_camera.moveForward(elapsedTime * MOVE_SPEED);
+		_camera->moveForward(elapsedTime);
 #ifdef POINTLIGHT_TEST
-		_light->getNode()->setTranslation(_camera.getPosition());
+		_light->getNode()->setTranslation(_camera->getPosition());
 #endif
 	}
 	if (_moveBackward)
 	{
-		_camera.moveBackward(elapsedTime * MOVE_SPEED);
+		_camera->moveBackward(elapsedTime);
 #ifdef POINTLIGHT_TEST
-		_light->getNode()->setTranslation(_camera.getPosition());
+		_light->getNode()->setTranslation(_camera->getPosition());
 #endif
 	}
 	if (_moveLeft)
 	{
-		_camera.moveLeft(elapsedTime * MOVE_SPEED);
+		_camera->moveLeft(elapsedTime);
 #ifdef POINTLIGHT_TEST
-		_light->getNode()->setTranslation(_camera.getPosition());
+		_light->getNode()->setTranslation(_camera->getPosition());
 #endif
 	}
 	if (_moveRight)
 	{
-		_camera.moveRight(elapsedTime * MOVE_SPEED);
+		_camera->moveRight(elapsedTime);
 #ifdef POINTLIGHT_TEST
-		_light->getNode()->setTranslation(_camera.getPosition());
+		_light->getNode()->setTranslation(_camera->getPosition());
 #endif
 	}
 }
 
 void Main::update(float elapsedTime)
 {
-
 	int iBlendmap, iNormalmap, iObjectpos, total;
 	bool blendmap = false, normalmap = false, objectpos = false;
 
@@ -1287,9 +871,9 @@ void Main::update(float elapsedTime)
 
 	if (_inputMode == INPUT_MODE::EDITING && RMB == true)
 	{
-		Control * control = _mainForm->getControl("LowerButton");
+		Control * control = interface->mainForm->getControl("LowerButton");
 		Button * button = (Button *)control;
-		if (button->getSkinColor(Control::State::NORMAL) == activeButton)
+		if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
 		{
 			TerrainEditor TerrEdit;
 			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
@@ -1308,9 +892,9 @@ void Main::update(float elapsedTime)
 				_pager->reload(heightfields);
 			}
 		}
-		control = _mainForm->getControl("FlattenButton");
+		control = interface->mainForm->getControl("FlattenButton");
 		button = (Button *)control;
-		if (button->getSkinColor(Control::State::NORMAL) == activeButton)
+		if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
 		{
 			TerrainEditor TerrEdit;
 			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
@@ -1327,11 +911,12 @@ void Main::update(float elapsedTime)
 						_pager->loadedHeightfields);
 
 				_pager->reload(heightfields);
+				//_pager->reloadTerrains();
 			}
 		}
-		control = _mainForm->getControl("RaiseButton");
+		control = interface->mainForm->getControl("RaiseButton");
 		button = (Button *)control;
-		if (button->getSkinColor(Control::State::NORMAL) == activeButton)
+		if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
 		{
 			TerrainEditor TerrEdit;
 			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
@@ -1350,19 +935,19 @@ void Main::update(float elapsedTime)
 				_pager->reload(modified);
 			}
 		}
-		control = _mainForm->getControl("PaintToolbar");
+		control = interface->mainForm->getControl("PaintToolbar");
 		Container * container = (Container*)control;
 		if (container->isVisible() == true)
 		{
 			bool paint = false,draw=false,erase=false;
-			control = _mainForm->getControl("DrawButton");
+			control = interface->mainForm->getControl("DrawButton");
 			RadioButton * button = (RadioButton *)control;
 			if (button->isSelected() == true)
 			{
 				paint = true;
 				draw = true;
 			}
-			control = _mainForm->getControl("EraseButton");
+			control = interface->mainForm->getControl("EraseButton");
 			button = (RadioButton *)control;
 			if (button->isSelected() == true)
 			{
@@ -1398,19 +983,19 @@ void Main::update(float elapsedTime)
 
 				int selectedTexture = 0;
 
-				control = _mainForm->getControl("Texture0");
+				control = interface->mainForm->getControl("Texture0");
 				RadioButton * button = (RadioButton *)control;
 				if (button->isSelected())
 				{
 					selectedTexture = 0;
 				}
-				control = _mainForm->getControl("Texture1");
+				control = interface->mainForm->getControl("Texture1");
 				button = (RadioButton *)control;
 				if (button->isSelected())
 				{
 					selectedTexture = 1;
 				}
-				control = _mainForm->getControl("Texture2");
+				control = interface->mainForm->getControl("Texture2");
 				button = (RadioButton *)control;
 				if (button->isSelected())
 				{
@@ -1461,7 +1046,33 @@ void Main::update(float elapsedTime)
 						_pager->parameters.heightFieldResolution
 						);
 				}
-				
+				//TODO: i should only reload modified terrain
+				//check every modified blendmaps against loaded terrains positions to know which of those to reload
+				/*std::vector<int> toReload;
+				for (size_t i = 0; i < modified.size(); i++)
+				{
+					for (size_t g = 0; g < modified[i].size(); g++)
+					{
+						if (toReload.size() != 0)
+						{
+							for (size_t f = 0; f < toReload.size(); f++)
+							{
+
+							}
+						}
+						else
+						{
+							for (size_t j = 0; j < _pager->loadedTerrains.size(); j++)
+							{
+								int z = (modified[1][i].x / _pager->parameters.heightFieldResolution);
+								int x = (modified[1][i].z / _pager->parameters.heightFieldResolution);
+
+
+								toReload
+							}
+						}
+					}
+				}*/
 				_pager->reloadTerrains();
 				//_pager->reload(modified[0]);
 				//_pager->reload(modified[1]);
@@ -1471,12 +1082,7 @@ void Main::update(float elapsedTime)
 
 	moveCamera(elapsedTime);
 
-	_mainForm->update(elapsedTime);
-	_generateTerrainsForm->update(elapsedTime);
-	_generateBlendmapsForm->update(elapsedTime);
-	_generateObjectsForm->update(elapsedTime);
-	_loadForm->update(elapsedTime);
-	_saveForm->update(elapsedTime);
+	interface->updateForms(elapsedTime);
 }
 
 void Main::render(float elapsedTime)
@@ -1504,55 +1110,12 @@ void Main::render(float elapsedTime)
 		}
 	}
 
-	// Visit all the nodes in the scene for drawing
-	//_scene->visit(this, &Main::drawScene);
-
-	if (_mainForm->isVisible())
-	{
-		_mainForm->draw();
-	}
-	if (_generateTerrainsForm->isVisible())
-	{
-		_generateTerrainsForm->draw();
-	}
-	if (_generateBlendmapsForm->isVisible())
-	{
-		_generateBlendmapsForm->draw();
-	}
-	if (_loadForm->isVisible())
-	{
-		_loadForm->draw();
-	}
-	if (_saveForm->isVisible())
-	{
-		_saveForm->draw();
-	}
-	if (_generateObjectsForm->isVisible())
-	{
-		_generateObjectsForm->draw();
-	}
+	interface->renderForms();
 }
 
 bool Main::drawScene(Node* node)
 {
-	// If the node visited contains a model, draw it
-	/*
-	Model* model = dynamic_cast<Model*>(node->getDrawable());
-	if (model)
-	{
-		float ActualDistance = _scene->getActiveCamera()->getNode()->getTranslationWorld().distance(node->getTranslationWorld());
-
-		//if the range of view is too much small....it crash lol
-		if (ActualDistance < _pager->parameters.distanceMaxModelRender)
-		{
-			if (_pager->parameters.generatedObjects = true)
-			{
-				//model->draw();
-				node->getDrawable()->draw();
-			}
-		}
-	}*/
-	return true;
+	return false;
 }
 
 void Main::keyEvent(Keyboard::KeyEvent evt, int key)
@@ -1597,31 +1160,33 @@ void Main::keyEvent(Keyboard::KeyEvent evt, int key)
 		case Keyboard::KEY_TAB:
 			if (_inputMode == NAVIGATION)
 			{
-				Control * control=_mainForm->getControl("NavigateButton");
+				Control * control= interface->mainForm->getControl("NavigateButton");
 				RadioButton * button = (RadioButton*)control;
 				button->setSelected(false);
-				control = _mainForm->getControl("EditorButton");
+				control = interface->mainForm->getControl("EditorButton");
 				button = (RadioButton*)control;
 				button->setSelected(true);
 
 				_inputMode = EDITING;
-				_mainForm->getControl("NavigateToolBar")->setVisible(false);
-				_mainForm->getControl("GeneratorToolBar")->setVisible(false);
-				_mainForm->getControl("TerrainEditorbar")->setVisible(true);
+				interface->inputMode = (UI::INPUT_MODE)EDITING;
+				interface->mainForm->getControl("NavigateToolBar")->setVisible(false);
+				interface->mainForm->getControl("GeneratorToolBar")->setVisible(false);
+				interface->mainForm->getControl("TerrainEditorbar")->setVisible(true);
 			}
 			else if (_inputMode == EDITING)
 			{
-				Control * control = _mainForm->getControl("NavigateButton");
+				Control * control = interface->mainForm->getControl("NavigateButton");
 				RadioButton * button = (RadioButton*)control;
 				button->setSelected(true);
-				control = _mainForm->getControl("EditorButton");
+				control = interface->mainForm->getControl("EditorButton");
 				button = (RadioButton*)control;
 				button->setSelected(false);
 
 				_inputMode = NAVIGATION;
-				_mainForm->getControl("TerrainEditorbar")->setVisible(false);
-				_mainForm->getControl("GeneratorToolBar")->setVisible(false);
-				_mainForm->getControl("NavigateToolBar")->setVisible(true);
+				interface->inputMode = (UI::INPUT_MODE)NAVIGATION;
+				interface->mainForm->getControl("TerrainEditorbar")->setVisible(false);
+				interface->mainForm->getControl("GeneratorToolBar")->setVisible(false);
+				interface->mainForm->getControl("NavigateToolBar")->setVisible(true);
 			}
 			break;
 		}
@@ -1681,7 +1246,7 @@ bool Main::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 		{
 			Ray pickRay;
 			_scene->getActiveCamera()->pickRay(gameplay::Rectangle(0, 0, getWidth(), getHeight()), x, y, &pickRay);
-			pickRay.setOrigin(_camera.getPosition());
+			pickRay.setOrigin(_camera->getPosition());
 
 			for (size_t i = 0; i < _pager->loadedTerrains.size(); i++)
 			{
@@ -1712,7 +1277,7 @@ bool Main::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 		{
 			float pitch = -MATH_DEG_TO_RAD(deltaY * 0.5f);
 			float yaw = MATH_DEG_TO_RAD(deltaX * 0.5f);
-			_camera.rotate(yaw, pitch);
+			_camera->rotate(yaw, pitch);
 		}
 		_prevX = x;
 		_prevY = y;

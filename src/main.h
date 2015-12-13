@@ -70,6 +70,7 @@
 #include "FilesSaver.h"
 #include "Pager.h"
 #include "TerrainEditor.h"
+#include "UInterface.h"
 
 /**
 * Used to confirm a thread termination.
@@ -186,16 +187,6 @@ class Main : public Game, Control::Listener
 	};
 
 	/**
-	* Movement speed of the camera.
-	**/
-	float MOVE_SPEED;
-
-	/**
-	* Used in editing tools to toggle tools
-	**/
-	Vector4 activeButton, normalButton;
-
-	/**
 	* The Pager will take care of loading,unloading and rendering various objects based on distance
 	**/
 	Pager * _pager;
@@ -223,48 +214,15 @@ class Main : public Game, Control::Listener
 	/**
 	* This is the scene camera.
 	**/
-	FirstPersonCamera _camera;
+	FirstPersonCamera * _camera;
 
 	/**
 	* The scene light.
 	**/
 	Light* _light;
 
-	/**
-	* A ui form.
-	**/
-	Form* _mainForm;
-
-	/**
-	* A ui form.
-	**/
-	Form* _sizeForm;
-
-	/**
-	* UI form for generating objects.
-	**/
-	Form* _generateObjectsForm;
-
-	/**
-	* UI form for generating terrains.
-	**/
-	Form* _generateTerrainsForm;
-
-	/**
-	* UI form for modiying blendmaps intensity.
-	**/
-	Form* _generateBlendmapsForm;
-
-	/**
-	* UI form for loading files.
-	**/
-	Form* _loadForm;
-
-	/**
-	* UI form for saving files.
-	**/
-	Form* _saveForm;
-
+	UI * interface;
+	
 	/**
 	* boolean flags to say if we are moving.
 	**/
@@ -284,11 +242,6 @@ class Main : public Game, Control::Listener
 	* Used to know if the button is hold
 	**/
 	bool LMB, RMB;
-
-	/**
-	* The scale of the selection.
-	**/
-	float _selectionScale;
 
 	/**
 	* The current input mode.

@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "Main.h"
 
 // heightfields[z][x]//only horizontal pager
 // heightfields[z][x][y]//pager with vertical paging
@@ -264,8 +264,6 @@ void Pager::removeTerrains()
 	{
 		removeTerrain(PosZ[i], PosX[i]);
 	}
-	PosX.~vector();
-	PosZ.~vector();
 }
 
 void Pager::reloadTerrains()
@@ -281,8 +279,6 @@ void Pager::reloadTerrains()
 		removeTerrain(PosZ[i], PosX[i]);
 		loadTerrain(PosZ[i], PosX[i]);
 	}
-	PosX.~vector();
-	PosZ.~vector();
 }
 
 void Pager::reload(std::vector<int> pos)
@@ -302,8 +298,6 @@ void Pager::reload(std::vector<int> pos)
 		removeTerrain(fieldZ, fieldX);
 		loadTerrain(fieldZ, fieldX);
 	}
-	PosX.~vector();
-	PosZ.~vector();
 }
 
 int Pager::findTerrain(Vector2 pos, Vector2 resolution)

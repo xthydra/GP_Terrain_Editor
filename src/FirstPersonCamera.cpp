@@ -16,7 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "Main.h"
 
 FirstPersonCamera::FirstPersonCamera()
 	: _pitchNode(NULL), _rootNode(NULL)
@@ -63,6 +63,11 @@ Camera* FirstPersonCamera::getCamera()
 	return NULL;
 }
 
+void FirstPersonCamera::setMoveSpeed(float moveSpeed)
+{
+	_moveSpeed = moveSpeed;
+}
+
 void FirstPersonCamera::setPosition(const Vector3& position)
 {
 	_rootNode->setTranslation(position);
@@ -70,6 +75,7 @@ void FirstPersonCamera::setPosition(const Vector3& position)
 
 void FirstPersonCamera::moveForward(float amount)
 {
+	amount *= _moveSpeed;
 	Vector3 v = _pitchNode->getForwardVectorWorld();
 	v.normalize().scale(amount);
 	_rootNode->translate(v);
@@ -82,21 +88,25 @@ void FirstPersonCamera::moveBackward(float amount)
 
 void FirstPersonCamera::moveLeft(float amount)
 {
+	amount *= _moveSpeed;
 	_rootNode->translateLeft(amount);
 }
 
 void FirstPersonCamera::moveRight(float amount)
 {
+	amount *= _moveSpeed;
 	_rootNode->translateLeft(-amount);
 }
 
 void FirstPersonCamera::moveUp(float amount)
 {
+	amount *= _moveSpeed;
 	_rootNode->translateUp(amount);
 }
 
 void FirstPersonCamera::moveDown(float amount)
 {
+	amount *= _moveSpeed;
 	_rootNode->translateUp(-amount);
 }
 

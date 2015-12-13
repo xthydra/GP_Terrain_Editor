@@ -16,8 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include "main.h"
+#include "Main.h"
 
 SelectionRing::SelectionRing(Scene* scene)
 	:_ringCount(16)

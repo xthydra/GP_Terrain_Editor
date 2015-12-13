@@ -16,8 +16,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
-
 /**
 * The structure is called and destroyed only for editing given terrains
 **/

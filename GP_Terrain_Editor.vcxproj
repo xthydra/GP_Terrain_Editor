@@ -208,6 +208,7 @@
     <ClCompile Include="src\Pager.cpp" />
     <ClCompile Include="src\AutoBindingResolver.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\UInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DiamondSquareNoise.h" />
@@ -224,6 +225,7 @@
     <ClInclude Include="src\Generator.h" />
     <ClInclude Include="src\Pager.h" />
     <ClInclude Include="src\AutoBindingResolver.h" />
+    <ClInclude Include="src\UInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />

@@ -16,7 +16,7 @@
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "Main.h"
 
 void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField*> > heightFields)
 {
@@ -79,7 +79,11 @@ void TerrainEditor::aligningTerrainsVertexes(std::vector<std::vector<HeightField
 	}
 }
 
-std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)
+std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing,
+										int scaleXZ,
+										int scaleY,
+										std::vector<gameplay::Terrain*> terrains,
+										std::vector<HeightField*> heightFields)
 {
 	std::vector<int> fields;
 
@@ -94,10 +98,10 @@ std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleX
 	for (size_t i = 0; i < terrains.size(); i++)
 	{
 		Vector3 terrainPos = terrains[i]->getNode()->getTranslationWorld();
-		//terrain bounding box in world space
+		//terrain bounding box world space
 		int boxSize = terrains[i]->getBoundingBox().max.x;
 		BoundingBox worldBox(
-			(terrainPos.z - boxSize),
+			(terrainPos.x - boxSize),
 			terrains[i]->getBoundingBox().min.y,
 			(terrainPos.z - boxSize),
 			(terrainPos.x + boxSize),
@@ -160,7 +164,11 @@ std::vector<int> TerrainEditor::flatten(BoundingSphere selectionRing, int scaleX
 	return fields;
 }
 
-std::vector<int> TerrainEditor::lower(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)
+std::vector<int> TerrainEditor::lower(BoundingSphere selectionRing,
+									  int scaleXZ,
+									  int scaleY,
+									  std::vector<gameplay::Terrain*> terrains,
+									  std::vector<HeightField*> heightFields)
 {
 	std::vector<int> fields;
 
@@ -172,7 +180,7 @@ std::vector<int> TerrainEditor::lower(BoundingSphere selectionRing, int scaleXZ,
 		//terrain bounding box world space
 		int boxSize = terrains[i]->getBoundingBox().max.x;
 		BoundingBox worldBox(
-			(terrainPos.z - boxSize),
+			(terrainPos.x - boxSize),
 			terrains[i]->getBoundingBox().min.y,
 			(terrainPos.z - boxSize),
 			(terrainPos.x + boxSize),
@@ -197,9 +205,15 @@ std::vector<int> TerrainEditor::lower(BoundingSphere selectionRing, int scaleXZ,
 					//check against distance and apply strength
 					float dist = vertexePosition.distance(selectionRing.center);
 
+					float brushStr = 1.5;//1.0 - 1.5
+
+					//float str = dist / selectionRing.radius;
+					double str = (((selectionRing.radius*brushStr) - dist) / selectionRing.radius);
+
 					if (dist <= selectionRing.radius)
 					{
-						heights[x + (z * heightFieldSize)] -= (selectionRing.radius - dist) * 0.01;
+						//heights[x + (z * heightFieldSize)] -= (selectionRing.radius - dist) * 0.01;
+						heights[x + (z * heightFieldSize)] -= str;
 					}
 				}
 			}
@@ -207,7 +221,11 @@ std::vector<int> TerrainEditor::lower(BoundingSphere selectionRing, int scaleXZ,
 	}
 	return fields;
 }
-std::vector<int> TerrainEditor::raise(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)
+std::vector<int> TerrainEditor::raise(BoundingSphere selectionRing,
+									  int scaleXZ,
+									  int scaleY,
+									  std::vector<gameplay::Terrain*> terrains,
+									  std::vector<HeightField*> heightFields)
 {
 	std::vector<int> fields;
 
@@ -219,7 +237,7 @@ std::vector<int> TerrainEditor::raise(BoundingSphere selectionRing, int scaleXZ,
 		//terrain bounding box world space
 		int boxSize=terrains[i]->getBoundingBox().max.x;
 		BoundingBox worldBox(
-			(terrainPos.z - boxSize),
+			(terrainPos.x - boxSize),
 			terrains[i]->getBoundingBox().min.y,
 			(terrainPos.z - boxSize),
 			(terrainPos.x + boxSize),
@@ -255,7 +273,11 @@ std::vector<int> TerrainEditor::raise(BoundingSphere selectionRing, int scaleXZ,
 	return fields;
 }
 
-std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ, int scaleY, std::vector<gameplay::Terrain*> terrains, std::vector<HeightField*> heightFields)
+std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing,
+									   int scaleXZ,
+									   int scaleY,
+									   std::vector<gameplay::Terrain*> terrains,
+									   std::vector<HeightField*> heightFields)
 {
 	//TODO : isnt meant to be used right now
 	std::vector<int> fields;
@@ -274,7 +296,7 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 		//terrain bounding box in world space
 		int boxSize = terrains[i]->getBoundingBox().max.x;
 		BoundingBox worldBox(
-			(terrainPos.z - boxSize),
+			(terrainPos.x - boxSize),
 			terrains[i]->getBoundingBox().min.y,
 			(terrainPos.z - boxSize),
 			(terrainPos.x + boxSize),
@@ -424,13 +446,13 @@ std::vector<int> TerrainEditor::smooth(BoundingSphere selectionRing, int scaleXZ
 }
 
 std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<unsigned char>> blendmap1,
-																		  std::vector<std::vector<unsigned char>> blendmap2,
-																		  std::vector<Vector3> fieldsPos,
-																		  int selectedTex,
-																		  Vector2 pos,
-																		  int blendmapRes,
-																		  int radius,
-																		  bool draw)
+													   std::vector<std::vector<unsigned char>> blendmap2,
+													   std::vector<Vector3> fieldsPos,
+													   int selectedTex,
+													   Vector2 pos,
+													   int blendmapRes,
+													   int radius,
+													   bool draw)
 {
 	std::vector<std::vector<Vector3>> modified;
 	modified.resize(2);
@@ -441,7 +463,8 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 		{
 			for (size_t z = 0; z < blendmapRes; z++)
 			{
-				Vector2 pixel = Vector2(((fieldsPos[i].x - (blendmapRes*0.5)) + x), ((fieldsPos[i].z - (blendmapRes*0.5)) + z));
+				Vector2 pixel = Vector2(((fieldsPos[i].x - (blendmapRes*0.5)) + x), 
+										((fieldsPos[i].z - (blendmapRes*0.5)) + z));
 
 				float dist = pos.distance(pixel);
 
@@ -449,8 +472,7 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 				{
 					int k = 4 * x + (z * blendmapRes * 4);
 
-					float strNeg = (dist / radius);
-
+					double strNeg = (dist / radius);
 					double strPlus = ((radius - dist) / radius);
 					float brushStr = 1;//minimum 1// maximum ~1.5
 					strPlus += brushStr;
@@ -468,12 +490,12 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							blendmap1[i][k] *= strNeg;
 							blendmap1[i][k+1] *= strNeg;
 							blendmap1[i][k+2] *= strNeg;
-							blendmap1[i][k + 3] = (((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) * strNeg) / 3);
+							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
 
 							blendmap2[i][k] *= strNeg;
 							blendmap2[i][k + 1] *= strNeg;
 							blendmap2[i][k + 2] *= strNeg;
-							blendmap2[i][k + 3] = (((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) * strNeg) / 3);
+							blendmap2[i][k + 3] = ((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) / 3);
 						}
 						// you cannot remove the texture one because it's not a blendmap
 						//tho you can replace it by using blendmaps but it doesn't follow the logical expression behind "removing a texture"
@@ -488,6 +510,7 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 
 							//blendmap1[++]
 							//blendmap2[--]
+							
 							int height = blendmap1[i][k] * strPlus;
 							if (height > 255) { height = 255; }
 							blendmap1[i][k] = height;
@@ -499,15 +522,12 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							height = blendmap1[i][k + 2] * strPlus;
 							if (height > 255) { height = 255; }
 							blendmap1[i][k + 2] = height;
-
-							height = blendmap1[i][k + 3] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap1[i][k + 3] = height;
+							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
 
 							blendmap2[i][k] *= strNeg;
 							blendmap2[i][k + 1] *= strNeg;
 							blendmap2[i][k + 2] *= strNeg;
-							blendmap2[i][k + 3] = (((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) * strNeg) / 3);
+							blendmap2[i][k + 3] = ((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) / 3);
 						}
 						else
 						{
@@ -518,7 +538,7 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							blendmap1[i][k] *= strNeg;
 							blendmap1[i][k + 1] *= strNeg;
 							blendmap1[i][k + 2] *= strNeg;
-							blendmap1[i][k + 3] = (((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) * strNeg) / 3);
+							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
 						}
 					}
 					if (selectedTex == 2)
@@ -534,7 +554,7 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							blendmap1[i][k] *= strNeg;
 							blendmap1[i][k + 1] *= strNeg;
 							blendmap1[i][k + 2] *= strNeg;
-							blendmap1[i][k + 3] = (((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) * strNeg) / 3);
+							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
 
 							int height = blendmap2[i][k] * strPlus;
 							if (height > 255) { height = 255; }
@@ -547,10 +567,7 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							height = blendmap2[i][k + 2] * strPlus;
 							if (height > 255) { height = 255; }
 							blendmap2[i][k + 2] = height;
-
-							height = blendmap2[i][k + 3] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap2[i][k + 3] = height;
+							blendmap2[i][k + 3] = ((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) / 3);
 						}
 						else
 						{
@@ -558,15 +575,16 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 
 							//blendmap2[--]
 
-							blendmap2[i][k] *= (dist / radius);
-							blendmap2[i][k + 1] *= (dist / radius);
-							blendmap2[i][k + 2] *= (dist / radius);
-							blendmap2[i][k + 3] = (((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) * (dist / radius)) / 3);
+							blendmap2[i][k] *= strNeg;
+							blendmap2[i][k + 1] *= strNeg;
+							blendmap2[i][k + 2] *= strNeg;
+							blendmap2[i][k + 3] = ((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) / 3);
 						}
 					}
 				}
 			}
 		}
+		//used to specify which terrains to reload if a modification have occured
 		if (bBlend1 == true)
 		{
 			modified[0].push_back(fieldsPos[i]);

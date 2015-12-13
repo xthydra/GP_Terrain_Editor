@@ -16,10 +16,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#include "main.h"
-#include "gameplay.h"
+#include "Main.h"
 
 const double SimplexNoise::F2 = 0.5 * (sqrt(3.0) - 1.0);
 const double SimplexNoise::G2 = (3.0 - sqrt(3.0)) / 6.0;
@@ -126,11 +123,11 @@ double SimplexNoise::noise(double x, double z)
 
 	if (bAmp == true)
 	{
-		amplitude = 1.0 / (_worldScale * (tilesResolution * a_Amp));// more hills jesus snapping turtling christ
+		amplitude = 1.0 / (_worldScale * (tilesResolution * a_Amp)); // incline hills formation
 	}
 	else
 	{
-		amplitude = 1.0 / (_worldScale * (tilesResolution / a_Amp));// soften hills
+		amplitude = 1.0 / (_worldScale * (tilesResolution / a_Amp)); // decline hills formation
 	}
 
 	const double lacunarity = 0.1;// * (tilesResolution * 4);

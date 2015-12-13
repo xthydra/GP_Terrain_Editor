@@ -24,6 +24,8 @@
 
 6) it can edit the terrains vertices
 
+7) it can edit blendmaps by using a paint brush
+
 #What is wrong with it
 
 1) it possibly have a bad syntax

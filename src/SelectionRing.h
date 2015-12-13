@@ -16,12 +16,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#ifndef SELECTIONRING_H
-#define SELECTIONRING_H
-
-#include "gameplay.h"
-
 using namespace gameplay;
 
 /**
@@ -108,5 +102,3 @@ public:
 	**/
 	virtual ~SelectionRing();
 };
-
-#endif // SELECTIONRING_H
