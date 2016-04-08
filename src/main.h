@@ -79,11 +79,13 @@ struct Threads
 {
 	bool blendmap,
 		normalmap,
-		objectPos;
+		objectPos,
+		heightmap;
 
-	void blendBool() { blendmap = true, normalmap = false, objectPos = false; }
-	void normalBool() { blendmap = false, normalmap = true, objectPos = false; }
-	void objectBool() { blendmap = false, normalmap = false, objectPos = true; }
+	void heightBool() { heightmap = true, blendmap  = false, normalmap = false, objectPos = false; }
+	void blendBool()  { blendmap = true , normalmap = false, heightmap = false, objectPos = false; }
+	void normalBool() { normalmap = true, blendmap  = false, heightmap = false, objectPos = false; }
+	void objectBool() { objectPos = true, blendmap  = false, normalmap = false, heightmap = false; }
 };
 
 using namespace gameplay;

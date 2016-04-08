@@ -510,18 +510,19 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 
 							//blendmap1[++]
 							//blendmap2[--]
-							
-							int height = blendmap1[i][k] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap1[i][k] = height;
 
-							height = blendmap1[i][k + 1] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap1[i][k + 1] = height;
+							int height = (((255 - (blendmap1[i][k] + 1)) * 0.5) * strPlus);
+							if (height + blendmap1[i][k] > 255) { blendmap1[i][k] = 255; }
+							else { blendmap1[i][k] += height; }
 
-							height = blendmap1[i][k + 2] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap1[i][k + 2] = height;
+							height = (((255 - (blendmap1[i][k + 1] + 1)) * 0.5) * strPlus);
+							if (height + blendmap1[i][k + 1] > 255) { blendmap1[i][k + 1] = 255; }
+							else { blendmap1[i][k + 1] += height; }
+
+							height = (((255 - (blendmap1[i][k + 2] + 1)) * 0.5) * strPlus);
+							if (height + blendmap1[i][k + 2] > 255) { blendmap1[i][k + 2] = 255; }
+							else { blendmap1[i][k + 2] += height; }
+
 							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
 
 							blendmap2[i][k] *= strNeg;
@@ -538,6 +539,7 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							blendmap1[i][k] *= strNeg;
 							blendmap1[i][k + 1] *= strNeg;
 							blendmap1[i][k + 2] *= strNeg;
+
 							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
 						}
 					}
@@ -551,23 +553,24 @@ std::vector<std::vector<Vector3>> TerrainEditor::paint(std::vector<std::vector<u
 							//blendmap1[--]
 							//blendmap2[++]
 
+							int height = (((255 - (blendmap2[i][k] + 1)) * 0.5) * strPlus);
+							if (height + blendmap2[i][k] > 255) { blendmap2[i][k] = 255; }
+							else { blendmap2[i][k] += height; }
+
+							height = (((255 - (blendmap2[i][k + 1] + 1)) * 0.5) * strPlus);
+							if (height + blendmap2[i][k + 1] > 255) { blendmap2[i][k + 1] = 255; }
+							else { blendmap2[i][k + 1] += height; }
+
+							height = (((255 - (blendmap2[i][k + 2] + 1)) * 0.5) * strPlus);
+							if (height + blendmap2[i][k + 2] > 255) { blendmap2[i][k + 2] = 255; }
+							else { blendmap2[i][k + 2] += height; }
+
+							blendmap2[i][k + 3] = ((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) / 3);
+
 							blendmap1[i][k] *= strNeg;
 							blendmap1[i][k + 1] *= strNeg;
 							blendmap1[i][k + 2] *= strNeg;
 							blendmap1[i][k + 3] = ((blendmap1[i][k] + blendmap1[i][k + 1] + blendmap1[i][k + 2]) / 3);
-
-							int height = blendmap2[i][k] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap2[i][k] = height;
-
-							height = blendmap2[i][k + 1] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap2[i][k + 1] = height;
-
-							height = blendmap2[i][k + 2] * strPlus;
-							if (height > 255) { height = 255; }
-							blendmap2[i][k + 2] = height;
-							blendmap2[i][k + 3] = ((blendmap2[i][k] + blendmap2[i][k + 1] + blendmap2[i][k + 2]) / 3);
 						}
 						else
 						{

@@ -43,9 +43,9 @@ struct PagerParameters
 	gameplay::Vector3 scale;
 	
 	/**
-	* Resolution of paged terrains.
+	* Resolution of the zone.(E.G : a resolution of 4 would equal to a total of 16 terrains)
 	**/
-	int tilesResolution;
+	int zoneResolution;
 
 	/**
 	* Resolution of a terrain.
@@ -67,16 +67,16 @@ struct PagerParameters
 	/*
 	if you want to draw the terrain in wireframe
 	*/
-	bool Debug;
+	bool debug;
 };
 
 /**
 * Used in "zonelist" vector for the pager class
 **/
-class BufferZone
+class Zone
 {
 public:
-	BufferZone(gameplay::Vector3 pos, gameplay::Vector3 scale)
+	Zone(gameplay::Vector3 pos, gameplay::Vector3 scale)
 	{
 		_pos = pos;
 		_scale = scale;
@@ -88,8 +88,9 @@ public:
 	CTerrain * getObjectInside() { return object; }
 	gameplay::Vector3 getPosition(){ return _pos; }
 	gameplay::Vector3 getScale(){ return _scale; }
+
 	/**
-	* used to check against during "pagingcheck" or "render"
+	* used to check against during "pagingCheck" or "render"
 	**/
 	void setLoaded(bool state) { loaded = state; }
 
@@ -102,6 +103,27 @@ public:
 	* used to check against during "pagingcheck" or "render"
 	**/
 	bool isLoaded() { return loaded; }
+
+	/**
+	* Heightfields used for editing and loading gameplay::Terrain.
+	**/
+	gameplay::HeightField* heightField;
+
+	/**
+	* the first vector is either 0 or 1(blendmap 0 or 1)
+	* the second vector is the blendmap image data
+	**/
+	std::vector<std::vector<unsigned char> > blendMaps;
+
+	/**
+	* the normalmap image data stacked into a vector
+	**/
+	std::vector<unsigned char> normalMap;
+
+	/**
+	* A vector stack of 3 string defining the texture location used by the blendmaps used by the terrain
+	**/
+	std::vector<std::string> texturesLocation;
 private:
 	/**
 	* terrain position and scale
@@ -112,11 +134,6 @@ private:
 	* the terrain
 	**/
 	CTerrain * object;
-
-	/**
-	* a pointer to the scene created in Main.cpp
-	**/
-	gameplay::Scene* _Scene;
 
 	/**
 	* used to check against during "pagingcheck" or "render"
@@ -162,11 +179,11 @@ public:
 
 	/**
 	Recreate the "zonelist" vector by calculating the position of each heightfields in the heightFieldList vector.
-	**/
+	**/	
 	void computePositions();
 
 	/**
-	* Remove all objects stored in "obj" vector and release the objects from the gameplay Scene.
+	* Remove all objects stored in "objects" vector and release the objects from the gameplay Scene.
 	**/
 	void removeObjects();
 	
@@ -193,36 +210,17 @@ public:
 	int findTerrain(Vector2, Vector2);
 
 	/**
+	* Find the nearest terrain from a vector3 world position
+	*
+	* @param Vector3 coordinates
+	* @return int pointing to the terrain in the "loadedTerrains" vector
+	**/
+	int findTerrain(Vector3);
+
+	/**
 	* Used to define alot of parameters for the pager.
 	**/
 	PagerParameters parameters;
-
-	/**
-	* Heightfields used for editing and loading gameplay::Terrain.
-	**/
-	std::vector<std::vector<gameplay::HeightField*> > heightFieldList;
-
-	/**
-	* Files List to load.
-	**/
-	std::vector<std::vector<char*> >			   normalMapList;
-	std::vector<std::vector<char*> >			   heightMapRAWList;
-	std::vector<std::vector<std::vector<char*> > > blendMapList;
-
-	/**
-	* position X defined by world space position
-	* position Z defined by world space position
-	* blendmap 0 or 1
-	* the blendmaps image data stacked into a vector
-	**/
-	std::vector<std::vector<std::vector<std::vector<unsigned char> > > > blendMaps;
-
-	/**
-	* position X defined by world space position
-	* position Z defined by world space position
-	* the normalmaps image data stacked into a vector
-	**/
-	std::vector<std::vector<std::vector<unsigned char> > > normalMaps;
 
 	/**
 	* position X defined by world space position
@@ -230,13 +228,6 @@ public:
 	* vector stack of gameplay::Vector3 defining the number of objects on one terrain
 	**/
 	std::vector<std::vector<std::vector<Vector3*> > > objectsPosition;
-
-	/**
-	* position X defined by world space position
-	* position Z defined by world space position
-	* A vector stack of 3 string defining the texture location used by the blendmaps used by the terrain
-	**/
-	std::vector<std::vector<std::vector<std::string>>> texturesLocation;
 
 	/**
 	* position X defined by world space position
@@ -253,9 +244,9 @@ public:
 	std::vector<gameplay::HeightField*> loadedHeightfields;
 
 	/**
-	* Storing heightfields position to conditionally create terrains.
+	* Used to store heightfields,blendmaps and normalmaps if a terrain need to be created or modified.
 	**/
-	std::vector<std::vector<BufferZone*> > zoneList;
+	std::vector<std::vector<Zone*> > zoneList;
 private:
 
 	/**

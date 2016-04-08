@@ -97,7 +97,7 @@ form GenerateForm
 	}
 	label TilesResolutionLabel
 	{
-		text = Tiles Resolution
+		text = Zones Resolution
 		height = 45
 		width = 400
 	}

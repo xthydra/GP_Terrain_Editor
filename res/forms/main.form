@@ -173,9 +173,15 @@ form MainForm
 		{
 			visible = false
 			width = 241
-			height = 181
+			height = 360
 			layout = LAYOUT_FLOW
 
+			button SetTexture
+			{
+				text = Set_New_Textures_Path
+				height = 45
+				width = 240
+			}
 			radioButton Texture0
 			{
 				group = Texture
@@ -185,9 +191,9 @@ form MainForm
 			}
 			textbox Texture0Pos
 			{
-				text = 0
+				text = NULL
 				height = 45
-				width = 120
+				width = 240
 			}
 			radioButton Texture1
 			{
@@ -198,9 +204,9 @@ form MainForm
 			}
 			textbox Texture1Pos
 			{
-				text = 0
+				text = NULL
 				height = 45
-				width = 120
+				width = 240
 			}
 			radioButton Texture2
 			{
@@ -211,9 +217,9 @@ form MainForm
 			}
 			textbox Texture2Pos
 			{
-				text = 0
+				text = NULL
 				height = 45
-				width = 120
+				width = 240
 			}
 			radioButton DrawButton
 			{
@@ -232,7 +238,7 @@ form MainForm
 		}
 		slider SizeSlider
 		{
-			text = Brush Size
+			text = Brush_Size
 			selected = true
 			min = 1.0
 			max = 20.0

@@ -108,7 +108,7 @@ void Main::initialize()
 	parameters.generatedNormalmaps = false;
 	parameters.generatedHeightmaps = false;
 	parameters.generatedObjects = false;
-	parameters.tilesResolution = 2;
+	parameters.zoneResolution = 2;
 	parameters.heightFieldResolution = 128;
 	//if you put LOD on 1 it will make terrain creation faster
 	parameters.lodQuality = 1;
@@ -123,14 +123,14 @@ void Main::initialize()
 	parameters.terrainMaterialPath = "res/materials/terrainDirectionallight.material";
 #endif
 
-	parameters.scale = Vector3(parameters.heightFieldResolution, ((parameters.heightFieldResolution*parameters.tilesResolution)*0.10), parameters.heightFieldResolution);
+	parameters.scale = Vector3(parameters.heightFieldResolution, ((parameters.heightFieldResolution*parameters.zoneResolution)*0.10), parameters.heightFieldResolution);
 
 	parameters.boundingBox = (parameters.heightFieldResolution * parameters.heightFieldResolution) - parameters.heightFieldResolution;
 
 	TerrainGenerator terrainGenerator;
 	std::vector<std::vector<gameplay::HeightField*>> heightfields;
 	heightfields = terrainGenerator.buildTerrainTiles(parameters.heightFieldResolution,
-		parameters.tilesResolution,
+		parameters.zoneResolution,
 		parameters.minHeight,
 		parameters.maxHeight,
 		0,
@@ -139,7 +139,7 @@ void Main::initialize()
 		true,
 		true);
 
-	parameters.Debug = false;
+	parameters.debug = false;
 
 	parameters.distanceTerrainLoad = parameters.boundingBox * .9;
 	parameters.distanceTerrainUnload = parameters.boundingBox * 1;
@@ -147,15 +147,22 @@ void Main::initialize()
 
 	_pager = new Pager(parameters, _scene);
 
-	_pager->heightFieldList = heightfields;
-
 	_pager->computePositions();
+
+	//putting heightfields inside the zone list buffer
+	for (size_t i = 0; i < heightfields.size(); i++)
+	{
+		for (size_t f = 0; f < heightfields[i].size(); f++)
+		{
+			_pager->zoneList[i][f]->heightField = heightfields[i][f];
+		}
+	}
 
 	//creating and setting up the UI
 	interface = new UI(_scene, this, _camera, _pager);
 
 #ifdef CREATE_BLENDMAPS
-	_pager->blendMaps =
+	std::vector<std::vector<std::vector<std::vector<unsigned char>>>> blendMaps =
 		terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
 														   _pager->parameters.scale.x,
 														   0,
@@ -163,19 +170,19 @@ void Main::initialize()
 														   0,
 														   100,
 														   _pager->parameters.heightFieldResolution,
-														   _pager->heightFieldList);
+														   heightfields);
 	_pager->parameters.blendMapDIR = createTMPFolder();
 
-
-	_pager->texturesLocation.resize(_pager->parameters.tilesResolution);
-	for (size_t i = 0; i < _pager->parameters.tilesResolution; i++)
+	//putting blendmaps and assigning textures path in the zone list buffer
+	for (size_t i = 0; i < blendMaps.size(); i++)
 	{
-		_pager->texturesLocation[i].resize(_pager->parameters.tilesResolution);
-		for (size_t j = 0; j < _pager->parameters.tilesResolution; j++)
+		for (size_t f = 0; f < blendMaps[i].size(); f++)
 		{
-			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/grass.dds"));
-			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/dirt.dds"));
-			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/rock.dds"));
+			_pager->zoneList[i][f]->blendMaps = blendMaps[i][f];
+
+			_pager->zoneList[i][f]->texturesLocation.push_back(std::string("res/common/terrain/grass.dds"));
+			_pager->zoneList[i][f]->texturesLocation.push_back(std::string("res/common/terrain/dirt.dds"));
+			_pager->zoneList[i][f]->texturesLocation.push_back(std::string("res/common/terrain/rock.dds"));
 		}
 	}
 
@@ -187,20 +194,29 @@ void Main::initialize()
 	threads.push_back(std::thread(
 		&FilesSaver::saveBlendmaps,
 		saver,
-		_pager->blendMaps,
+		blendMaps,
 		_pager->parameters.blendMapDIR,
 		_pager->parameters.heightFieldResolution));
 
 #endif
 
 #ifdef CREATE_NORMALMAPS
-	_pager->normalMaps = 
+	std::vector<std::vector<std::vector<unsigned char>>> normalMaps =
 		terrainGenerator.createNormalmaps(parameters.scale.y, 
 										  _pager->parameters.scale.x,
 										  _pager->parameters.heightFieldResolution, 
-										  _pager->heightFieldList);
+										  heightfields);
 
 	_pager->parameters.normalMapDIR = createTMPFolder();
+
+	//putting blendmaps and assigning textures path in the zone list buffer
+	for (size_t i = 0; i < normalMaps.size(); i++)
+	{
+		for (size_t f = 0; f < normalMaps[i].size(); f++)
+		{
+			_pager->zoneList[i][f]->normalMap = normalMaps[i][f];
+		}
+	}
 
 	Threads t2;
 	t2.normalBool();
@@ -209,12 +225,12 @@ void Main::initialize()
 	threads.push_back(std::thread(
 		&FilesSaver::saveNormalmaps,
 		saver,
-		_pager->normalMaps,
+		normalMaps,
 		_pager->parameters.normalMapDIR,
 		_pager->parameters.heightFieldResolution));
 
 #endif
-	_camera->setPosition(Vector3(0, ((parameters.heightFieldResolution*parameters.tilesResolution) * 25), 0));
+	_camera->setPosition(Vector3(0, ((parameters.heightFieldResolution*parameters.zoneResolution) * 25), 0));
 	_camera->rotate(0, -90);
 
 	_selectionRing = new SelectionRing(_scene);
@@ -240,7 +256,7 @@ void Main::initialize()
 
 void Main::finalize()
 {
-	SAFE_RELEASE(_light);
+	SAFE_RELEASE(_light);	
 	SAFE_RELEASE(_selectionRing);
 	SAFE_RELEASE(_scene);
 	delete _binding;
@@ -267,12 +283,25 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "RAWHeightmapsButton") == 0)
 	{
+		std::vector<std::vector<HeightField*>> heightFields;
+		heightFields.resize(_pager->zoneList.size());
+		for (size_t i = 0; i < _pager->zoneList.size(); i++)
+		{
+			for (size_t f = 0; f < _pager->zoneList.size(); f++)
+			{
+				heightFields[i].push_back(_pager->zoneList[i][f]->heightField);
+			}
+		}
+
 		FilesSaver saver;
+		Threads t;
+		t.heightBool();
+		saverThreads.push_back(t);
 
 		threads.push_back(std::thread(
 			&FilesSaver::saveRAWHeightmaps,
 			saver,
-			_pager->heightFieldList));
+			heightFields));
 	}
 	else if (strcmp(control->getId(), "BlendmapsButton") == 0)
 	{
@@ -281,10 +310,22 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		t.blendBool();
 		saverThreads.push_back(t);
 
+		std::vector < std::vector < std::vector<std::vector<unsigned char>>>> blendMaps;
+		blendMaps.resize(_pager->zoneList.size());
+		for (size_t i = 0; i < _pager->zoneList.size(); i++)
+		{
+			blendMaps[i].resize(_pager->zoneList[i].size());
+			for (size_t f = 0; f < _pager->zoneList.size(); f++)
+			{
+				blendMaps[i][f].push_back(_pager->zoneList[i][f]->blendMaps[0]);
+				blendMaps[i][f].push_back(_pager->zoneList[i][f]->blendMaps[1]);
+			}
+		}
+
 		threads.push_back(std::thread(
 			&FilesSaver::saveBlendmaps,
 			saver,
-			_pager->blendMaps,
+			blendMaps,
 			_pager->parameters.blendMapDIR,
 			_pager->parameters.heightFieldResolution));
 
@@ -323,14 +364,23 @@ void Main::load()
 
 	control = interface->loadForm->getControl("RawHeightfieldRadio");
 	radioButton = (RadioButton *)control;
+	std::vector<std::vector<HeightField*>> heightfields;
 	if (radioButton->isSelected())
 	{
 		_pager->removeObjects();
 		_pager->removeTerrains();
 		FilesLoader load;
-		_pager->heightFieldList = load.loadRAWHeightmaps(folder);
+		heightfields = load.loadRAWHeightmaps(folder);
 		_pager->parameters.heightMapDIR = (char*)folder;
-		_pager->parameters.tilesResolution = load.tilesResolution;
+		_pager->parameters.zoneResolution = load.tilesResolution;
+	}
+
+	for (size_t i = 0; i < heightfields.size(); i++)
+	{
+		for (size_t f = 0; f < heightfields[i].size() ; f++)
+		{
+			_pager->zoneList[i][f]->heightField = heightfields[i][f];
+		}
 	}
 
 	control = interface->loadForm->getControl("BlendmapRadio");
@@ -338,9 +388,11 @@ void Main::load()
 	if (radioButton->isSelected())
 	{
 		FilesLoader load;
-		_pager->blendMapList = load.loadBlendmaps(folder);
+		//TODO : i should use the load function to check against the folder and the tiles resolution and return a bool
+		//about if the folder have the same tiles resolution as the currently generated terrains
+		load.loadBlendmaps(folder);
 		_pager->parameters.blendMapDIR = (char*)folder;
-		_pager->parameters.tilesResolution = load.tilesResolution;
+		//_pager->parameters.tilesResolution = load.tilesResolution;
 		_pager->reloadTerrains();
 	}
 
@@ -348,6 +400,8 @@ void Main::load()
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
+		//TODO : i should use the load function to check against the folder and the tiles resolution and return a bool
+		//about if the folder have the same tiles resolution as the currently generated terrains
 		_pager->removeObjects();
 		FilesLoader load;
 		_pager->objectsPosition = load.loadObjectsPos(folder);
@@ -359,8 +413,10 @@ void Main::load()
 	radioButton = (RadioButton *)control;
 	if (radioButton->isSelected())
 	{
+		//TODO : i should use the load function to check against the folder and the tiles resolution and return a bool
+		//about if the folder have the same tiles resolution as the currently generated terrains
 		FilesLoader load;
-		_pager->normalMapList = load.loadNormalmaps(folder);
+		load.loadNormalmaps(folder);
 		_pager->parameters.normalMapDIR = (char*)folder;
 		_pager->reloadTerrains();
 	}
@@ -392,14 +448,26 @@ void Main::generateNewBlendmaps()
 
 		TerrainGenerator terrainGenerator;
 
-		_pager->blendMaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
+		std::vector<std::vector<HeightField*>> heightfields;
+		heightfields.resize(_pager->zoneList.size());
+		for (size_t i = 0; i < _pager->zoneList.size(); i++)
+		{
+			for (size_t f = 0; f < _pager->zoneList[i].size(); f++)
+			{
+				heightfields[i].push_back(_pager->zoneList[i][f]->heightField);
+			}
+		}
+
+		std::vector<std::vector<std::vector<std::vector<unsigned char>>>> blendMaps =
+			terrainGenerator.createTiledTransparentBlendImages(
+			_pager->parameters.scale.y,
 			_pager->parameters.scale.x,
 			Intensity1,
 			Intensity2,
 			Opacity1,
 			Opacity2,
 			_pager->parameters.heightFieldResolution,
-			_pager->heightFieldList);
+			heightfields);
 		_pager->parameters.blendMapDIR = createTMPFolder();
 
 		for (size_t i = 0; i < threads.size(); i++)
@@ -421,7 +489,7 @@ void Main::generateNewBlendmaps()
 		threads.push_back(std::thread(
 			&FilesSaver::saveBlendmaps,
 			saver,
-			_pager->blendMaps,
+			blendMaps,
 			_pager->parameters.blendMapDIR,
 			_pager->parameters.heightFieldResolution));
 
@@ -433,7 +501,7 @@ void Main::generateObjectsPosition()
 {
 	if (_pager)
 	{
-		if (_pager->heightFieldList.size() > 0)
+		if (_pager->zoneList.size() > 0)
 		{
 			_pager->removeObjects();
 
@@ -479,23 +547,33 @@ void Main::generateObjectsPosition()
 			_pager->pagingCheck();
 			_pager->loadedTerrains[0]->getNode()->getWorldMatrix().getScale(&worldScale);
 
+			std::vector<std::vector<HeightField*>> heightfields;
+			heightfields.resize(_pager->zoneList.size());
+			for (size_t i = 0; i < _pager->zoneList.size(); i++)
+			{
+				for (size_t f = 0; f < _pager->zoneList[i].size(); f++)
+				{
+					heightfields[i].push_back(_pager->zoneList[i][f]->heightField);
+				}
+			}
+
 			TerrainGenerator terrainGenerator;
 			std::vector<std::vector<std::vector<Vector3*> > > objsPos = terrainGenerator.generateObjectsPosition(worldScale, 
 				_pager->parameters.scale.y, 
 				_pager->parameters.scale.x,
 				2, 
 				_pager->parameters.heightFieldResolution, 
-				_pager->heightFieldList, 
+				heightfields, 
 				node);
 
 			std::vector<std::vector<std::vector<Node*> > > objs;
 			std::vector<Model*> models;
 
-			objs.resize(_pager->heightFieldList.size());
-			for (size_t i = 0; i < _pager->heightFieldList.size(); i++)
+			objs.resize(_pager->zoneList.size());
+			for (size_t i = 0; i < _pager->zoneList.size(); i++)
 			{
-				objs[i].resize(_pager->heightFieldList.size());
-				for (size_t j = 0; j < _pager->heightFieldList[i].size(); j++)
+				objs[i].resize(_pager->zoneList.size());
+				for (size_t j = 0; j < _pager->zoneList[i].size(); j++)
 				{
 					for (size_t g = 0; g < objsPos[i][j].size(); g++)
 					{
@@ -515,7 +593,7 @@ void Main::generateObjectsPosition()
 			_pager->objects = objs;
 			_pager->objectsPosition = objsPos;
 			char * file = (char*)fileName.c_str();
-			_pager->objectsFilename.push_back(file);
+			_pager->objectsFilename.push_back((char*)fileName.c_str());
 
 			FilesSaver saver;
 
@@ -549,7 +627,6 @@ void Main::generateNewTerrain()
 	if (_pager)
 	{
 		_pager->removeObjects();
-
 		_pager->removeTerrains();
 		for (size_t i = 0; i < _pager->zoneList.size(); i++)
 		{
@@ -561,7 +638,6 @@ void Main::generateNewTerrain()
 				}
 			}
 		}
-
 		_pager->loadedTerrains.clear();
 		_pager->loadedHeightfields.clear();
 	}
@@ -575,7 +651,7 @@ void Main::generateNewTerrain()
 		parameters.generatedHeightmaps = false;
 		parameters.generatedObjects = false;
 		parameters.skirtSize = 16;
-		parameters.Debug = false;
+		parameters.debug = false;
 		_pager = new Pager(parameters, _scene);
 	}
 
@@ -622,7 +698,7 @@ void Main::generateNewTerrain()
 
 	control = interface->generateTerrainsForm->getControl("TilesResolutionBox");
 	textBox = (TextBox *)control;
-	_pager->parameters.tilesResolution = (strtol(textBox->getText(), NULL, 10));
+	_pager->parameters.zoneResolution = (strtol(textBox->getText(), NULL, 10));
 
 	control = interface->generateTerrainsForm->getControl("TerrainMaterialBox");
 	textBox = (TextBox *)control;
@@ -664,8 +740,8 @@ void Main::generateNewTerrain()
 	//creating heightfields
 	TerrainGenerator terrainGenerator;
 
-	_pager->heightFieldList = terrainGenerator.buildTerrainTiles(_pager->parameters.heightFieldResolution,
-		_pager->parameters.tilesResolution,
+	std::vector<std::vector<HeightField*>> heightfields = terrainGenerator.buildTerrainTiles(_pager->parameters.heightFieldResolution,
+		_pager->parameters.zoneResolution,
 		_pager->parameters.minHeight,
 		_pager->parameters.maxHeight,
 		noise,
@@ -674,7 +750,7 @@ void Main::generateNewTerrain()
 		bGain,
 		bAmp);
 
-	_pager->parameters.boundingBox = ((_pager->parameters.heightFieldResolution-1) * scaleXZ);
+	_pager->parameters.boundingBox = ((_pager->parameters.heightFieldResolution - 1) * scaleXZ);
 
 	_pager->parameters.distanceTerrainLoad = _pager->parameters.boundingBox * .9;
 	_pager->parameters.distanceTerrainUnload = _pager->parameters.boundingBox * 1;
@@ -682,9 +758,17 @@ void Main::generateNewTerrain()
 
 	_pager->computePositions();
 
+	for (size_t i = 0; i < heightfields.size(); i++)
+	{
+		for (size_t f = 0; f < heightfields[i].size(); f++)
+		{
+			_pager->zoneList[i][f]->heightField=heightfields[i][f];
+		}
+	}
+
 	//aligning vertexes for aesthetic
 	TerrainEditor terrEdit;
-	terrEdit.aligningTerrainsVertexes(_pager->heightFieldList);
+	terrEdit.aligningTerrainsVertexes(heightfields);
 
 	//configuring blend maps generation
 	control = interface->generateBlendmapsForm->getControl("Blendmap1-Intensity");
@@ -704,26 +788,24 @@ void Main::generateNewTerrain()
 	int Opacity2 = slider->getValue();
 
 	//generating blendmaps
-	_pager->blendMaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
+	std::vector<std::vector<std::vector<std::vector<unsigned char>>>> blendmaps = terrainGenerator.createTiledTransparentBlendImages(_pager->parameters.scale.y,
 		_pager->parameters.scale.x,
 		Intensity1,
 		Intensity2,
 		Opacity1,
 		Opacity2,
 		_pager->parameters.heightFieldResolution,
-		_pager->heightFieldList);
+		heightfields);
 	_pager->parameters.blendMapDIR = createTMPFolder();
 	_pager->parameters.generatedBlendmaps = false;
 
-	_pager->texturesLocation.resize(_pager->parameters.tilesResolution);
-	for (size_t i = 0; i < _pager->parameters.tilesResolution; i++)
+	for (size_t i = 0; i < _pager->parameters.zoneResolution; i++)
 	{
-		_pager->texturesLocation[i].resize(_pager->parameters.tilesResolution);
-		for (size_t j = 0; j < _pager->parameters.tilesResolution; j++)
+		for (size_t j = 0; j < _pager->parameters.zoneResolution; j++)
 		{
-			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/grass.dds"));
-			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/dirt.dds"));
-			_pager->texturesLocation[i][j].push_back(std::string("res/common/terrain/rock.dds"));
+			_pager->zoneList[i][j]->texturesLocation.push_back(std::string("res/common/terrain/grass.dds"));
+			_pager->zoneList[i][j]->texturesLocation.push_back(std::string("res/common/terrain/dirt.dds"));
+			_pager->zoneList[i][j]->texturesLocation.push_back(std::string("res/common/terrain/rock.dds"));
 		}
 	}
 
@@ -746,18 +828,17 @@ void Main::generateNewTerrain()
 	//create a thread to save blendmaps into PNG images format
 	threads.push_back(std::thread(&FilesSaver::saveBlendmaps,
 		saver,
-		_pager->blendMaps,
+		blendmaps,
 		_pager->parameters.blendMapDIR,
 		_pager->parameters.heightFieldResolution));
 
 #define CREATE_NORMALMAPS
 #ifdef CREATE_NORMALMAPS
-
-	_pager->normalMaps =
+	std::vector<std::vector<std::vector<unsigned char>>> normalMaps =
 		terrainGenerator.createNormalmaps(_pager->parameters.scale.y,
 		_pager->parameters.scale.x,
 		_pager->parameters.heightFieldResolution,
-		_pager->heightFieldList);
+		heightfields);
 
 	_pager->parameters.normalMapDIR = createTMPFolder();
 	_pager->parameters.generatedNormalmaps = false;
@@ -768,7 +849,7 @@ void Main::generateNewTerrain()
 
 	threads.push_back(std::thread(&FilesSaver::saveNormalmaps,
 		saver,
-		_pager->normalMaps,
+		normalMaps,
 		_pager->parameters.normalMapDIR,
 		_pager->parameters.heightFieldResolution));
 
@@ -816,8 +897,8 @@ void Main::moveCamera(float elapsedTime)
 
 void Main::update(float elapsedTime)
 {
-	int iBlendmap, iNormalmap, iObjectpos, total;
-	bool blendmap = false, normalmap = false, objectpos = false;
+	int iBlendmap, iNormalmap, iObjectpos, iHeightmap, total;
+	bool blendmap = false, normalmap = false, objectpos = false, heightmap=false;
 
 	total = threads.size();
 
@@ -843,7 +924,19 @@ void Main::update(float elapsedTime)
 				iObjectpos = i;
 				continue;
 			}
+			if (saverThreads[i].heightmap == true)
+			{
+				heightmap = true;
+				iHeightmap = i;
+				continue;
+			}
 		}
+	}
+	if (heightmap == true && total == saverThreads.size())
+	{
+		saverThreads.erase(saverThreads.begin() + iHeightmap);
+		threads[iHeightmap].join();
+		threads.erase(threads.begin() + iHeightmap);
 	}
 	if (blendmap == true && total == saverThreads.size())
 	{
@@ -854,7 +947,6 @@ void Main::update(float elapsedTime)
 	}
 	if (normalmap == true && total == saverThreads.size())
 	{
-		_pager->normalMaps.clear();
 		saverThreads.erase(saverThreads.begin() + iNormalmap);
 		threads[iNormalmap].join();
 		threads.erase(threads.begin() + iNormalmap);
@@ -871,73 +963,99 @@ void Main::update(float elapsedTime)
 
 	if (_inputMode == INPUT_MODE::EDITING && RMB == true)
 	{
-		Control * control = interface->mainForm->getControl("LowerButton");
-		Button * button = (Button *)control;
-		if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
-		{
-			TerrainEditor TerrEdit;
-			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-			if (nearest != -1)
-			{
-				Vector3 ringPos = _selectionRing->getPosition();
-
-				std::vector<int> heightfields =
-					TerrEdit.lower(
-						BoundingSphere(ringPos, _selectionRing->getScale()),
-						_pager->parameters.scale.x,
-						_pager->parameters.scale.y,
-						_pager->loadedTerrains,
-						_pager->loadedHeightfields);
-
-				_pager->reload(heightfields);
-			}
-		}
-		control = interface->mainForm->getControl("FlattenButton");
-		button = (Button *)control;
-		if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
-		{
-			TerrainEditor TerrEdit;
-			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-			if (nearest != -1)
-			{
-				Vector3 ringPos = _selectionRing->getPosition();
-
-				std::vector<int> heightfields =
-					TerrEdit.flatten(
-						BoundingSphere(ringPos, _selectionRing->getScale()),
-						_pager->parameters.scale.x,
-						_pager->parameters.scale.y,
-						_pager->loadedTerrains,
-						_pager->loadedHeightfields);
-
-				_pager->reload(heightfields);
-				//_pager->reloadTerrains();
-			}
-		}
-		control = interface->mainForm->getControl("RaiseButton");
-		button = (Button *)control;
-		if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
-		{
-			TerrainEditor TerrEdit;
-			int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
-			if (nearest != -1)
-			{
-				Vector3 ringPos = _selectionRing->getPosition();
-
-				std::vector<int> modified =
-					TerrEdit.raise(
-						BoundingSphere(ringPos, _selectionRing->getScale()),
-						_pager->parameters.scale.x,
-						_pager->parameters.scale.y,
-						_pager->loadedTerrains,
-						_pager->loadedHeightfields);
-
-				_pager->reload(modified);
-			}
-		}
-		control = interface->mainForm->getControl("PaintToolbar");
+		Control * control = interface->mainForm->getControl("PaintToolbar");
 		Container * container = (Container*)control;
-		if (container->isVisible() == true)
+		bool paintIsVisible = container->isVisible();
+
+		if (paintIsVisible == false)
+		{
+			control = interface->mainForm->getControl("LowerButton");
+			Button * button = (Button *)control;
+			if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
+			{
+				TerrainEditor TerrEdit;
+				int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+				if (nearest != -1)
+				{
+					Vector3 ringPos = _selectionRing->getPosition();
+
+					std::vector<int> heightfields =
+						TerrEdit.lower(
+							BoundingSphere(ringPos, _selectionRing->getScale()),
+							_pager->parameters.scale.x,
+							_pager->parameters.scale.y,
+							_pager->loadedTerrains,
+							_pager->loadedHeightfields);	
+
+					_pager->reload(heightfields);
+				}
+			}
+			control = interface->mainForm->getControl("FlattenButton");
+			button = (Button *)control;
+			if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
+			{
+				TerrainEditor TerrEdit;
+				int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+				if (nearest != -1)
+				{
+					Vector3 ringPos = _selectionRing->getPosition();
+
+					std::vector<int> heightfields =
+						TerrEdit.flatten(
+							BoundingSphere(ringPos, _selectionRing->getScale()),
+							_pager->parameters.scale.x,
+							_pager->parameters.scale.y,
+							_pager->loadedTerrains,
+							_pager->loadedHeightfields);
+
+					_pager->reload(heightfields);
+					//_pager->reloadTerrains();
+				}
+			}
+			control = interface->mainForm->getControl("RaiseButton");
+			button = (Button *)control;
+			if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
+			{
+				TerrainEditor TerrEdit;
+				int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+				if (nearest != -1)
+				{
+					Vector3 ringPos = _selectionRing->getPosition();
+
+					std::vector<int> modified =
+						TerrEdit.raise(
+							BoundingSphere(ringPos, _selectionRing->getScale()),
+							_pager->parameters.scale.x,
+							_pager->parameters.scale.y,
+							_pager->loadedTerrains,
+							_pager->loadedHeightfields);
+
+					_pager->reload(modified);
+				}
+			}
+			control = interface->mainForm->getControl("SmoothButton");
+			button = (Button *)control;
+			if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
+			{
+				TerrainEditor TerrEdit;
+				int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
+				if (nearest != -1)
+				{
+					Vector3 ringPos = _selectionRing->getPosition();
+
+					std::vector<int> modified =
+						TerrEdit.raise(
+							BoundingSphere(ringPos, _selectionRing->getScale()),
+							_pager->parameters.scale.x,
+							_pager->parameters.scale.y,
+							_pager->loadedTerrains,
+							_pager->loadedHeightfields);
+
+					_pager->reload(modified);
+				}
+			}
+		}
+		if (paintIsVisible == true)
 		{
 			bool paint = false,draw=false,erase=false;
 			control = interface->mainForm->getControl("DrawButton");
@@ -976,8 +1094,10 @@ void Main::update(float elapsedTime)
 
 					//blend1.push_back(_pager->blendMaps[posX][posZ][0]);
 					//blend2.push_back(_pager->blendMaps[posX][posZ][1]);
-					blend1.push_back(_pager->blendMaps[posZ][posX][0]);
-					blend2.push_back(_pager->blendMaps[posZ][posX][1]);
+					//blend1.push_back(_pager->blendMaps[posZ][posX][0]);
+					//blend2.push_back(_pager->blendMaps[posZ][posX][1]);
+					blend1.push_back(_pager->zoneList[posZ][posX]->blendMaps[0]);
+					blend2.push_back(_pager->zoneList[posZ][posX]->blendMaps[1]);
 					fieldsPos.push_back(Vector3(sPosX, 0, sPosZ));
 				}
 
@@ -1019,10 +1139,10 @@ void Main::update(float elapsedTime)
 					int z = (modified[0][i].x / _pager->parameters.heightFieldResolution);
 					int x = (modified[0][i].z / _pager->parameters.heightFieldResolution);
 
-					_pager->blendMaps[x][z][0] = TerrEdit.blend1[i];
+					_pager->zoneList[x][z]->blendMaps[0] = TerrEdit.blend1[i];
 					FilesSaver saver;
 					saver.saveBlendmap(
-						_pager->blendMaps[x][z][0],
+						_pager->zoneList[x][z]->blendMaps[0],
 						1,
 						_pager->parameters.blendMapDIR,
 						x,
@@ -1035,10 +1155,10 @@ void Main::update(float elapsedTime)
 					int z = (modified[1][i].x / _pager->parameters.heightFieldResolution);
 					int x = (modified[1][i].z / _pager->parameters.heightFieldResolution);
 
-					_pager->blendMaps[x][z][1] = TerrEdit.blend2[i];
+					_pager->zoneList[x][z]->blendMaps[1] = TerrEdit.blend2[i];
 					FilesSaver saver;
 					saver.saveBlendmap(
-						_pager->blendMaps[x][z][1],
+						_pager->zoneList[x][z]->blendMaps[1],
 						2,
 						_pager->parameters.blendMapDIR,
 						x,
@@ -1257,6 +1377,23 @@ bool Main::mouseEvent(Mouse::MouseEvent evt, int x, int y, int wheelDelta)
 					if (hitResult.object == _pager->loadedTerrains[i]->getNode()->getCollisionObject())
 					{
 						_selectionRing->setPosition(hitResult.point.x, hitResult.point.z, _pager->loadedTerrains[i]);
+
+
+						//changing textures path in the UI according to the nearest terrain from the selection ring
+						int indexX = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().x / _pager->parameters.boundingBox;
+						int indexZ = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().z / _pager->parameters.boundingBox;
+
+						Control * control = interface->mainForm->getControl("Texture0Pos");
+						TextBox * textBox = (TextBox *)control;
+						textBox->setText(_pager->zoneList[indexX][indexZ]->texturesLocation[0].c_str());
+
+						control = interface->mainForm->getControl("Texture1Pos");
+						textBox = (TextBox *)control;
+						textBox->setText(_pager->zoneList[indexX][indexZ]->texturesLocation[1].c_str());
+
+						control = interface->mainForm->getControl("Texture2Pos");
+						textBox = (TextBox *)control;
+						textBox->setText(_pager->zoneList[indexX][indexZ]->texturesLocation[2].c_str());
 					}
 				}
 			}

@@ -83,6 +83,9 @@ UI::UI(Scene * scene, Control::Listener * listener, FirstPersonCamera * camera_,
 	control = mainForm->getControl("PaintButton");
 	control->addListener(listener, Control::Listener::CLICK);
 
+	control = mainForm->getControl("SetTexture");
+	control->addListener(listener, Control::Listener::CLICK);
+
 	//===============
 	generateTerrainsForm = Form::create("res/forms/generateTerrains.form");
 	generateTerrainsForm->setVisible(false);
@@ -178,7 +181,7 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 	{
 		if (pager)
 		{
-			if (pager->heightFieldList.size() > 0)
+			if (pager->zoneList.size() > 0)
 			{
 				mainForm->setVisible(false);
 				generateBlendmapsForm->setVisible(true);
@@ -189,10 +192,19 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 	{
 		if (pager)
 		{
-			if (pager->heightFieldList.size() > 0)
+			if (pager->zoneList.size() > 0)
 			{
+				std::vector<std::vector<HeightField*>> fields;
+				fields.resize(pager->zoneList.size());
+				for (size_t i = 0; i < pager->zoneList.size(); i++)
+				{
+					for (size_t g = 0; g < pager->zoneList[i].size(); g++)
+					{
+						fields[i].push_back(pager->zoneList[i][g]->heightField);
+					}
+				}
 				TerrainGenerator terrainGenerator;
-				terrainGenerator.createNormalmaps(pager->parameters.scale.y, pager->parameters.scale.x, pager->parameters.heightFieldResolution, pager->heightFieldList);
+				terrainGenerator.createNormalmaps(pager->parameters.scale.y, pager->parameters.scale.x, pager->parameters.heightFieldResolution, fields);
 			}
 		}
 	}
@@ -285,15 +297,20 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 	else if (strcmp(control->getId(), "AlignButton") == 0)
 	{
 		TerrainEditor TerrEdit;
-		TerrEdit.aligningTerrainsVertexes(pager->heightFieldList);
+		std::vector<std::vector<HeightField*>> fields;
+		fields.resize(pager->zoneList.size());
+		for (size_t i = 0; i < pager->zoneList.size(); i++)
+		{
+			for (size_t g = 0; g < pager->zoneList[i].size(); g++)
+			{
+				fields[i].push_back(pager->zoneList[i][g]->heightField);
+			}
+		}
+		TerrEdit.aligningTerrainsVertexes(fields);
 		pager->reloadTerrains();
 	}
 	else if (strcmp(control->getId(), "RaiseButton") == 0)
 	{
-		control = mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
 		control = mainForm->getControl("RaiseButton");
 		Button * button = (Button *)control;
 		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
@@ -304,6 +321,12 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
 		}
 		control = mainForm->getControl("FlattenButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = mainForm->getControl("SmoothButton");
 		button = (Button *)control;
 		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
 		{
@@ -312,10 +335,6 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "LowerButton") == 0)
 	{
-		control = mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
 		control = mainForm->getControl("LowerButton");
 		Button * button = (Button *)control;
 		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
@@ -326,6 +345,12 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
 		}
 		control = mainForm->getControl("FlattenButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = mainForm->getControl("SmoothButton");
 		button = (Button *)control;
 		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
 		{
@@ -334,10 +359,6 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 	}
 	else if (strcmp(control->getId(), "FlattenButton") == 0)
 	{
-		control = mainForm->getControl("PaintToolbar");
-		Container * container = (Container *)control;
-		container->setVisible(false);
-
 		control = mainForm->getControl("FlattenButton");
 		Button * button = (Button *)control;
 		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
@@ -353,10 +374,59 @@ void UI::controlEvents(Control* control, Control::Listener::EventType evt)
 		{
 			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
 		}
+		control = mainForm->getControl("SmoothButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
 	}
 	else if (strcmp(control->getId(), "SmoothButton") == 0)
 	{
-		//TODO: add the functions like the buttons above
+		control = mainForm->getControl("SmoothButton");
+		Button * button = (Button *)control;
+		button->setSkinColor(activeButton, gameplay::Control::State::NORMAL);
+		control = mainForm->getControl("LowerButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = mainForm->getControl("RaiseButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+		control = mainForm->getControl("FlattenButton");
+		button = (Button *)control;
+		if (button->getSkinColor(gameplay::Control::State::NORMAL) == activeButton)
+		{
+			button->setSkinColor(normalButton, gameplay::Control::State::NORMAL);
+		}
+	}
+	else if (strcmp(control->getId(), "SetTexture") == 0)
+	{
+		int closest = pager->findTerrain(selectionRing->getPosition());
+
+		int indexX = pager->loadedTerrains[closest]->getNode()->getTranslationWorld().x / pager->parameters.boundingBox;
+		int indexZ = pager->loadedTerrains[closest]->getNode()->getTranslationWorld().z / pager->parameters.boundingBox;
+
+		Control * control = mainForm->getControl("Texture0Pos");
+		TextBox * textBox = (TextBox *)control;
+		pager->zoneList[indexX][indexZ]->texturesLocation[0] = textBox->getText();
+
+		control = mainForm->getControl("Texture1Pos");
+		textBox = (TextBox *)control;
+		pager->zoneList[indexX][indexZ]->texturesLocation[1] = textBox->getText();
+
+		control = mainForm->getControl("Texture2Pos");
+		textBox = (TextBox *)control;
+		pager->zoneList[indexX][indexZ]->texturesLocation[2] = textBox->getText();
+
+		std::vector<int> closestV;
+		closestV.push_back(closest);
+		pager->reload(closestV);
 	}
 	else if (strcmp(control->getId(), "PaintButton") == 0)
 	{

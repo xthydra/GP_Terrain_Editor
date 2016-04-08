@@ -30,55 +30,52 @@ Pager::Pager(PagerParameters param, gameplay::Scene* scen)
 	// get parameters
 	parameters = param;
 
-	if (heightFieldList.size() > 0)
+	zoneList.resize(parameters.zoneResolution);
+	for (int i = 0; i < parameters.zoneResolution; i++)
 	{
-		zoneList.resize(parameters.tilesResolution);
-		for (int i = 0; i < parameters.tilesResolution; i++)
+		zoneList[i].resize(parameters.zoneResolution);
+		for (int j = 0; j < parameters.zoneResolution; j++)
 		{
-			zoneList[i].resize(parameters.tilesResolution);
-			for (int j = 0; j < parameters.tilesResolution; j++)
-			{
 #define TEST1
 #ifdef TEST1
-				float posX = j*param.boundingBox;
-				float posZ = i*param.boundingBox;
+			float posX = j*param.boundingBox;
+			float posZ = i*param.boundingBox;
 #endif
 #ifdef TEST2
-				float posX = -j*param.BoundingBox;
-				float posZ = i*param.BoundingBox;
+			float posX = -j*param.BoundingBox;
+			float posZ = i*param.BoundingBox;
 #endif
 #ifdef TEST3
-				float posX = j*param.BoundingBox;
-				float posZ = -i*param.BoundingBox;
+			float posX = j*param.BoundingBox;
+			float posZ = -i*param.BoundingBox;
 #endif
 #ifdef TEST4
-				float posX = -j*param.BoundingBox;
-				float posZ = -i*param.BoundingBox;
+			float posX = -j*param.BoundingBox;
+			float posZ = -i*param.BoundingBox;
 #endif
-				////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////
 #ifdef TEST5
-				float posX = i*param.BoundingBox;
-				float posZ = j*param.BoundingBox;
+			float posX = i*param.BoundingBox;
+			float posZ = j*param.BoundingBox;
 #endif
 
 #ifdef TEST6
-				float posX = -i*param.BoundingBox;
-				float posZ = j*param.BoundingBox;
+			float posX = -i*param.BoundingBox;
+			float posZ = j*param.BoundingBox;
 #endif
 #ifdef TEST7
-				float posX = i*param.BoundingBox;
-				float posZ = -j*param.BoundingBox;
+			float posX = i*param.BoundingBox;
+			float posZ = -j*param.BoundingBox;
 #endif
 
 #ifdef TEST8
-				float posX = -i*param.BoundingBox;
-				float posZ = -j*param.BoundingBox;
+			float posX = -i*param.BoundingBox;
+			float posZ = -j*param.BoundingBox;
 #endif
 
-				BufferZone * zone = new BufferZone(gameplay::Vector3(posX, 0, posZ), parameters.scale);
+			Zone * zone = new Zone(gameplay::Vector3(posX, 0, posZ), parameters.scale);
 
-				zoneList[i][j] = zone;
-			}
+			zoneList[i][j] = zone;
 		}
 	}
 }
@@ -87,7 +84,7 @@ void Pager::loadTerrain(int z, int x)
 {
 	CTerrain * Terr;
 
-	if (heightFieldList.size() > 0)
+	if (zoneList.size() > 0)
 	{
 		std::string blendName1, blendName2, normalName;
 		//it make sure the blend maps image have been saved to the disk
@@ -116,11 +113,11 @@ void Pager::loadTerrain(int z, int x)
 
 			if (fileSize == -1 || fileSize2 == -1)
 			{
-				if (blendMaps.size() > 0)
+				if (zoneList[z][x]->blendMaps.size() > 0)
 				{
 					FilesSaver saver;
-					saver.saveBlendmap(blendMaps[z][x][0],
-						blendMaps[z][x][1],
+					saver.saveBlendmap(zoneList[z][x]->blendMaps[0],
+						zoneList[z][x]->blendMaps[1],
 						parameters.blendMapDIR,
 						z,
 						x,
@@ -132,11 +129,11 @@ void Pager::loadTerrain(int z, int x)
 					blendName2.clear();
 				}
 			}
-			if (blendMaps.size() > 0)
+			if (zoneList[z][x]->blendMaps.size() > 0)
 			{
 				FilesSaver saver;
-				saver.saveBlendmap(blendMaps[z][x][0],
-					blendMaps[z][x][1],
+				saver.saveBlendmap(zoneList[z][x]->blendMaps[0],
+					zoneList[z][x]->blendMaps[1],
 					parameters.blendMapDIR,
 					z,
 					x,
@@ -177,10 +174,10 @@ void Pager::loadTerrain(int z, int x)
 
 			if (fileSize == -1)
 			{
-				if (normalMaps.size() > 0)
+				if (zoneList[z][x]->normalMap.size() > 0)
 				{
 					FilesSaver saver;
-					saver.saveNormalmap(normalMaps[z][x],
+					saver.saveNormalmap(zoneList[z][x]->normalMap,
 						parameters.normalMapDIR,
 						z,
 						x,
@@ -205,7 +202,7 @@ void Pager::loadTerrain(int z, int x)
 		//copying the heightfield before sending it because if i ask gameplay to delete a terrain it would delete the heightfield too
 		int resolution = parameters.heightFieldResolution;
 		gameplay::HeightField* field = HeightField::create(resolution, resolution);
-		memcpy(field->getArray(), heightFieldList[z][x]->getArray(), sizeof(float)*(resolution*resolution));
+		memcpy(field->getArray(), zoneList[z][x]->heightField->getArray(), sizeof(float)*(resolution*resolution));
 	
 		//create the terrain
 		Terr = new CTerrain(field,
@@ -217,7 +214,7 @@ void Pager::loadTerrain(int z, int x)
 			gameplay::Vector3(zoneList[z][x]->getPosition().x,
 				0,
 				zoneList[z][x]->getPosition().z),
-			texturesLocation[z][x],
+			zoneList[z][x]->texturesLocation,
 			normalName,
 			blendName1.c_str(),
 			blendName2.c_str(),
@@ -234,7 +231,7 @@ void Pager::loadTerrain(int z, int x)
 
 	//terrain pager values to check against
 	loadedTerrains.push_back(zoneList[z][x]->getObjectInside()->terrain);
-	loadedHeightfields.push_back(heightFieldList[z][x]);
+	loadedHeightfields.push_back(zoneList[z][x]->heightField);
 }
 
 void Pager::removeTerrain(int z, int x)
@@ -324,20 +321,36 @@ int Pager::findTerrain(Vector2 pos, Vector2 resolution)
 	return -1;
 }
 
+int Pager::findTerrain(Vector3 pos)
+{
+	int nearest = -1;
+	float distance1=-1, distance2=-1;
+	for (size_t i = 0; i < loadedTerrains.size(); i++)
+	{
+		float distance1 = pos.distance(loadedTerrains[i]->getNode()->getTranslationWorld());
+		if (distance1 > distance2)
+		{
+			nearest = i;
+		}
+		distance2 = distance1;
+	}
+	return nearest;
+}
+
 void Pager::computePositions()
 {
-	if (heightFieldList.size() > 0)
+	if (zoneList.size() != 0)
 	{
-		zoneList.resize(parameters.tilesResolution);
-		for (int i = 0; i < parameters.tilesResolution; i++)
+		zoneList.resize(parameters.zoneResolution);
+		for (int i = 0; i < parameters.zoneResolution; i++)
 		{
-			zoneList[i].resize(parameters.tilesResolution);
-			for (int j = 0; j < parameters.tilesResolution; j++)
+			zoneList[i].resize(parameters.zoneResolution);
+			for (int j = 0; j < parameters.zoneResolution; j++)
 			{
 				float posX = j*parameters.boundingBox;
 				float posZ = i*parameters.boundingBox;
 
-				BufferZone * zone = new BufferZone(gameplay::Vector3(posX, 0, posZ), parameters.scale);
+				Zone * zone = new Zone(gameplay::Vector3(posX, 0, posZ), parameters.scale);
 
 				zoneList[i][j] = zone;
 			}
@@ -380,9 +393,9 @@ void Pager::removeObjects()
 
 void Pager::pagingCheck()
 {
-	for (int i = 0; i < parameters.tilesResolution; i++)
+	for (int i = 0; i < parameters.zoneResolution; i++)
 	{
-		for (int j = 0; j < parameters.tilesResolution; j++)
+		for (int j = 0; j < parameters.zoneResolution; j++)
 		{
 			Vector3 v = _Scene->getActiveCamera()->getNode()->getTranslationWorld();
 			Vector3 v2 = zoneList[i][j]->getPosition();
@@ -430,7 +443,7 @@ void Pager::render()
 
 			if (ActualDistance < parameters.distanceTerrainMaxRender)
 			{
-				loadedTerrains[i]->draw(parameters.Debug);
+				loadedTerrains[i]->draw(parameters.debug);
 
 				if (objects.size() > 0)
 				{
@@ -439,7 +452,7 @@ void Pager::render()
 
 					for (size_t j = 0; j < objects[posZ][posX].size(); j++)
 					{
-						BoundingSphere test = objects[posZ][posX][j]->getBoundingSphere();
+						//BoundingSphere objectBound = objects[posZ][posX][j]->getBoundingSphere();
 						if (_Scene->getActiveCamera()->getFrustum().intersects(
 							objects[posZ][posX][j]->getBoundingSphere()))
 						{

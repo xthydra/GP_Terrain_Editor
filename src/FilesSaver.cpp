@@ -20,6 +20,7 @@
 
 void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > > objsPos, char * objectName)
 {
+	//creating the folder for files that'll contain objects position
 #ifdef WIN32
 	char tmpdir[] = "res/tmp/fileXXXXXX";
 	mktemp(tmpdir);
@@ -29,20 +30,36 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 	char tmpdir[] = "res/tmp/fileXXXXXX";
 	mkdtemp(tmpdir);
 #endif
+	std::string modifiedObjectName = objectName;
+
+	//replacing foward slashes character in the object name to something that can be written in the file name
+	int g = 0;
+	while (g != modifiedObjectName.size())
+	{
+		if (modifiedObjectName[g] == '/')
+		{
+			modifiedObjectName.replace(g, 1, "_!_");
+			g = 0;
+		}
+		g++;
+	}
+
 	for (size_t i = 0; i < objsPos.size();)
 	{
 		for (size_t j = 0; j < objsPos[i].size();)
 		{
 			std::vector<__int16> raw;
 
+			//storing objects position inside a vector
 			for (size_t g = 0; g < objsPos[i][j].size();)
 			{
 				raw.push_back(objsPos[i][j][g]->x);
 				raw.push_back(objsPos[i][j][g]->y);
 				raw.push_back(objsPos[i][j][g]->z);
-				g++;
+				g++;	
 			}
-
+				
+			//making the file name
 			std::string fileName;
 			fileName += tmpdir;
 			fileName += "/";
@@ -50,8 +67,10 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 			fileName += "-";
 			fileName += std::to_string(j);
 			fileName += "-";
-			fileName += objectName;
+			fileName += modifiedObjectName;
+			fileName += ".objPos";
 
+			//saving the file
 			int fd = open(fileName.c_str(), O_CREAT | O_WRONLY | O_RAW);
 			if (fd != -1)
 			{
