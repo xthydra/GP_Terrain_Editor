@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2016 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -19,11 +19,25 @@
 struct FilesSaver
 {
 	/*
+	Save the zone objects file path and terrain textures file path
+	the first and second vectors define the world position of the terrains but i always forget which one is defining where
+
+	the third vector for objects is defining how many different objects file paths there's
+	the third vector for terrains is defining how many textures path the terrain have been assigned
+	it output everything in a text file for loading an instance
+	@param objects file paths in a vector of unsigned characters
+	@param file paths of terrains textures in a vector of unsigned characters
+	@param folder to save into
+	*/
+	void saveZoneInformation(std::vector<std::vector<std::vector<unsigned char> > >, std::vector<std::vector<std::vector<unsigned char> > >,char *);
+
+	/*
 	Save objects positions in a binary format(or someshit)
 	@param objects positions in 3 vectors (z,x, positions)
-	@param object name
+	@param object index position inside the information file
+	@param folder to save into
 	*/
-	void saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > >,char*);
+	void saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > >,int,char*);
 
 	/*
 	Output normal maps as PNG images
@@ -36,8 +50,9 @@ struct FilesSaver
 	/*
 	Output heightfields in binary files
 	@param heightfields in 2 vectors (z,x)
+	@param folder to save into
 	*/
-	void saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> >);
+	void saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> >, char *);
 
 	/*
 	Output blend maps as PNG images

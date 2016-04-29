@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2016 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -171,7 +171,7 @@ void Main::initialize()
 														   100,
 														   _pager->parameters.heightFieldResolution,
 														   heightfields);
-	_pager->parameters.blendMapDIR = createTMPFolder();
+	_pager->parameters.tmpFolder = createTMPFolder();
 
 	//putting blendmaps and assigning textures path in the zone list buffer
 	for (size_t i = 0; i < blendMaps.size(); i++)
@@ -195,7 +195,7 @@ void Main::initialize()
 		&FilesSaver::saveBlendmaps,
 		saver,
 		blendMaps,
-		_pager->parameters.blendMapDIR,
+		_pager->parameters.tmpFolder,
 		_pager->parameters.heightFieldResolution));
 
 #endif
@@ -206,8 +206,6 @@ void Main::initialize()
 										  _pager->parameters.scale.x,
 										  _pager->parameters.heightFieldResolution, 
 										  heightfields);
-
-	_pager->parameters.normalMapDIR = createTMPFolder();
 
 	//putting blendmaps and assigning textures path in the zone list buffer
 	for (size_t i = 0; i < normalMaps.size(); i++)
@@ -226,7 +224,7 @@ void Main::initialize()
 		&FilesSaver::saveNormalmaps,
 		saver,
 		normalMaps,
-		_pager->parameters.normalMapDIR,
+		_pager->parameters.tmpFolder,
 		_pager->parameters.heightFieldResolution));
 
 #endif
@@ -301,7 +299,8 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 		threads.push_back(std::thread(
 			&FilesSaver::saveRAWHeightmaps,
 			saver,
-			heightFields));
+			heightFields,
+			_pager->parameters.tmpFolder));
 	}
 	else if (strcmp(control->getId(), "BlendmapsButton") == 0)
 	{
@@ -326,7 +325,7 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 			&FilesSaver::saveBlendmaps,
 			saver,
 			blendMaps,
-			_pager->parameters.blendMapDIR,
+			_pager->parameters.tmpFolder,
 			_pager->parameters.heightFieldResolution));
 
 		//TODO: i really dont know if i need to clear the folder containing the blendmaps before overwriting
@@ -336,11 +335,15 @@ void Main::controlEvent(Control* control, Control::Listener::EventType evt)
 	{
 		FilesSaver saver;
 
+		//TODO: the index im sending to the function that save objects positions
+		//doesn't adapt to conditional requests
+
 		threads.push_back(std::thread(
 			&FilesSaver::saveObjectsPos,
 			saver,
 			_pager->objectsPosition,
-			_pager->objectsFilename[0]));
+			1,
+			_pager->parameters.tmpFolder));
 
 		Threads t;
 		t.objectBool();
@@ -371,7 +374,7 @@ void Main::load()
 		_pager->removeTerrains();
 		FilesLoader load;
 		heightfields = load.loadRAWHeightmaps(folder);
-		_pager->parameters.heightMapDIR = (char*)folder;
+		_pager->parameters.tmpFolder = (char*)folder;
 		_pager->parameters.zoneResolution = load.tilesResolution;
 	}
 
@@ -391,7 +394,7 @@ void Main::load()
 		//TODO : i should use the load function to check against the folder and the tiles resolution and return a bool
 		//about if the folder have the same tiles resolution as the currently generated terrains
 		load.loadBlendmaps(folder);
-		_pager->parameters.blendMapDIR = (char*)folder;
+		_pager->parameters.tmpFolder = (char*)folder;
 		//_pager->parameters.tilesResolution = load.tilesResolution;
 		_pager->reloadTerrains();
 	}
@@ -417,7 +420,7 @@ void Main::load()
 		//about if the folder have the same tiles resolution as the currently generated terrains
 		FilesLoader load;
 		load.loadNormalmaps(folder);
-		_pager->parameters.normalMapDIR = (char*)folder;
+		_pager->parameters.tmpFolder = (char*)folder;
 		_pager->reloadTerrains();
 	}
 
@@ -468,7 +471,6 @@ void Main::generateNewBlendmaps()
 			Opacity2,
 			_pager->parameters.heightFieldResolution,
 			heightfields);
-		_pager->parameters.blendMapDIR = createTMPFolder();
 
 		for (size_t i = 0; i < threads.size(); i++)
 		{
@@ -490,7 +492,7 @@ void Main::generateNewBlendmaps()
 			&FilesSaver::saveBlendmaps,
 			saver,
 			blendMaps,
-			_pager->parameters.blendMapDIR,
+			_pager->parameters.tmpFolder,
 			_pager->parameters.heightFieldResolution));
 
 		_pager->reloadTerrains();
@@ -592,16 +594,20 @@ void Main::generateObjectsPosition()
 			}
 			_pager->objects = objs;
 			_pager->objectsPosition = objsPos;
-			char * file = (char*)fileName.c_str();
-			_pager->objectsFilename.push_back((char*)fileName.c_str());
+			//char * file = (char*)fileName.c_str();
+			//_pager->objectsFilename.push_back((char*)fileName.c_str());
 
 			FilesSaver saver;
+
+			//TODO: the index im sending to the function that save objects positions
+			//doesn't adapt to conditional requests
 
 			threads.push_back(std::thread(
 				&FilesSaver::saveObjectsPos,
 				saver,
 				_pager->objectsPosition,
-				file));
+				1,
+				_pager->parameters.tmpFolder));
 
 			Threads t3;
 			t3.objectBool();
@@ -796,7 +802,7 @@ void Main::generateNewTerrain()
 		Opacity2,
 		_pager->parameters.heightFieldResolution,
 		heightfields);
-	_pager->parameters.blendMapDIR = createTMPFolder();
+
 	_pager->parameters.generatedBlendmaps = false;
 
 	for (size_t i = 0; i < _pager->parameters.zoneResolution; i++)
@@ -829,7 +835,7 @@ void Main::generateNewTerrain()
 	threads.push_back(std::thread(&FilesSaver::saveBlendmaps,
 		saver,
 		blendmaps,
-		_pager->parameters.blendMapDIR,
+		_pager->parameters.tmpFolder,
 		_pager->parameters.heightFieldResolution));
 
 #define CREATE_NORMALMAPS
@@ -840,7 +846,6 @@ void Main::generateNewTerrain()
 		_pager->parameters.heightFieldResolution,
 		heightfields);
 
-	_pager->parameters.normalMapDIR = createTMPFolder();
 	_pager->parameters.generatedNormalmaps = false;
 
 	Threads t2;
@@ -850,7 +855,7 @@ void Main::generateNewTerrain()
 	threads.push_back(std::thread(&FilesSaver::saveNormalmaps,
 		saver,
 		normalMaps,
-		_pager->parameters.normalMapDIR,
+		_pager->parameters.tmpFolder,
 		_pager->parameters.heightFieldResolution));
 
 #endif
@@ -897,11 +902,13 @@ void Main::moveCamera(float elapsedTime)
 
 void Main::update(float elapsedTime)
 {
+	//references to prevent segmentation fault
 	int iBlendmap, iNormalmap, iObjectpos, iHeightmap, total;
 	bool blendmap = false, normalmap = false, objectpos = false, heightmap=false;
 
 	total = threads.size();
 
+	//check if a thread is finished the function
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		if (threads[i].joinable())
@@ -932,6 +939,8 @@ void Main::update(float elapsedTime)
 			}
 		}
 	}
+
+	//if a thread finished then delete references, merge the thread with the main thread and send the confirmation to the Pager class
 	if (heightmap == true && total == saverThreads.size())
 	{
 		saverThreads.erase(saverThreads.begin() + iHeightmap);
@@ -961,8 +970,10 @@ void Main::update(float elapsedTime)
 		_pager->parameters.generatedObjects = true;
 	}
 
+	//check against user interface and right click mouse event
 	if (_inputMode == INPUT_MODE::EDITING && RMB == true)
 	{
+		//if the paint tool bar is visible
 		Control * control = interface->mainForm->getControl("PaintToolbar");
 		Container * container = (Container*)control;
 		bool paintIsVisible = container->isVisible();
@@ -973,12 +984,15 @@ void Main::update(float elapsedTime)
 			Button * button = (Button *)control;
 			if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
 			{
+				//get the nearest terrain according to the camera focus in 3D world space
 				TerrainEditor TerrEdit;
 				int nearest = _pager->findTerrain(Vector2(_prevX, _prevY), Vector2(getWidth(), getHeight()));
 				if (nearest != -1)
 				{
+					//get the selection ring position
 					Vector3 ringPos = _selectionRing->getPosition();
 
+					//query the heightfields from the editing function
 					std::vector<int> heightfields =
 						TerrEdit.lower(
 							BoundingSphere(ringPos, _selectionRing->getScale()),
@@ -987,9 +1001,11 @@ void Main::update(float elapsedTime)
 							_pager->loadedTerrains,
 							_pager->loadedHeightfields);	
 
+					//reload the terrains with new heightfields
 					_pager->reload(heightfields);
 				}
 			}
+			//and so on
 			control = interface->mainForm->getControl("FlattenButton");
 			button = (Button *)control;
 			if (button->getSkinColor(Control::State::NORMAL) == interface->activeButton)
@@ -1080,6 +1096,8 @@ void Main::update(float elapsedTime)
 
 				for (size_t i = 0; i < _pager->loadedTerrains.size(); i++)
 				{
+					//trying to find a loaded terrain index by using world space position
+					//to find the blendmaps inside the zonelist vector
 					int posX = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().x;
 					int posZ = _pager->loadedTerrains[i]->getNode()->getTranslationWorld().z;
 
@@ -1101,6 +1119,7 @@ void Main::update(float elapsedTime)
 					fieldsPos.push_back(Vector3(sPosX, 0, sPosZ));
 				}
 
+				//trying to know what to paint
 				int selectedTexture = 0;
 
 				control = interface->mainForm->getControl("Texture0");
@@ -1125,6 +1144,8 @@ void Main::update(float elapsedTime)
 				bool drawOrErase;
 				if (draw == true) { drawOrErase = true; }
 				if (erase == true) { drawOrErase = false; }
+
+				//then it paint
 				std::vector<std::vector<Vector3>> modified = TerrEdit.paint(blend1,
 					blend2,
 					fieldsPos,
@@ -1134,6 +1155,8 @@ void Main::update(float elapsedTime)
 					_selectionRing->getScale() / _pager->parameters.scale.x,
 					drawOrErase);
 
+				//then it reload terrains, but there's possibly a weird unoptimized function here or above
+				//im not sure where i screwed up yet
 				for (size_t i = 0; i < modified[0].size(); i++)
 				{
 					int z = (modified[0][i].x / _pager->parameters.heightFieldResolution);
@@ -1144,7 +1167,7 @@ void Main::update(float elapsedTime)
 					saver.saveBlendmap(
 						_pager->zoneList[x][z]->blendMaps[0],
 						1,
-						_pager->parameters.blendMapDIR,
+						_pager->parameters.tmpFolder,
 						x,
 						z,
 						_pager->parameters.heightFieldResolution
@@ -1160,7 +1183,7 @@ void Main::update(float elapsedTime)
 					saver.saveBlendmap(
 						_pager->zoneList[x][z]->blendMaps[1],
 						2,
-						_pager->parameters.blendMapDIR,
+						_pager->parameters.tmpFolder,
 						x,
 						z,
 						_pager->parameters.heightFieldResolution

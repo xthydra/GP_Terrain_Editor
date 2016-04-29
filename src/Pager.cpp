@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2016 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ void Pager::loadTerrain(int z, int x)
 		//it make sure the blend maps image have been saved to the disk
 		if (parameters.generatedBlendmaps == false)
 		{
-			blendName1 += parameters.blendMapDIR;
+			blendName1 += parameters.tmpFolder;
 
 			blendName1 += "blend-";
 			blendName1 += std::to_string(z);
@@ -118,7 +118,7 @@ void Pager::loadTerrain(int z, int x)
 					FilesSaver saver;
 					saver.saveBlendmap(zoneList[z][x]->blendMaps[0],
 						zoneList[z][x]->blendMaps[1],
-						parameters.blendMapDIR,
+						parameters.tmpFolder,
 						z,
 						x,
 						parameters.heightFieldResolution);
@@ -134,7 +134,7 @@ void Pager::loadTerrain(int z, int x)
 				FilesSaver saver;
 				saver.saveBlendmap(zoneList[z][x]->blendMaps[0],
 					zoneList[z][x]->blendMaps[1],
-					parameters.blendMapDIR,
+					parameters.tmpFolder,
 					z,
 					x,
 					parameters.heightFieldResolution);
@@ -142,7 +142,7 @@ void Pager::loadTerrain(int z, int x)
 		}
 		else 
 		{
-			blendName1 += parameters.blendMapDIR;
+			blendName1 += parameters.tmpFolder;
 
 			blendName1 += "blend-";
 			blendName1 += std::to_string(z);
@@ -161,7 +161,7 @@ void Pager::loadTerrain(int z, int x)
 		//it make sure the normal maps image have been saved to the disk
 		if (parameters.generatedNormalmaps == false)
 		{
-			normalName += parameters.normalMapDIR;
+			normalName += parameters.tmpFolder;
 
 			normalName += "normalMap-";
 			normalName += std::to_string(z);
@@ -178,7 +178,7 @@ void Pager::loadTerrain(int z, int x)
 				{
 					FilesSaver saver;
 					saver.saveNormalmap(zoneList[z][x]->normalMap,
-						parameters.normalMapDIR,
+						parameters.tmpFolder,
 						z,
 						x,
 						parameters.heightFieldResolution);
@@ -191,7 +191,7 @@ void Pager::loadTerrain(int z, int x)
 		}
 		else 
 		{
-			normalName += parameters.normalMapDIR;
+			normalName += parameters.tmpFolder;
 
 			normalName += "normalMap-";
 			normalName += std::to_string(z);

@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2016 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,32 +18,51 @@
 
 #include "Main.h"
 
-void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > > objsPos, char * objectName)
+void FilesSaver::saveZoneInformation(std::vector<std::vector<std::vector<unsigned char> > > objectsPath, std::vector<std::vector<std::vector<unsigned char> > > texturesPath, char * tmpFolder)
 {
-	//creating the folder for files that'll contain objects position
-#ifdef WIN32
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mktemp(tmpdir);
-	_mkdir("res/tmp");
-	_mkdir(tmpdir);
-#else
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mkdtemp(tmpdir);
-#endif
-	std::string modifiedObjectName = objectName;
-
-	//replacing foward slashes character in the object name to something that can be written in the file name
-	int g = 0;
-	while (g != modifiedObjectName.size())
+	for (size_t i = 0; i < objectsPath.size();)
 	{
-		if (modifiedObjectName[g] == '/')
+		for (size_t j = 0; j < objectsPath[i].size();)
 		{
-			modifiedObjectName.replace(g, 1, "_!_");
-			g = 0;
-		}
-		g++;
-	}
+			//making the file name
+			std::string fileName;
+			fileName += tmpFolder;
+			fileName += "/";
+			fileName += std::to_string(i);
+			fileName += "-";
+			fileName += std::to_string(j);
+			fileName += ".info";
 
+			//saving the file
+			int fd = open(fileName.c_str(), O_CREAT | O_WRONLY | O_RAW);
+			for (size_t g = 0; g < objectsPath[i][j].size();)
+			{
+				//write all the objects path inside the info file
+				if (fd != -1)
+				{
+					//write(fd, raw.data(), raw.size() * sizeof(__int16));
+					//close(fd);
+				}
+				g++;
+			}
+			for (size_t g = 0; g < texturesPath[i][j].size();)
+			{
+				if (fd != -1)
+				{
+					//write(fd, raw.data(), raw.size() * sizeof(__int16));
+					//close(fd);
+				}
+				//write all textures paths inside the info file
+				g++;
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
+void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > > objsPos, int objectIndex, char * tmpFolder)
+{
 	for (size_t i = 0; i < objsPos.size();)
 	{
 		for (size_t j = 0; j < objsPos[i].size();)
@@ -61,13 +80,13 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 				
 			//making the file name
 			std::string fileName;
-			fileName += tmpdir;
+			fileName += tmpFolder;
 			fileName += "/";
 			fileName += std::to_string(i);
 			fileName += "-";
 			fileName += std::to_string(j);
-			fileName += "-";
-			fileName += modifiedObjectName;
+			fileName += "-obj";
+			fileName += objectIndex;
 			fileName += ".objPos";
 
 			//saving the file
@@ -83,7 +102,7 @@ void FilesSaver::saveObjectsPos(std::vector<std::vector<std::vector<Vector3*> > 
 	}
 }
 
-void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned char> > > normalmaps, char * folder, int normalMapResolution)
+void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned char> > > normalmaps, char * tmpFolder, int normalMapResolution)
 {
 	for (size_t i = 0; i < normalmaps.size(); i++)
 	{
@@ -92,7 +111,7 @@ void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned cha
 			//E.G //field-0-0.png
 			std::string fieldName;
 
-			fieldName += folder;
+			fieldName += tmpFolder;
 			fieldName += "/";
 			fieldName += "normalMap-";
 			fieldName += std::to_string(i);
@@ -108,19 +127,8 @@ void FilesSaver::saveNormalmaps(std::vector<std::vector<std::vector<unsigned cha
 	}
 }
 
-void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> > heightFields)
+void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField *> > heightFields, char * tmpFolder)
 {
-	// Generate a new tmp folder for the blend images.
-#ifdef WIN32
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mktemp(tmpdir);
-	_mkdir("res/tmp");
-	_mkdir(tmpdir);
-#else
-	char tmpdir[] = "res/tmp/fileXXXXXX";
-	mkdtemp(tmpdir);
-#endif
-
 	//TODO: if i want to be able to support 32 bit integer instead of 16 bit then
 	//i would need a conditional iteration like : while(i<heightfields.size() && bit16==true)
 	//check against every height if it doesnt go beyond or below 32000 else bit16==false
@@ -154,7 +162,7 @@ void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField
 			//create the filename
 			std::string fieldName;
 
-			fieldName += tmpdir;
+			fieldName += tmpFolder;
 			fieldName += "/";
 			fieldName += "field-";
 			fieldName += std::to_string(i);
@@ -173,7 +181,7 @@ void FilesSaver::saveRAWHeightmaps(std::vector<std::vector<gameplay::HeightField
 	}
 }
 
-void FilesSaver::saveBlendmaps(std::vector<std::vector<std::vector<std::vector<unsigned char> > > > blendmaps, char* folder, int blendmapRes)
+void FilesSaver::saveBlendmaps(std::vector<std::vector<std::vector<std::vector<unsigned char> > > > blendmaps, char* tmpFolder, int blendmapRes)
 {
 	blendFilesname.resize(blendmaps.size());
 	for (size_t i = 0; i < blendmaps.size(); i++)
@@ -183,7 +191,7 @@ void FilesSaver::saveBlendmaps(std::vector<std::vector<std::vector<std::vector<u
 		{	
 			std::string fieldName;
 
-			fieldName += folder;
+			fieldName += tmpFolder;
 			fieldName += "blend-";
 			fieldName += std::to_string(i);
 			fieldName += "-";
@@ -201,7 +209,7 @@ void FilesSaver::saveBlendmaps(std::vector<std::vector<std::vector<std::vector<u
 
 			fieldName.clear();
 
-			fieldName += folder;
+			fieldName += tmpFolder;
 			fieldName += "blend-";
 			fieldName += std::to_string(i);
 			fieldName += "-";

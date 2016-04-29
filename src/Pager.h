@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2016 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -19,19 +19,9 @@
 struct PagerParameters
 {
 	/**
-	* Folder name to access blendmap files encoded in PNG.
+	* Folder name to access blendmaps,normalmaps, objects position, heightmaps and terrains information
 	**/
-	char * blendMapDIR;
-
-	/**
-	* Folder name to access normalmap files encoded in PNG.
-	*/
-	char * normalMapDIR;
-
-	/**
-	* Folder name to access heightmap files encoded in binary.
-	**/
-	char * heightMapDIR;
+	char * tmpFolder;
 
 	/**
 	* Parameters used to create gameplay::Terrain.

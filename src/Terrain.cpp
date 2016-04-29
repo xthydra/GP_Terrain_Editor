@@ -1,6 +1,6 @@
 ﻿/*
 	GP_Terrain_Editor - GamePlay3D Unoffical Third Party Terrain Editor
-	Copyright (C) 2015 Anthony Belisle <xt.hydra@gmail.com>
+	Copyright (C) 2016 Anthony Belisle <xt.hydra@gmail.com>
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -44,7 +44,8 @@ CTerrain::CTerrain(gameplay::HeightField * heightField,
 			normalmap.c_str(),
 			terrainMaterial);
 	}
-	else {
+	else
+	{
 		terrain = gameplay::Terrain::create(heightField,
 			scale,
 			patchSize,

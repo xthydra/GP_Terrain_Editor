@@ -2,7 +2,7 @@
 
 #How can you compile it
 
-1) you will need gameplay 3D game engine https://github.com/gameplay3d/GamePlay/tree/next
+1) you will need gameplay 3D game engine https://github.com/gameplay3d/GamePlay/
 
 2) put the project in a folder and put the project folder in a folder that contain a folder named "gameplay" which would contain gameplay 3D engine
 

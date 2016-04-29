@@ -1,23 +1,14 @@
 =====================UPCOMING_FEATURES
-------------------------PRIOR
-change the texture text box inside the painting UI tool when the selection ring is changing position to make sure that the z
-
-add new blendmaps settings to the blendmap UI
-update the example function to make sure it would keep track of the blendmaps name
-
-make a class for creating UI forms and for checking against the UI(Editing tools are taking too much space inside the main source files and UI initilization list is horribly long)
-
-put the generatingTerrain,normal maps and such inside interface class
+-------------------------PRIOR
+change 
 ------------------------------
 
--------------------------MAJOR
+-------------------------LATTER
 
-i noticed that most generators functions create a world space positioning then convert it back to heightfield space(returnHeight()) to query heigtfield height which is very inneficient and pretty dumb
+i noticed that most generators functions create a world space positioning then convert it back to heightfield local space(returnHeight()) to query heigtfield height which is very inneficient and pretty dumb
 it can probably query heightfield height without a world space positioning since i only send heightfield(and not terrains) to the generators functions
 
 add blendmap settings in the UI form that generate terrains
-
-add object material name inside the filenames. for e.g : field-0-0.bin.terrain.material , 0-0-objects.gbp.object.material, 0-0-objects.gbp.objects.scene
 
 when in editing mode mouse wheel should be able to increase or decrease selection ring size
 
@@ -26,6 +17,8 @@ saving normalmaps,blendmaps, terrains, objects positions , materials and scenes 
 add support for nav mesh generation https://github.com/recastnavigation/recastnavigation
 
 Angular terrain editing tools
+
+fix the "smooth" editing tool
 
 Generate terrains,normalmaps,blendmaps and object positions on a GPU(if possible)
 
@@ -40,6 +33,8 @@ if i had maximum height from when creating terrains then i wouldn't need to gene
 =============================
 
 ==========================BUGS
+
+the painting tool seem slow when used against terrains with specific positions(for E.A : the terrain at 0,0,0 would be painted normally but the others would be painted slower)
 
 the aligning function is missing 4 vertexes alignment between 4 terrains extremities
 the diamondSquare noiser look too much smooth on Y scale
