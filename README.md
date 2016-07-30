@@ -38,12 +38,4 @@
 
 5) 75% of all the project contains functions that aren't commented(lol)
 
-#What i will try to change
-
-1) https://github.com/xthydra/GP_Terrain_Editor/blob/master/TODO.txt
-
-2) https://github.com/xthydra/GP_Terrain_Editor/issues
-
-#What will i not change
-
-1) i don't feel like testing this project on a linux or mac platform
+# i don't have the ambition anymore to work on this project anymore
